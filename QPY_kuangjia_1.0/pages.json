@@ -1,0 +1,203 @@
+{
+	"pages": [
+			{
+				"path": "pages/login/index/index",
+				"style": {
+					"navigationBarTitleText": "登录"
+				}
+			},
+			{
+			    "path": "pages/search/index/index",
+			    "style": {
+			        "navigationBarTitleText": "搜索"
+			    }
+			},
+			{
+			    "path": "pages/search/result/result",
+			    "style": {
+			        "navigationBarTitleText": "搜索结果"
+			    }
+			},
+			{
+				"path": "pages/user/index/index",
+				"style": {
+					"navigationBarTitleText": "个人中心"
+				}
+			},
+	        {
+	            "path": "pages/dialog/addFriend/addFriend",
+	            "style": {
+	                "navigationBarTitleText": "添加好友"
+	            }
+	        },
+	        {
+	            "path": "pages/dialog/chat/chat",
+	            "style": {
+	                "navigationBarTitleText": "聊天"
+	            }
+	        },
+	        {
+	            "path": "pages/dialog/index/index",
+	            "style": {
+	                "navigationBarTitleText": "对话列表"
+	            }
+	        },
+	        {
+	            "path": "pages/community/index/index",
+	            "style": {
+	                "navigationBarTitleText": "群组"
+	            }
+	        },
+			{
+			    "path": "pages/community/createPost/createPost",
+			    "style": {
+			        "navigationBarTitleText": "发帖"
+			    }
+			},
+			{
+			    "path": "pages/community/postDetail/postDetail",
+			    "style": {
+			        "navigationBarTitleText": "帖子详情"
+			    }
+			},
+			{
+			    "path": "pages/community/friendProfile/friendProfile",
+			    "style": {
+			        "navigationBarTitleText": "好友资料"
+			    }
+			},
+	        {
+	            "path": "pages/user/creation/creation",
+	            "style": {
+	                "navigationBarTitleText": "创作"
+	            }
+	        },
+	        {
+	            "path": "pages/user/editProfile/editProfile",
+	            "style": {
+	                "navigationBarTitleText": "编辑资料"
+	            }
+	        },
+	        {
+	            "path": "pages/user/favoriteDetail/favoriteDetail",
+	            "style": {
+	                "navigationBarTitleText": "收藏详情"
+	            }
+	        },
+	        {
+	            "path": "pages/user/favorites/favorites",
+	            "style": {
+	                "navigationBarTitleText": "我的收藏"
+	            }
+	        },
+	        {
+	            "path": "pages/user/friendProfile/friendProfile",
+	            "style": {
+	                "navigationBarTitleText": "好友资料"
+	            }
+	        },
+	        {
+	            "path": "pages/user/friends/friends",
+	            "style": {
+	                "navigationBarTitleText": "我的好友"
+	            }
+	        },
+	       
+	        {
+	            "path": "pages/user/postDetail/postDetail",
+	            "style": {
+	                "navigationBarTitleText": "帖子详情"
+	            }
+	        },
+	        {
+	            "path": "pages/user/workDetail/workDetail",
+	            "style": {
+	                "navigationBarTitleText": "作品详情"
+	            }
+	        },
+	        {
+	            "path": "pages/write/index/index",
+	            "style": {
+	                "navigationBarTitleText": "撰写"
+	            }
+	        },
+			{
+			    "path": "pages/write/choose/choose",
+			    "style": {
+			        "navigationBarTitleText": "选择词牌"
+			    }
+			},
+			{
+			    "path": "pages/write/creation/creation",
+			    "style": {
+			        "navigationBarTitleText": "作品集"
+			    }
+			},
+			{
+			    "path": "pages/write/draft/draft",
+			    "style": {
+			        "navigationBarTitleText": "草稿箱"
+			    }
+			},
+			{
+			    "path": "pages/write/draftDetail/draftDetail",
+			    "style": {
+			        "navigationBarTitleText": "草稿详情"
+			    }
+			},
+			{
+			    "path": "pages/write/workDetail/workDetail",
+			    "style": {
+			        "navigationBarTitleText": "工作详情"
+			    }
+			},
+			{
+			    "path": "pages/write/write/write",
+			    "style": {
+			        "navigationBarTitleText": "创作（待开发）"
+			    }
+			}
+	    ],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"tabBar": {
+		"backgroundColor": "#fafafa",
+		"color": "#a2a2a7",
+		"selectedColor": "#2b2b2b",
+		"list": [{
+				"pagePath": "pages/search/index/index",
+				"iconPath": "static/tabbar/search-icon.png",
+				"selectedIconPath": "static/tabbar/search-icon-selected.png",
+				"text": "搜索"
+			},
+			{
+				"pagePath": "pages/community/index/index",
+				"iconPath": "static/tabbar/community-icon.png",
+				"selectedIconPath": "static/tabbar/community-icon-selected.png",
+				"text": "社区"
+			},
+			{
+				"pagePath": "pages/write/index/index",
+				"iconPath": "static/tabbar/write-icon.png",
+				"selectedIconPath": "static/tabbar/write-icon-selected.png",
+				"text": "创作"
+			},
+			{
+				"pagePath": "pages/dialog/index/index",
+				"iconPath": "static/tabbar/dialog-icon.png",
+				"selectedIconPath": "static/tabbar/dialog-icon-selected.png",
+				"text": "消息"
+			},
+			{
+				"pagePath": "pages/user/index/index",
+				"iconPath": "static/tabbar/user-icon.png",
+				"selectedIconPath": "static/tabbar/user-icon-seleted.png",
+				"text": "我"
+			}
+		]
+	}
+}

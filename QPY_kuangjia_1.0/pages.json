@@ -13,10 +13,22 @@
 			    }
 			},
 			{
-			    "path": "pages/search/result/result",
-			    "style": {
-			        "navigationBarTitleText": "搜索结果"
-			    }
+				"path": "pages/search/searchresultList/searchresultList_ci",
+				"style": {
+				    "navigationBarTitleText": "词搜索结果列表"
+				}
+			},
+			{
+				"path": "pages/search/searchresultList/searchresultList_cipai",
+				"style": {
+				    "navigationBarTitleText": "词牌搜索结果列表"
+				}
+			},
+			{
+				"path": "pages/search/searchresultList/searchresultList_author",
+				"style": {
+				    "navigationBarTitleText": "词人搜索结果列表"
+				}
 			},
 			{
 				"path": "pages/user/index/index",
@@ -156,6 +168,27 @@
 			    "style": {
 			        "navigationBarTitleText": "创作（待开发）"
 			    }
+			},
+			{
+				"path" : "pages/info/info_ci/info_ci",
+				"style" : 
+				{
+					"navigationBarTitleText" : "词详情"
+				}
+			},
+			{
+				"path" : "pages/info/info_cipai/info_cipai",
+				"style" : 
+				{
+					"navigationBarTitleText" : "词牌详情"
+				}
+			},
+			{
+				"path" : "pages/info/info_author/info_author",
+				"style" : 
+				{
+					"navigationBarTitleText" : "词人详情"
+				}
 			}
 	    ],
 	"globalStyle": {

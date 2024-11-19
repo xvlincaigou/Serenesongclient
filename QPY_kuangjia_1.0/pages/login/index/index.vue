@@ -18,26 +18,27 @@ export default {
       uni.login({
         provider: 'weixin',
         success: loginRes => {
-          console.log('微信登录成功:', loginRes);
-          uni.showToast({ title: '微信登录成功', icon: 'success' });
+          console.log('请求信息：', loginRes);
           this.processLogin(loginRes.code);
         },
         fail: () => {
-          uni.showToast({ title: '微信登录失败', icon: 'none' });
+          uni.showToast({ title: '微信登录失败1', icon: 'none' });
         }
       });
     },
 
     // 通过微信授权码向后端发送请求处理登录
     processLogin(code) {
+	  let baseurl = getApp().globalData.baseURL;
+	  console.log('是否取到全局变量：', baseurl)
       uni.request({
-        url: `http://124.221.16.68:8080/login?wxcode=${code}`,
+        url: `${baseurl}/login?wxcode=${code}`,
         method: 'POST',
         success: response => {
           this.handleResponse(response);
         },
         fail: () => {
-          uni.showToast({ title: '请求登录接口失败', icon: 'none' });
+          uni.showToast({ title: '微信登录失败2', icon: 'none' });
         }
       });
     },
@@ -45,10 +46,11 @@ export default {
     // 处理服务器响应
     handleResponse(response) {
       if (response.statusCode === 200) {
+		uni.showToast({ title: '微信登录成功', icon: 'success' });
         this.processToken(response.data);
       } else {
-        console.error('登录请求失败，状态码:', response.statusCode);
-        uni.showToast({ title: '登录失败，请稍后重试', icon: 'none' });
+        console.error('登录请求失败，目前状态码:', response.statusCode);
+        uni.showToast({ title: '微信登录失败3', icon: 'none' });
       }
     },
 
@@ -64,7 +66,7 @@ export default {
           url: '/pages/search/index/index'
         });
       } else {
-        uni.showToast({ title: '获取Token失败', icon: 'none' });
+        uni.showToast({ title: '微信登陆失败4', icon: 'none' });
       }
     }
   }

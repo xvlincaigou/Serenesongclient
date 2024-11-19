@@ -7,9 +7,18 @@
         <view v-else class="avatar-placeholder" @click="changeAvatar"></view>
       </view>
       <view class="stats">
-        <text @click="navigateTo('creation')">创作<br>23</text>
-        <text @click="navigateTo('favorites')">收藏<br>15</text>
-        <text @click="navigateTo('friends')">词友<br>12</text>
+        <view class="stat-item" @click="navigateTo('creation')">
+          <text class="stat-label">创作</text>
+          <text class="stat-number">{{ creationCount }}</text>
+        </view>
+        <view class="stat-item" @click="navigateTo('favorites')">
+          <text class="stat-label">收藏</text>
+          <text class="stat-number">{{ favoritesCount }}</text>
+        </view>
+        <view class="stat-item" @click="navigateTo('friends')">
+          <text class="stat-label">词友</text>
+          <text class="stat-number">{{ friendsCount }}</text>
+        </view>
       </view>
     </view>
     <view class="info">
@@ -88,7 +97,11 @@ export default {
     return {
       avatar: '',  // 默认未选择头像
 	  name: "我",
+	  favoritesCount: 0,       // 收藏数量
+	  creationCount: 0,       // 创作数量
+	  friendsCount: 0,        // 词友数量
       selectedTab: 'dynamic',  // 默认选择的标签
+	  token: "",
       dynamicPosts: [
 		  {
 		    title: "钗头凤--陆游",
@@ -138,6 +151,9 @@ export default {
           ]
     };
   },
+  onShow() {
+    this.getFavoritesCount(); // 获取收藏数量
+  },
   methods: {
     changeAvatar() {
       uni.chooseImage({
@@ -151,6 +167,39 @@ export default {
     navigateTo(page) {
       uni.navigateTo({ url: `/pages/user/${page}/${page}` });
     },
+	getFavoritesCount() {
+	    const token = uni.getStorageSync('userToken');
+	    if (token) {
+		  this.token = token;
+		  console.log('token:', token);
+	      uni.request({
+	        url: `http://124.221.16.68:8080/getCollectionItemCount?token=${this.token}`,
+	        method: 'GET',
+	        success: (res) => {
+	          if (res.statusCode === 200) {
+				console.log('收藏数量:', res.data.count);
+	            this.favoritesCount = res.data.count;
+	          } else {
+	            uni.showToast({
+	              title: '获取收藏数失败',
+	              icon: 'none',
+	            });
+	          }
+	        },
+	        fail: () => {
+	          uni.showToast({
+	            title: '请求失败',
+	            icon: 'none',
+	          });
+	        }
+	      });
+	    } else {
+	      uni.showToast({
+	        title: '请先登录',
+	        icon: 'none',
+	      });
+	    }
+	},
     selectTab(tab) {
       this.selectedTab = tab;
     },
@@ -205,8 +254,11 @@ export default {
 .email { font-size: 14px; color: grey; }
 .signature { font-size: 12px; color: grey; }
 
-.stats { display: flex; align-items: center; margin-left: 30px;}
-.stats text { margin-right: 50px; font-size: 14px; text-align: center; }
+.stats { display: flex; justify-content: space-around; margin-left: 30px; margin-right: 30px; }
+.stat-item { display: flex; flex-direction: column; align-items: center; margin-right: 20px; margin-left: 10px; }
+.stat-label { font-size: 14px; text-align: center; }
+.stat-number { font-size: 14px; text-align: center; margin-top: 4px; }
+
 
 .edit-profile {
   width: 100%; margin: 12px 0; padding: -5px; font-size: 14px;

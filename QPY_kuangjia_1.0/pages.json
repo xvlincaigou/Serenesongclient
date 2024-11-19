@@ -102,6 +102,12 @@
 	                "navigationBarTitleText": "我的收藏"
 	            }
 	        },
+			{
+			    "path": "pages/user/favoriteList/favoriteList",
+			    "style": {
+			        "navigationBarTitleText": "我的收藏"
+			    }
+			},
 	        {
 	            "path": "pages/user/friendProfile/friendProfile",
 	            "style": {

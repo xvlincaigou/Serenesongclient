@@ -29,6 +29,7 @@
 export default {
   data() {
     return {
+	  baseurl:getApp().globalData.baseURL,
       favoriteTitle: '',
       favoriteAuthor: '',
       favoriteContent: [],
@@ -72,7 +73,7 @@ export default {
         return;
       }
       uni.request({
-        url: `http://124.221.16.68:8080/modifyCollectionComment?collectionID=${this.collectionID}&ciID=${this.ciID}&comment=${encodeURIComponent(this.favoriteAnalysis)}&token=${this.token}`,
+        url: `${this.baseurl}/modifyCollectionComment?collectionID=${this.collectionID}&ciID=${this.ciID}&comment=${encodeURIComponent(this.favoriteAnalysis)}&token=${this.token}`,
         method: 'POST',
         header: {
           'Content-Type': 'application/json',

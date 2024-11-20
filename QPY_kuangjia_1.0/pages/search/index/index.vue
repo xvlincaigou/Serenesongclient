@@ -124,6 +124,7 @@ export default {
 }
 
 .search-bar {
+  width:100%;
   position: relative;
   padding: 8px;
   background-color: #f8f8f8;
@@ -131,7 +132,7 @@ export default {
 }
 
 input {
-  width: 100%;
+  width: 90%;
   padding: 8px;
   border: 1px solid #cccccc;
   border-radius: 4px;

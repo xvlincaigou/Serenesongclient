@@ -95,6 +95,7 @@
 export default {
   data() {
     return {
+	  baseurl:getApp().globalData.baseURL,
       avatar: '',  // 默认未选择头像
 	  name: "我",
 	  favoritesCount: 0,       // 收藏数量
@@ -173,7 +174,7 @@ export default {
 		  this.token = token;
 		  console.log('token:', token);
 	      uni.request({
-	        url: `http://124.221.16.68:8080/getCollectionItemCount?token=${this.token}`,
+	        url: `${this.baseurl}/getCollectionItemCount?token=${this.token}`,
 	        method: 'GET',
 	        success: (res) => {
 	          if (res.statusCode === 200) {

@@ -18,6 +18,7 @@
 export default {
   data() {
     return {
+	  baseurl:getApp().globalData.baseURL,
       token: "",
       collectionID: "",
       works: [],
@@ -48,7 +49,7 @@ export default {
     // 获取收藏夹中的作品列表
     getCollectionItems() {
       uni.request({
-        url: `http://124.221.16.68:8080/getAllColletionItems?collectionID=${this.collectionID}&token=${this.token}`,
+        url: `${this.baseurl}/getAllColletionItems?collectionID=${this.collectionID}&token=${this.token}`,
         method: 'GET',
         header: {
           'Content-Type': 'application/json',
@@ -68,7 +69,7 @@ export default {
 				}
 				return new Promise((resolve, reject) => {
 					uni.request({
-						url: `http://124.221.16.68:8080/getCiById?_id=${item.ciID}`,
+						url: `${this.baseurl}/getCiById?_id=${item.ciID}`,
 						method: 'GET',
 			            header: {
 			                'Content-Type': 'application/json',
@@ -124,7 +125,7 @@ export default {
     // 模拟添加作品到收藏夹
     simulateAddWork(ciID) {
       uni.request({
-        url: `http://124.221.16.68:8080/addToCollection?collectionID=${this.collectionID}&ciID=${ciID}&token=${this.token}`,
+        url: `${this.baseurl}/addToCollection?collectionID=${this.collectionID}&ciID=${ciID}&token=${this.token}`,
         method: 'POST',
         success: (res) => {
           if (res.statusCode === 200) {
@@ -151,7 +152,7 @@ export default {
     // 从收藏夹中删除作品
     removeFromCollection(ciID, index) {
       uni.request({
-        url: `http://124.221.16.68:8080/removeFromCollection?collectionID=${this.collectionID}&ciID=${ciID}&token=${this.token}`,
+        url: `{this.baseurl}ction?collectionID=${this.collectionID}&ciID=${ciID}&token=${this.token}`,
         method: 'POST',
         success: (res) => {
           if (res.statusCode === 200) {

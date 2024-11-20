@@ -4,21 +4,25 @@
       <text>词搜索结果 - "{{ keyword }}"</text>
     </view>
     <view class="results-list">
-      <view
-        class="result-item"
-        v-for="(ci, index) in matchedCi"
-        :key="index"
-        @click="navigateToDetail(ci)"
-      >
-        <text class="result-title">
-          {{ ci.cipai[0] }} · {{ getFirstSentence(ci.content[0]) }}
-        </text>
-        <text class="result-subtitle">&nbsp;&nbsp;&nbsp;{{ ci.author }}</text>
+      <view v-if="matchedCi.length > 0">
+        <view
+          class="result-item"
+          v-for="(ci, index) in matchedCi"
+          :key="index"
+          @click="navigateToDetail(ci)"
+        >
+          <text class="result-title">
+            {{ ci.cipai[0] }} · {{ getFirstSentence(ci.content[0]) }}
+          </text>
+          <text class="result-subtitle">&nbsp;&nbsp;&nbsp;{{ ci.author }}</text>
+        </view>
+      </view>
+      <view v-else class="no-results">
+        <text>哎呀，没有匹配搜索的词</text>
       </view>
     </view>
   </view>
 </template>
-
 
 <script>
 export default {
@@ -35,8 +39,10 @@ export default {
   methods: {
     fetchResults() {
       const baseurl = getApp().globalData.baseURL;
+	  const keywords = this.keyword.split(' ').filter(k => k.trim() !== '');
+	  const keywordsString = keywords.map(k => `keyword=${encodeURIComponent(k)}`).join('&'); 
       uni.request({
-        url: `${baseurl}/search?keyword=${encodeURIComponent(this.keyword)}&option=ci`,
+        url: `${baseurl}/search?${keywordsString}&option=ci`,
         method: 'GET',
         success: (res) => {
           console.log('API response:', res);
@@ -51,12 +57,10 @@ export default {
         }
       });
     },
-    // 提取文本的第一句
     getFirstSentence(text) {
-      const sentences = text.split(/[，。\n]/); // 按中文逗号、句号或换行符分割
+      const sentences = text.split(/[，。\n]/);
       return sentences[0];
     },
-    // 跳转到详情页
     navigateToDetail(originalCi) {
       let contentCombined = originalCi.content.join('\n'); 
       let firstSentence = this.getFirstSentence(originalCi.content[0]); 
@@ -70,7 +74,6 @@ export default {
         url: `/pages/info/info_ci/info_ci?ci=${encodeURIComponent(JSON.stringify(ciToSend))}`
       });
     }
-
   }
 }
 </script>
@@ -109,15 +112,9 @@ export default {
   text-overflow: ellipsis;
 }
 
-.ci-content {
-  margin-top: 10px;
-}
-
-.ci-content text {
-  display: block;
-  font-size: 16px;
-  color: #555;
-  line-height: 24px;
+.no-results {
+  padding: 12px 16px;
+  text-align: center;
+  color: #999999;
 }
 </style>
-

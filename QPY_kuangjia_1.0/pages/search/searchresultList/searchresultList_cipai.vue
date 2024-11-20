@@ -4,9 +4,14 @@
       <text>词牌搜索结果 - "{{ keyword }}"</text>
     </view>
     <view class="results-list">
-      <view class="result-item" v-for="(cipai, name) in matchedCipai" :key="name" @click="navigateToDetail(cipai, name)">
-        <text class="result-title">{{ name }}</text>
-        <text class="result-desc">{{ cipai.desc }}</text>
+      <view v-if="Object.keys(matchedCipai).length > 0">
+        <view class="result-item" v-for="(cipai, name) in matchedCipai" :key="name" @click="navigateToDetail(cipai, name)">
+          <text class="result-title">{{ name }}</text>
+          <text class="result-desc">{{ cipai.desc }}</text>
+        </view>
+      </view>
+      <view v-else class="no-results">
+        <text>哎呀，没有匹配搜索的词牌</text>
       </view>
     </view>
   </view>
@@ -92,4 +97,9 @@ export default {
   max-height: none;  
 }
 
+.no-results {
+  padding: 12px 16px;
+  text-align: center;
+  color: #999999;
+}
 </style>

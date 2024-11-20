@@ -32,6 +32,7 @@
 export default {
   data() {
     return {
+	  baseurl:getApp().globalData.baseURL,
       token: "",
       favorites: [],
       showCreateModal: false,
@@ -66,7 +67,7 @@ export default {
     // 获取全部收藏夹
     getAllCollections() {
       uni.request({
-        url: `http://124.221.16.68:8080/getAllCollections?token=${this.token}`,
+        url: `${this.baseurl}/getAllCollections?token=${this.token}`,
         method: 'GET',
         header: {
           'Content-Type': 'application/json',
@@ -109,7 +110,7 @@ export default {
         return;
       }
       uni.request({
-        url: `http://124.221.16.68:8080/createCollection?collectionName=${this.newCollectionName}&token=${this.token}`,
+        url: `${this.baseurl}/createCollection?collectionName=${this.newCollectionName}&token=${this.token}`,
         method: 'POST',
         header: {
           'Content-Type': 'application/json',
@@ -188,7 +189,7 @@ export default {
       console.log('删除收藏夹，collectionID:', collectionID);
       console.log('Token:', this.token);
       uni.request({
-        url: `http://124.221.16.68:8080/deleteCollection?collectionID=${collectionID}&token=${this.token}`,
+        url: `${this.baseurl}/deleteCollection?collectionID=${collectionID}&token=${this.token}`,
         method: 'POST',
         header: {
           'Content-Type': 'application/json',

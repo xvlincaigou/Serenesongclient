@@ -4,13 +4,18 @@
       <text>词人搜索结果 - "{{ keyword }}"</text>
     </view>
     <view class="results-list">
-      <view
-        class="result-item"
-        v-for="(author, index) in matched_authors"
-        :key="index"
-        @click="navigateToDetail(author)"
-      >
-        <text class="result-title">{{ author.name }}</text>
+      <view v-if="matched_authors.length > 0">
+        <view
+          class="result-item"
+          v-for="(author, index) in matched_authors"
+          :key="index"
+          @click="navigateToDetail(author)"
+        >
+          <text class="result-title">{{ author.name }}</text>
+        </view>
+      </view>
+      <view v-else class="no-results">
+        <text>哎呀，没有匹配搜索的词人</text>
       </view>
     </view>
   </view>
@@ -82,4 +87,9 @@ export default {
   color: #333333;
 }
 
+.no-results {
+  padding: 12px 16px;
+  text-align: center;
+  color: #999999;
+}
 </style>

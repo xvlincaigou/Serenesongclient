@@ -152,7 +152,7 @@ export default {
     // 从收藏夹中删除作品
     removeFromCollection(ciID, index) {
       uni.request({
-        url: `{this.baseurl}ction?collectionID=${this.collectionID}&ciID=${ciID}&token=${this.token}`,
+        url: `${this.baseurl}ction?collectionID=${this.collectionID}&ciID=${ciID}&token=${this.token}`,
         method: 'POST',
         success: (res) => {
           if (res.statusCode === 200) {

@@ -8,7 +8,10 @@
     </view>
     <view class="formats-section">
       <view v-for="(format, index) in cipaiDetail.formats" :key="index" class="section format-section">
-        <text class="format-header">韵律版本{{ index + 1 }}：{{ format.author }}\n\n</text>
+        <view class="format-header-container">
+          <text class="format-header">韵律版本{{ index + 1 }}：{{ format.author }}</text>
+          <button class="compose-button" @click="goToCompose(cipaiDetail.name, index)">以此韵律创作</button>
+        </view>
         <text v-if="format.desc" class="format-desc-title">古人点评:\n</text>
         <text v-if="format.desc" class="format-desc">{{ format.desc }}\n\n</text>
         <text v-if="format.sketch" class="format-sketch-title">韵律特征:\n</text>
@@ -34,6 +37,11 @@ export default {
       return tunes.map(tune => `${tune.tune}${tune.rhythm ? ' (' + tune.rhythm + ')' : ''}`)
                   .join('')
                   .replace(/韵\)/g, '韵)\n'); // 每当有“韵”字符时换行
+    },
+    goToCompose(cipai_name, format_num) {
+      uni.navigateTo({
+        url: `/pages/write/write/write?cipai_name=${encodeURIComponent(cipai_name)}&format_num=${format_num}`
+      });
     }
   },
   onLoad(options) {
@@ -42,6 +50,7 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 .container {
   display: flex;
@@ -53,7 +62,7 @@ export default {
   padding: 20px;
 }
 
-.section, .format-section{
+.section, .format-section {
   width: 90%;
   background-color: #ffffff;
   padding: 20px;
@@ -78,11 +87,24 @@ export default {
   text-align: center; /* 使标题居中 */
 }
 
+.format-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .format-header {
   font-size: 18px;
   color: #333;
   font-weight: bold;
-  margin-bottom: 10px;
+}
+
+.compose-button {
+  color: #909090;
+  padding: 0px 6px;
+  margin-right: 0px;
+  border-radius: 5px;
+  font-size: 14px;
 }
 
 .desc-text, .format-desc, .format-sketch, .tunes {

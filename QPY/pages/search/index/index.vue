@@ -60,7 +60,7 @@ export default {
   methods: {
     navigateToList(option) {
       uni.navigateTo({
-        url: `/pages/search/searchresultList/searchresultList_${option}?keyword=${this.searchText}`,
+        url: `/pages1_search/searchresultList/searchresultList_${option}?keyword=${this.searchText}`,
       });
     },
     handleBlur() {

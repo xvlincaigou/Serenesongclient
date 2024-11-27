@@ -166,7 +166,7 @@ export default {
       });
     },
     navigateTo(page) {
-      uni.navigateTo({ url: `/pages/user/${page}/${page}` });
+      uni.navigateTo({ url: `/pages5_user/${page}/${page}` });
     },
 	getFavoritesCount() {
 	    const token = uni.getStorageSync('userToken');
@@ -206,7 +206,7 @@ export default {
     },
     viewPost(post) {
       uni.navigateTo({
-        url: `/pages/user/postDetail/postDetail?title=${encodeURIComponent(post.title)}&date=${post.date}&content=${encodeURIComponent(post.content)}&avatar=${encodeURIComponent(this.avatar)}&nickname=${encodeURIComponent(this.name)}&category=${encodeURIComponent(post.category)}&detail=${encodeURIComponent(post.detail)}`
+        url: `/pages5_user/postDetail/postDetail?title=${encodeURIComponent(post.title)}&date=${post.date}&content=${encodeURIComponent(post.content)}&avatar=${encodeURIComponent(this.avatar)}&nickname=${encodeURIComponent(this.name)}&category=${encodeURIComponent(post.category)}&detail=${encodeURIComponent(post.detail)}`
       });
     },
     share(item) {
@@ -218,14 +218,14 @@ export default {
     },
     comment(item) {
       uni.navigateTo({
-        url: `/pages/user/postDetail/postDetail?title=${encodeURIComponent(item.title)}&date=${item.date}&content=${encodeURIComponent(item.content)}&avatar=${encodeURIComponent(this.avatar)}&nickname=${encodeURIComponent(this.name)}&category=${encodeURIComponent(item.category)}&detail=${encodeURIComponent(item.detail)}`
+        url: `/pages5_user/postDetail/postDetail?title=${encodeURIComponent(item.title)}&date=${item.date}&content=${encodeURIComponent(item.content)}&avatar=${encodeURIComponent(this.avatar)}&nickname=${encodeURIComponent(this.name)}&category=${encodeURIComponent(item.category)}&detail=${encodeURIComponent(item.detail)}`
       });
     },
     love(item) {
       item.liked = !item.liked;
     },
     viewWork(work) {
-      uni.navigateTo({ url: `/pages/user/workDetail/workDetail?title=${work.title}&date=${work.date}&content=${work.content}` });
+      uni.navigateTo({ url: `/pages5_user/workDetail/workDetail?title=${work.title}&date=${work.date}&content=${work.content}` });
     },
     edit(item) {
       // 编辑逻辑

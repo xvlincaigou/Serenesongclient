@@ -26,15 +26,15 @@ export default {
     return {
       searchText: "",
       friends: [
-        { nickname: "苏轼", avatar: "/static/dialog/avatar1.png", lastMessage: "大江东去浪淘尽，千古风流人物。故垒西边，人道是，三国周郎赤壁。", time: "10:30" },
-        { nickname: "辛弃疾", avatar: "/static/dialog/avatar2.png", lastMessage: "青山遮不住，毕竟东流去。江晚正愁余，山深闻鹧鸪。", time: "11:00" },
-        { nickname: "柳永", avatar: "/static/dialog/avatar3.png", lastMessage: "东南形胜", time: "12:15" },
-        { nickname: "晏殊", avatar: "/static/dialog/avatar4.png", lastMessage: "一曲新词酒一杯", time: "14:05" },
-        { nickname: "李清照", avatar: "/static/dialog/avatar5.png", lastMessage: "寻寻觅觅，冷冷清清，凄凄惨惨戚戚。", time: "15:30" },
-        { nickname: "陆游", avatar: "/static/dialog/avatar6.png", lastMessage: "[图片]", time: "16:45" },
-        { nickname: "李白", avatar: "/static/dialog/avatar7.png", lastMessage: "故人西辞黄鹤楼", time: "17:45" },
-        { nickname: "杜甫", avatar: "/static/dialog/avatar8.png", lastMessage: "风急天高猿啸哀", time: "17:00" },
-        { nickname: "许霖", avatar: "/static/dialog/avatar9.png", lastMessage: "软工前端写完了吗！！", time: "0:00" }
+        { nickname: "苏轼", avatar: "/static/dialog/avatar0.png", lastMessage: "大江东去浪淘尽，千古风流人物。故垒西边，人道是，三国周郎赤壁。", time: "10:30" },
+        { nickname: "辛弃疾", avatar: "/static/dialog/avatar0.png", lastMessage: "青山遮不住，毕竟东流去。江晚正愁余，山深闻鹧鸪。", time: "11:00" },
+        { nickname: "柳永", avatar: "/static/dialog/avatar0.png", lastMessage: "东南形胜", time: "12:15" },
+        { nickname: "晏殊", avatar: "/static/dialog/avatar0.png", lastMessage: "一曲新词酒一杯", time: "14:05" },
+        { nickname: "李清照", avatar: "/static/dialog/avatar0.png", lastMessage: "寻寻觅觅，冷冷清清，凄凄惨惨戚戚。", time: "15:30" },
+        { nickname: "陆游", avatar: "/static/dialog/avatar0.png", lastMessage: "[图片]", time: "16:45" },
+        { nickname: "李白", avatar: "/static/dialog/avatar0.png", lastMessage: "故人西辞黄鹤楼", time: "17:45" },
+        { nickname: "杜甫", avatar: "/static/dialog/avatar0.png", lastMessage: "风急天高猿啸哀", time: "17:00" },
+        { nickname: "许霖", avatar: "/static/dialog/avatar0.png", lastMessage: "软工前端写完了吗！！", time: "0:00" }
       ]
     };
   },
@@ -48,11 +48,11 @@ export default {
   },
   methods: {
     navigateTo(page) {
-      uni.navigateTo({ url: `/pages/${page}/${page}` });
+      uni.navigateTo({ url: `/pages4_dialog/${page}/${page}` });
     },
     navigateToChat(friend) {
       uni.navigateTo({
-        url: `/pages/dialog/chat/chat?nickname=${encodeURIComponent(friend.nickname)}&avatar=${encodeURIComponent(friend.avatar)}`
+        url: `/pages4_dialog/chat/chat?nickname=${encodeURIComponent(friend.nickname)}&avatar=${encodeURIComponent(friend.avatar)}`
       });
     },
     truncatedMessage(message) {

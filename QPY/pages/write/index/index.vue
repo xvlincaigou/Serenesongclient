@@ -17,20 +17,20 @@ export default {
     // 跳转到 create 页面
     chooseToCreate() {
       uni.navigateTo({
-        url: '/pages/write/choose/choose'  // 确保 create 页面已创建并且路径正确
+        url: '/pages3_write/choose/choose'
       });
     },
     
     // 跳转到 draft 页面
     checkDraft() {
       uni.navigateTo({
-        url: '/pages/write/draft/draft'  // 确保 draft 页面已创建并且路径正确
+        url: '/pages3_write/draft/draft'
       });
     },
 	
 	checkWork() {
 	  uni.navigateTo({
-	    url: '/pages/write/creation/creation'  // 确保 draft 页面已创建并且路径正确
+	    url: '/pages3_write/creation/creation'
 	  });
 	}
   }

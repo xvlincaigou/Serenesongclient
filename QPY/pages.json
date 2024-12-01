@@ -94,13 +94,13 @@
           }
         },
         {
-          "path": "creation/creation",
+          "path": "userWorkList/userWorkList",
           "style": {
-            "navigationBarTitleText": "作品集"
+            "navigationBarTitleText": "作品列表"
           }
         },
         {
-          "path": "draft/draft",
+          "path": "draftList/draftList",
           "style": {
             "navigationBarTitleText": "草稿箱"
           }
@@ -112,9 +112,9 @@
           }
         },
         {
-          "path": "workDetail/workDetail",
+          "path": "userWorkDetail/userWorkDetail",
           "style": {
-            "navigationBarTitleText": "工作详情"
+            "navigationBarTitleText": "作品详情"
           }
         },
         {

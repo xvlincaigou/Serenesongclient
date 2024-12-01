@@ -88,6 +88,7 @@ export default {
       this.fetchCollections();
     },
     fetchCollections() {
+	  console.log(this.userToken);
       uni.request({
         url: `${this.baseurl}/getAllCollections?token=${this.userToken}`,
         method: 'GET',

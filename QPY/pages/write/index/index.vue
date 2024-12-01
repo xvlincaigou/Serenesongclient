@@ -24,13 +24,13 @@ export default {
     // 跳转到 draft 页面
     checkDraft() {
       uni.navigateTo({
-        url: '/pages3_write/draft/draft'
+        url: '/pages3_write/draftList/draftList'
       });
     },
 	
 	checkWork() {
 	  uni.navigateTo({
-	    url: '/pages3_write/creation/creation'
+	    url: '/pages3_write/userWorkList/userWorkList'
 	  });
 	}
   }

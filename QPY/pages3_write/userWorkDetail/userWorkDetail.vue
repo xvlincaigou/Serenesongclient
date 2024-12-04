@@ -7,7 +7,9 @@
 
       <!-- 作品内容容器 -->
       <view class="UserWork-content-container">
-        <view class="UserWork-description">{{ UserWork.content[0] }}</view>
+        <view v-for="(item, index) in UserWork.content" :key="index" class="UserWork-description">
+            {{ item }}
+          </view>
       </view>
 
       <!-- 操作按钮容器 -->
@@ -82,9 +84,10 @@ export default {
 }
 
 .UserWork-description {
-  font-size: 14px;
+  font-size: 15px;
   color: #555;
   line-height: 1.6;
+  margin-bottom: 8px;
 }
 
 .UserWork-footer-container {

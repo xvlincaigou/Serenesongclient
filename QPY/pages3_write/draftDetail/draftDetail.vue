@@ -8,8 +8,11 @@
 
       <!-- 内容容器 -->
       <view class="draft-content-container">
-        <view class="draft-description">{{ draft.content[0] }}</view>
+        <view v-for="(item, index) in draft.content" :key="index" class="draft-description">
+          {{ item }}
+        </view>
       </view>
+
 
       <!-- 按钮容器 -->
       <view class="draft-footer-container">
@@ -158,9 +161,10 @@ export default {
 }
 
 .draft-description {
-  font-size: 14px;
+  font-size: 15px;
   color: #555;
   line-height: 1.6;
+  margin-bottom: 8px;
 }
 
 .draft-footer-container {

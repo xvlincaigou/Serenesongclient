@@ -31,6 +31,16 @@ export default {
       drafts: [],
     };
   },
+  onShow() {
+    // 监听刷新草稿列表的事件
+    uni.$on('refreshDrafts', this.refreshDraftList);
+  },
+  
+  onUnload() {
+    // 页面卸载时移除事件监听，避免内存泄漏
+    uni.$off('refreshDrafts', this.refreshDraftList);
+  },
+  
   onLoad(options) {
     uni.getStorage({
       key: 'userToken',
@@ -43,6 +53,11 @@ export default {
     });
   },
   methods: {
+	refreshDraftList() {
+	    // 这里放置刷新草稿列表的逻辑，比如重新获取草稿数据
+	    console.log('Refreshing drafts list...');
+	    this.fetchResults();  // 假设你有一个 fetchDrafts 方法来获取草稿数据
+	  },
     fetchResults() {
       const baseurl = getApp().globalData.baseURL;
       console.log('2userToken', this.userToken);

@@ -8,7 +8,7 @@
 
       <!-- 内容容器 -->
       <view class="draft-content-container">
-        <view v-for="(item, index) in draft.content" :key="index" class="draft-description">
+        <view v-for="(item, index) in contentArray" :key="index" class="draft-description">
           {{ item }}
         </view>
       </view>
@@ -16,9 +16,8 @@
 
       <!-- 按钮容器 -->
       <view class="draft-footer-container">
-        <button @click="editDraft" class="button edit-button">编辑草稿</button>
+        <button @click="editDraft" class="button edit-button">继续创作</button>
         <button @click="deleteDraft" class="button delete-button">删除草稿</button>
-        <button @click="promoteToOfficial" class="button promote-button">转正草稿</button>
       </view>
     </view>
 
@@ -32,93 +31,126 @@
 export default {
   data() {
     return {
-      draft: null, // 保存草稿的详细信息
+      draft: null, 
+	  token:'',
+	  formatData:{
+		  format:{
+			  author:'',
+			  desc: '',
+			  sketch: '',
+			  tunes: []
+		  }
+	  },
+	  contentArray : [],
     };
   },
   onLoad(options) {
     const draftData = options.draft ? JSON.parse(decodeURIComponent(options.draft)) : null;
     this.draft = draftData;
+	this.token = uni.getStorageSync('userToken');
+	this.fetchFormatData(this.draft.cipai[0], this.draft.cipai[1]);
   },
   methods: {
+	fetchFormatData(cipaiName, formatNum) {
+	  let baseurl = getApp().globalData.baseURL;
+	  const url = `${baseurl}/getFormat?cipai_name=${encodeURIComponent(cipaiName)}&format_num=${formatNum}`;
+	  uni.request({
+	    url: url,
+	    method: 'GET',
+	    success: (res) => {
+	      console.log('Data received:', res.data); // 打印返回的数据
+	      this.formatData = res.data;
+	      console.log('tunes:', this.formatData.format.tunes);
+		  this.getContentArray();
+		  console.log('cicontent',this.contentArray);
+	    },
+	    fail: (err) => {
+	      console.error('Failed to fetch data:', err); // 打印错误信息
+	    }
+	  });
+	},
+	getContentArray() {
+	    let contentStr = '';
+	    // 遍历填词框的每一行
+	    this.formatData.format.tunes.forEach((tune, index) => {
+	      // 获取每个 tune 的文本内容
+	      const tuneContent = this.draft.content[index] || '';
+	      // 将 tuneContent 添加到 content 字符串中
+	      contentStr += tuneContent;
+	      
+	      // 根据 rhythm（韵、句、读）添加标点符号
+	      if (tune.rhythm === '读') {
+	        contentStr += '、';  // "读" 音节之间用 "、"
+	      } else if (tune.rhythm === '句') {
+	        contentStr += '，';  // "句" 用逗号 "，"
+	      } else if (tune.rhythm === '韵') {
+	        contentStr += '。';  // "韵" 用句号 "。"
+	      }
+	    });
+	
+	    // 使用正则表达式根据标点符号分割 content 字符串
+	    let contentArray = contentStr.split(/([，。、])/).filter(item => item.trim() !== '');
+	
+	    // 将标点符号加入到每一项的后面
+	    for (let i = 0; i < contentArray.length; i++) {
+	      // 如果当前项是标点符号，前一个元素拼接上标点符号
+	      if (['、', '，', '。'].includes(contentArray[i])) {
+	        contentArray[i - 1] += contentArray[i];
+	        contentArray.splice(i, 1);  // 删除标点符号
+	        i--;  // 由于删除了元素，需要调整索引
+	      }
+	    }
+	    this.contentArray = contentArray;
+	  },
     editDraft() {
       uni.navigateTo({
         url: `/pages3_write/write/write?draft=${encodeURIComponent(JSON.stringify(this.draft))}`,
       });
     },
     deleteDraft() {
-      uni.showModal({
-        title: '删除草稿',
-        content: '确定删除此草稿吗？',
-        success: (res) => {
-          if (res.confirm) {
-            const baseurl = getApp().globalData.baseURL;
-            const userToken = uni.getStorageSync('userToken');
-            uni.request({
-              url: `${baseurl}/deleteDraft?token=${userToken}`,
-              method: 'POST',
-              data: { draftId: this.draft.id },
-              success: (response) => {
-                if (response.statusCode === 200) {
-                  uni.showToast({
-                    title: '草稿删除成功',
-                    icon: 'success',
-                  });
-                  uni.navigateBack();
-                } else {
-                  uni.showToast({
-                    title: '删除失败',
-                    icon: 'none',
-                  });
-                }
-              },
-              fail: (err) => {
-                uni.showToast({
-                  title: '网络请求失败',
-                  icon: 'none',
-                });
-              },
-            });
+        let baseurl = getApp().globalData.baseURL;
+        const url = `${baseurl}/delDraft`;
+        console.log('Sending request to:', url);
+        console.log('Using token:', this.token);
+		console.log('ciID:', this.draft._id);
+        uni.request({
+          url: url,
+          method: 'DELETE',
+          data: {
+			token: this.token,
+            draftID: this.draft._id, 
+          },
+          success: (res) => {
+            console.log('Response data:', res.data);
+            if (res.statusCode === 200) {
+              console.log('草稿删除成功！');
+			   // 显示删除成功的通知
+			  uni.showToast({
+				title: '删除成功',
+				icon: 'success', // 显示成功图标
+				duration: 1500,  // 持续时间
+				success: () => {
+				  // 在通知显示后延迟 0.5 秒再执行返回操作
+				  setTimeout(() => {
+					uni.navigateBack({
+					  delta: 1,  // 返回上一个页面
+					  success: () => {
+						// 通知前一个页面进行刷新
+						uni.$emit('refreshDrafts');  // 通过事件通知前一页刷新草稿列表
+					  }
+					});
+				  }, 500);  // 延迟 500 毫秒（0.5 秒）
+				}
+			  });
+            } else {
+              console.error('删除失败:', res.statusCode);
+            }
+          },
+          fail: (err) => {
+            console.error('请求失败:', err);
           }
-        },
-      });
-    },
-    promoteToOfficial() {
-      uni.showModal({
-        title: '转正草稿',
-        content: '确定将此草稿转正为正式作品吗？',
-        success: (res) => {
-          if (res.confirm) {
-            const baseurl = getApp().globalData.baseURL;
-            const userToken = uni.getStorageSync('userToken');
-            uni.request({
-              url: `${baseurl}/promoteToOfficial?token=${userToken}`,
-              method: 'POST',
-              data: { draftId: this.draft.id },
-              success: (response) => {
-                if (response.statusCode === 200) {
-                  uni.showToast({
-                    title: '草稿转正成功',
-                    icon: 'success',
-                  });
-                  uni.navigateBack();
-                } else {
-                  uni.showToast({
-                    title: '转正失败',
-                    icon: 'none',
-                  });
-                }
-              },
-              fail: (err) => {
-                uni.showToast({
-                  title: '网络请求失败',
-                  icon: 'none',
-                });
-              },
-            });
-          }
-        },
-      });
-    },
+        });
+      },
   },
 };
 </script>
@@ -174,7 +206,7 @@ export default {
 }
 
 .button {
-  padding: 5px 20px;
+  padding: 5px 30px;
   border-radius: 8px;
   font-size: 12px;
   cursor: pointer;
@@ -189,11 +221,6 @@ export default {
 
 .delete-button {
   background-color: #555;
-  color: #fff;
-}
-
-.promote-button {
-  background-color: #777;
   color: #fff;
 }
 

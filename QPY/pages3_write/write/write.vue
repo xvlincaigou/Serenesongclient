@@ -183,131 +183,151 @@ export default {
       }
       console.log('Temp storage after line cleared:', this.tempInput);
     },
-  addToCollection() {
-    if (!this.checkContentCompleted()) {
-      return;  // 如果没有完成创作，直接返回
-    }
-  
-    const contentArray = this.getContentArray();
-    const draftData = {
-      title: this.ciTitle || '未命名',  // 词的标题，默认为 '未命名'
-      cipai: [this.cipaiName],  // 词牌名数组
-      is_public: false,  // 默认不公开
-      content: contentArray,  // 作为数组的内容
-      prologue: '',  // 前言为空
-      tags: []  // 标签为空
-    };
-  
-    const requestData = {
-      token: this.token,
-      draft: draftData
-    };
-  
-    const baseurl = getApp().globalData.baseURL;
-  
-    uni.request({
-      url: `${baseurl}/putIntoDrafts`,
-      method: 'POST',
-      header: {
-        'Content-Type': 'application/json'
-      },
-      data: requestData,
-      success: (res) => {
-        if (res.data.message === 'Draft saved successfully') {
-          // 获取返回的 draft_id
-          const draftID = res.data.draft_id;
-  
-          // 调用 turnToFormal API，将草稿转为正式作品
-          uni.request({
-            url: `${baseurl}/turnToFormal`,
-            method: 'POST',
-            header: {
-              'Content-Type': 'application/json'
-            },
-            data: {
-              token: this.token,
-              draftID: draftID
-            },
-            success: (formalRes) => {
-              if (formalRes.data.message === 'Work saved successfully') {
-                // 提示用户加入作品集成功
-                uni.showToast({
-                  title: '已成功加入作品集',
-                  icon: 'success'
-                });
-              } else {
-                // 转为正式作品失败
-                uni.showToast({
-                  title: '加入作品集失败，请重试',
-                  icon: 'none'
-                });
-              }
-            },
-            fail: (formalErr) => {
-              // 请求失败处理
-              uni.showToast({
-                title: '失败，请检查网络',
-                icon: 'none'
-              });
-            }
-          });
-        }
-      },
-      fail: (err) => {
-        // 请求失败处理
-        uni.showToast({
-          title: '失败，请检查网络',
-          icon: 'none'
-        });
-      }
-    });
-  },
-
-    addToDrafts() {
+	addToDrafts() {
 	  const contentArray = this.getContentArray();
 	  console.log('contentArr:', contentArray);
-      const draftData = {
-		  title: this.ciTitle || '未命名', 
-		  cipai: [this.cipaiName], 
-		  is_public: false, 
-		  content: contentArray,
-		  prologue: '',
-		  tags: []
-		};
+	  const draftData = {
+	    title: this.ciTitle || '未命名', 
+	    cipai: [this.cipaiName, this.formatNum], 
+	    is_public: false, 
+	    content: this.ciContent,
+	    prologue: '',
+	    tags: []
+	  };
 	  const requestData = {
-		  token: this.token,
-		  draft: draftData
+	    token: this.token,
+	    draft: draftData
 	  };
 	  console.log('Request Data:', JSON.stringify(requestData));
 	  const baseurl = getApp().globalData.baseURL;
-	        uni.request({
-	          url: `${baseurl}/putIntoDrafts`,
-	          method: 'POST',
-			  data:requestData,
-	          success: (res) => {
-	            if (res.data.message === 'Draft saved successfully') {
-	              uni.showToast({
-	                title: '草稿保存成功',
-	                icon: 'success'
+	  
+	  uni.request({
+	    url: `${baseurl}/putIntoDrafts`,
+	    method: 'POST',
+	    data: requestData,
+	    success: (res) => {
+	      if (res.data.message === 'Draft saved successfully') {
+	        uni.showToast({
+	          title: '草稿保存成功',
+	          icon: 'success',
+	          duration: 1500,  // 持续时间
+	          success: () => {
+	            // 在通知显示后延迟 0.5 秒再执行返回操作
+	            setTimeout(() => {
+	              uni.switchTab({
+	                url: `/pages/write/index/index`
 	              });
-	            } else {
-	              uni.showToast({
-	                title: '保存失败，请重试',
-	                icon: 'none'
-	              });
-	            }
-	          },
-	          fail: () => {
-	            uni.showToast({
-	              title: '请求失败，请检查网络',
-	              icon: 'none'
-	            });
+	            }, 500);  // 延迟 500 毫秒（0.5 秒）
 	          }
 	        });
-    },
-	getContentArray() {
-	    let contentStr = '';
+	      } else {
+	        uni.showToast({
+	          title: '保存失败，请重试',
+	          icon: 'none'
+	        });
+	      }
+	    },
+	    fail: () => {
+	      uni.showToast({
+	        title: '请求失败，请检查网络',
+	        icon: 'none'
+	      });
+	    }
+	  });
+	},
+
 	
+	addToCollection() {
+		if (!this.checkContentCompleted()) {
+		return;  // 如果没有完成创作，直接返回
+		}
+		const contentArray = this.getContentArray();
+		console.log('contentArr:', contentArray);
+		const draftData = {
+		  title: this.ciTitle || '未命名',  // 词的标题，默认为 '未命名'
+		  cipai: [this.cipaiName,this.formatNum],  // 词牌名数组
+		  is_public: false,  // 默认不公开
+		  content: this.ciContent,  
+		  prologue: '',  
+		  tags: []
+		};
+	  
+		const requestData = {
+		  token: this.token,
+		  draft: draftData
+		};
+	  
+		const baseurl = getApp().globalData.baseURL;
+	  
+		uni.request({
+		  url: `${baseurl}/putIntoDrafts`,
+		  method: 'POST',
+		  header: {
+			'Content-Type': 'application/json'
+		  },
+		  data: requestData,
+		  success: (res) => {
+			if (res.data.message === 'Draft saved successfully') {
+			  // 获取返回的 draft_id
+			  const draftID = res.data.draft_id;
+	  
+			  // 调用 turnToFormal API，将草稿转为正式作品
+			  uni.request({
+				url: `${baseurl}/turnToFormal`,
+				method: 'POST',
+				header: {
+				  'Content-Type': 'application/json'
+				},
+				data: {
+				  token: this.token,
+				  draftID: draftID
+				},
+				success: (formalRes) => {
+				  if (formalRes.data.message === 'Work saved successfully') {
+					// 提示用户加入作品集成功
+					uni.showToast({
+					  title: '已成功加入作品集',
+					  icon: 'success',
+					  duration: 1500,  // 持续时间
+					  success: () => {
+					    // 在通知显示后延迟 0.5 秒再执行返回操作
+					    setTimeout(() => {
+					      uni.switchTab({
+					        url: `/pages/write/index/index`
+					      });
+					    }, 500);  // 延迟 500 毫秒（0.5 秒）
+					  }
+					});
+				  } else {
+					// 转为正式作品失败
+					uni.showToast({
+					  title: '加入作品集失败，请重试',
+					  icon: 'none'
+					});
+				  }
+				},
+				fail: (formalErr) => {
+				  // 请求失败处理
+				  uni.showToast({
+					title: '失败，请检查网络',
+					icon: 'none'
+				  });
+				}
+			  });
+			}
+		  },
+		  fail: (err) => {
+			// 请求失败处理
+			uni.showToast({
+			  title: '失败，请检查网络',
+			  icon: 'none'
+			});
+		  }
+		});
+	},
+
+    getContentArray() {
+	    let contentStr = '';
 	    // 遍历填词框的每一行
 	    this.formatData.format.tunes.forEach((tune, index) => {
 	      // 获取每个 tune 的文本内容

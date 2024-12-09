@@ -7,15 +7,14 @@
 
       <!-- 作品内容容器 -->
       <view class="UserWork-content-container">
-        <view v-for="(item, index) in UserWork.content" :key="index" class="UserWork-description">
+        <view v-for="(item, index) in contentArray" :key="index" class="UserWork-description">
             {{ item }}
           </view>
       </view>
 
       <!-- 操作按钮容器 -->
       <view class="UserWork-footer-container">
-        <button @click="editUserWork" class="button edit-button">编辑作品</button>
-        <button @click="deleteUserWork" class="button delete-button">删除作品</button>
+        <button @click="deleteUserWork" class="button delete-button">修改作品</button>
         <button @click="featureUserWork" class="button feature-button">推荐作品</button>
       </view>
     </view>
@@ -30,19 +29,78 @@
 export default {
   data() {
     return {
-      UserWork: null, // 保存作品的详细信息
+      UserWork: null, 
+	  token:'',
+	  formatData:{
+	  		  format:{
+	  			  author:'',
+	  			  desc: '',
+	  			  sketch: '',
+	  			  tunes: []
+	  		  }
+	  },
+	  contentArray : [],
     };
   },
   onLoad(options) {
     const workData = options.UserWork ? JSON.parse(decodeURIComponent(options.UserWork)) : null;
     this.UserWork = workData;
+	this.token = uni.getStorageSync('userToken');
+	this.fetchFormatData(this.UserWork.cipai[0], this.UserWork.cipai[1]);
   },
   methods: {
-    editUserWork() {
-      uni.navigateTo({
-        url: `/pages3_write/write/write?work=${encodeURIComponent(JSON.stringify(this.UserWork))}`,
+    fetchFormatData(cipaiName, formatNum) {
+      let baseurl = getApp().globalData.baseURL;
+      const url = `${baseurl}/getFormat?cipai_name=${encodeURIComponent(cipaiName)}&format_num=${formatNum}`;
+      uni.request({
+        url: url,
+        method: 'GET',
+        success: (res) => {
+          console.log('Data received:', res.data); // 打印返回的数据
+          this.formatData = res.data;
+          console.log('tunes:', this.formatData.format.tunes);
+    	  this.getContentArray();
+    	  console.log('cicontent',this.contentArray);
+        },
+        fail: (err) => {
+          console.error('Failed to fetch data:', err); // 打印错误信息
+        }
       });
     },
+    getContentArray() {
+        let contentStr = '';
+        // 遍历填词框的每一行
+        this.formatData.format.tunes.forEach((tune, index) => {
+          // 获取每个 tune 的文本内容
+          const tuneContent = this.UserWork.content[index] || '';
+          // 将 tuneContent 添加到 content 字符串中
+          contentStr += tuneContent;
+          
+          // 根据 rhythm（韵、句、读）添加标点符号
+          if (tune.rhythm === '读') {
+            contentStr += '、';  // "读" 音节之间用 "、"
+          } else if (tune.rhythm === '句') {
+            contentStr += '，';  // "句" 用逗号 "，"
+          } else if (tune.rhythm === '韵') {
+            contentStr += '。';  // "韵" 用句号 "。"
+          }
+        });
+    
+        // 使用正则表达式根据标点符号分割 content 字符串
+        let contentArray = contentStr.split(/([，。、])/).filter(item => item.trim() !== '');
+    
+        // 将标点符号加入到每一项的后面
+        for (let i = 0; i < contentArray.length; i++) {
+          // 如果当前项是标点符号，前一个元素拼接上标点符号
+          if (['、', '，', '。'].includes(contentArray[i])) {
+            contentArray[i - 1] += contentArray[i];
+            contentArray.splice(i, 1);  // 删除标点符号
+            i--;  // 由于删除了元素，需要调整索引
+          }
+        }
+        this.contentArray = contentArray;
+      },
+	  featureUserWork(){},//发布逻辑
   },
 };
 </script>

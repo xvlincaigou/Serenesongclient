@@ -466,7 +466,6 @@ export default {
 	  
 	  this.runCheck();
     },
-
     addToCollection() {
       if (!this.checkContentCompleted()) {
         return;
@@ -625,6 +624,200 @@ export default {
       }
       return true;
     }
+=======
+	addToDrafts() {
+	  const contentArray = this.getContentArray();
+	  console.log('contentArr:', contentArray);
+	  const draftData = {
+	    title: this.ciTitle || '未命名', 
+	    cipai: [this.cipaiName, this.formatNum], 
+	    is_public: false, 
+	    content: this.ciContent,
+	    prologue: '',
+	    tags: []
+	  };
+	  const requestData = {
+	    token: this.token,
+	    draft: draftData
+	  };
+	  console.log('Request Data:', JSON.stringify(requestData));
+	  const baseurl = getApp().globalData.baseURL;
+	  
+	  uni.request({
+	    url: `${baseurl}/putIntoDrafts`,
+	    method: 'POST',
+	    data: requestData,
+	    success: (res) => {
+	      if (res.data.message === 'Draft saved successfully') {
+	        uni.showToast({
+	          title: '草稿保存成功',
+	          icon: 'success',
+	          duration: 1500,  // 持续时间
+	          success: () => {
+	            // 在通知显示后延迟 0.5 秒再执行返回操作
+	            setTimeout(() => {
+	              uni.switchTab({
+	                url: `/pages/write/index/index`
+	              });
+	            }, 500);  // 延迟 500 毫秒（0.5 秒）
+	          }
+	        });
+	      } else {
+	        uni.showToast({
+	          title: '保存失败，请重试',
+	          icon: 'none'
+	        });
+	      }
+	    },
+	    fail: () => {
+	      uni.showToast({
+	        title: '请求失败，请检查网络',
+	        icon: 'none'
+	      });
+	    }
+	  });
+	},
+
+	
+	addToCollection() {
+		if (!this.checkContentCompleted()) {
+		return;  // 如果没有完成创作，直接返回
+		}
+		const contentArray = this.getContentArray();
+		console.log('contentArr:', contentArray);
+		const draftData = {
+		  title: this.ciTitle || '未命名',  // 词的标题，默认为 '未命名'
+		  cipai: [this.cipaiName,this.formatNum],  // 词牌名数组
+		  is_public: false,  // 默认不公开
+		  content: this.ciContent,  
+		  prologue: '',  
+		  tags: []
+		};
+	  
+		const requestData = {
+		  token: this.token,
+		  draft: draftData
+		};
+	  
+		const baseurl = getApp().globalData.baseURL;
+	  
+		uni.request({
+		  url: `${baseurl}/putIntoDrafts`,
+		  method: 'POST',
+		  header: {
+			'Content-Type': 'application/json'
+		  },
+		  data: requestData,
+		  success: (res) => {
+			if (res.data.message === 'Draft saved successfully') {
+			  // 获取返回的 draft_id
+			  const draftID = res.data.draft_id;
+	  
+			  // 调用 turnToFormal API，将草稿转为正式作品
+			  uni.request({
+				url: `${baseurl}/turnToFormal`,
+				method: 'POST',
+				header: {
+				  'Content-Type': 'application/json'
+				},
+				data: {
+				  token: this.token,
+				  draftID: draftID
+				},
+				success: (formalRes) => {
+				  if (formalRes.data.message === 'Work saved successfully') {
+					// 提示用户加入作品集成功
+					uni.showToast({
+					  title: '已成功加入作品集',
+					  icon: 'success',
+					  duration: 1500,  // 持续时间
+					  success: () => {
+					    // 在通知显示后延迟 0.5 秒再执行返回操作
+					    setTimeout(() => {
+					      uni.switchTab({
+					        url: `/pages/write/index/index`
+					      });
+					    }, 500);  // 延迟 500 毫秒（0.5 秒）
+					  }
+					});
+				  } else {
+					// 转为正式作品失败
+					uni.showToast({
+					  title: '加入作品集失败，请重试',
+					  icon: 'none'
+					});
+				  }
+				},
+				fail: (formalErr) => {
+				  // 请求失败处理
+				  uni.showToast({
+					title: '失败，请检查网络',
+					icon: 'none'
+				  });
+				}
+			  });
+			}
+		  },
+		  fail: (err) => {
+			// 请求失败处理
+			uni.showToast({
+			  title: '失败，请检查网络',
+			  icon: 'none'
+			});
+		  }
+		});
+	},
+
+    getContentArray() {
+	    let contentStr = '';
+	    // 遍历填词框的每一行
+	    this.formatData.format.tunes.forEach((tune, index) => {
+	      // 获取每个 tune 的文本内容
+	      const tuneContent = this.ciContent[index] || '';
+	      
+	
+	      // 将 tuneContent 添加到 content 字符串中
+	      contentStr += tuneContent;
+	      
+	      // 根据 rhythm（韵、句、读）添加标点符号
+	      if (tune.rhythm === '读') {
+	        contentStr += '、';  // "读" 音节之间用 "、"
+	      } else if (tune.rhythm === '句') {
+	        contentStr += '，';  // "句" 用逗号 "，"
+	      } else if (tune.rhythm === '韵') {
+	        contentStr += '。';  // "韵" 用句号 "。"
+	      }
+	    });
+	
+	    // 使用正则表达式根据标点符号分割 content 字符串
+	    let contentArray = contentStr.split(/([，。、])/).filter(item => item.trim() !== '');
+	
+	    // 将标点符号加入到每一项的后面
+	    for (let i = 0; i < contentArray.length; i++) {
+	      // 如果当前项是标点符号，前一个元素拼接上标点符号
+	      if (['、', '，', '。'].includes(contentArray[i])) {
+	        contentArray[i - 1] += contentArray[i];
+	        contentArray.splice(i, 1);  // 删除标点符号
+	        i--;  // 由于删除了元素，需要调整索引
+	      }
+	    }
+	
+	    return contentArray;
+	  },
+	  // 检查 ciContent 是否完全创作完成
+	    checkContentCompleted() {
+	      // 检查 this.ciContent 中是否有空字符串
+	      for (let i = 0; i < this.ciContent.length; i++) {
+	        if (!this.ciContent[i].trim()) {
+	          uni.showToast({
+	            title: '你的词还没创作完成，不能加入作品集哦！',
+	            icon: 'none'
+	          });
+	          return false;  // 返回 false，表示内容不完整
+	        }
+	      }
+	      return true;  // 所有内容都填写完成，返回 true
+	    },
   }
 }
 </script>

@@ -1,9 +1,77 @@
 <template>
   <view class="container">
-    <!-- 显示 cipaiName -->
-    <text class="cipai-name">{{ cipaiName }}</text>
+    <!-- cipaiName 区域添加按钮 -->
+    <view class="cipai-header">
+      <text class="cipai-name">{{ cipaiName }}</text>
+      <view class="sidebar-toggle" @click="toggleSidebar">
+        <view class="toggle-square"></view>
+      </view>
+    </view>
+
+    <!-- 侧边栏 -->
+    <view class="sidebar" :class="{ 'sidebar-open': isSidebarOpen }">
+      <view class="sidebar-header">
+        <text>平水韵</text>
+        <view class="sidebar-close" @click="toggleSidebar">返回</view>
+      </view>
+      <view class="sidebar-content">
+        <!-- 搜索区域 -->
+        <view class="search-container">
+          <input 
+            class="search-input" 
+            type="text"
+            placeholder="请输入单个汉字"
+            maxlength="1"
+          />
+          <button 
+            class="search-button" 
+            @click="performSearch"
+          >
+            搜索
+          </button>
+        </view>
+        
+        <!-- 提示文字 -->
+        <view v-if="!hasSearched" class="search-tip">
+          可输入单个汉字查询平水韵
+        </view>
+
+        <!-- 搜索结果展示区 -->
+        <scroll-view 
+          v-else-if="searchResults && searchResults.length > 0" 
+          class="search-results" 
+          scroll-y
+        >
+          <view 
+            v-for="(result, index) in searchResults" 
+            :key="index" 
+            class="result-item"
+          >
+            <view class="result-header">
+              <text class="first-level">{{ result.firstLevel }}</text>
+              <text class="second-level">{{ result.secondLevel }}</text>
+            </view>
+            <view class="character-list">
+              <text 
+                v-for="(char, charIndex) in result.chars" 
+                :key="charIndex"
+                :class="{ 'highlight': char === searchText }"
+                class="character"
+              >
+                {{ char }}
+              </text>
+            </view>
+          </view>
+        </scroll-view>
+
+        <!-- 无搜索结果提示 -->
+        <view v-else-if="hasSearched" class="no-result">
+          未找到相关字
+        </view>
+      </view>
+    </view>
     
-    <!-- 横线下的 ciTitle 输入框 -->
+    <!-- 词的标题输入区域 -->
     <view class="ci-title-container">
       <view class="underline"></view>
       <input 
@@ -14,7 +82,7 @@
       />
     </view>
     
-    <!-- 渲染填词框按行分组 -->
+    <!-- 填词区域 -->
     <view class="fill-words-container">
       <view 
         v-for="(line, lineIndex) in lines" 
@@ -38,19 +106,22 @@
           </view>
           <view 
             class="tune-box" 
-            :style="{ 'border-color': tune.rhythm === '韵' ? '#555' : '#d3d3d3' }"
+            :class="{ 'invalid-border': validationResults[globalIndex(lineIndex, index)] === false }" 
+            :style="{ 'border-color': validationResults[globalIndex(lineIndex, index)] === false ? 'red' : (tune.rhythm === '韵' ? '#555' : '#d3d3d3') }"
           >
             <input 
               class="tune-input" 
-              v-model="ciContent[globalIndex(lineIndex, index)]" 
-              @input="onTuneInput(globalIndex(lineIndex, index), $event)"
-              @focus="focusedIndex = globalIndex(lineIndex, index)"
+              :value="ciContent[globalIndex(lineIndex, index)]"
+              @input="(e) => onTuneInput(globalIndex(lineIndex, index), e)"
+              @focus="onTuneFocus(globalIndex(lineIndex, index))"
+              :id="'tune-input-' + globalIndex(lineIndex, index)"
             />
           </view>
-          <!-- 添加标点符号 -->
+          <!-- 标点符号 -->
           <text v-if="tune.rhythm === '读'">、</text>
           <text v-else-if="tune.rhythm === '句'">，</text>
           <text v-else-if="tune.rhythm === '韵'">。</text>
+		  <text v-else-if="tune.rhythm === '叶'">。</text>
         </view>
       </view>
     </view>
@@ -67,7 +138,8 @@
 export default {
   data() {
     return {
-	  token: '',
+      isSidebarOpen: false,
+      token: '',
       cipaiName: '',
       formatNum: 0,
       formatData: {
@@ -79,21 +151,25 @@ export default {
         }
       },
       ciTitle: '',
-      ciContent: [], // 用于保存填词框中的内容
-      focusedIndex: null, // 当前聚焦的填字框索引
-      maxItemsPerLine: 10, // 每行最多的元素数量（9个填词框+1个标点符号）
-      tempInput: [], // 临时存储当前输入的每个字符
+      ciContent: [],
+      focusedIndex: 0,
+      maxItemsPerLine: 10,
+      tempInput: [],
+      searchText: '',
+      searchResults: [],
+      hasSearched: false,
+	  pingshuiyun: {}, 
+	  validationResults: [],
     };
   },
+  
   computed: {
-    // 将tunes按行分组，每行最多maxItemsPerLine个元素
     lines() {
       const lines = [];
       let currentLine = [];
       this.formatData.format.tunes.forEach((tune) => {
         currentLine.push(tune);
-        if (tune.rhythm === '句' || tune.rhythm === '韵' || currentLine.length === this.maxItemsPerLine) {
-          // 填满一行或遇到换行标识
+        if (tune.rhythm === '句' || tune.rhythm === '韵' || tune.rhythm === '叶' || currentLine.length === this.maxItemsPerLine) {
           lines.push(currentLine);
           currentLine = [];
         }
@@ -102,26 +178,30 @@ export default {
         lines.push(currentLine);
       }
       return lines;
-    },
+    }
   },
+
   onLoad(options) {
-    // 接收传递过来的参数
     this.cipaiName = decodeURIComponent(options.cipai_name) || '';
     this.formatNum = options.format_num || 0;
-	this.token = uni.getStorageSync('userToken');
-    console.log('cipaiName:', this.cipaiName);
-    // 发起请求获取数据
+    this.token = uni.getStorageSync('userToken');
+	this.pingshuiyun = uni.getStorageSync('pingshuiyun') || {};
     this.fetchFormatData(this.cipaiName, this.formatNum);
   },
+  
   methods: {
+    toggleSidebar() {
+      this.isSidebarOpen = !this.isSidebarOpen;
+    },
+
     globalIndex(lineIndex, index) {
-      // 计算在 ciContent 中的全局索引
       let count = 0;
       for (let i = 0; i < lineIndex; i++) {
         count += this.lines[i].length;
       }
       return count + index;
     },
+
     fetchFormatData(cipaiName, formatNum) {
       let baseurl = getApp().globalData.baseURL;
       const url = `${baseurl}/getFormat?cipai_name=${encodeURIComponent(cipaiName)}&format_num=${formatNum}`;
@@ -129,233 +209,422 @@ export default {
         url: url,
         method: 'GET',
         success: (res) => {
-          console.log('Data received:', res.data); // 打印返回的数据
           this.formatData = res.data;
-          console.log('tunes:', this.formatData.format.tunes);
-          // 初始化 ciContent 数组，长度与填词框一致
           this.ciContent = Array(this.formatData.format.tunes.length).fill('');
-          this.tempInput = Array(this.ciContent.length).fill(''); // 初始化临时储存器
+          this.tempInput = Array(this.ciContent.length).fill('');
+		  this.validationResults = Array(this.ciContent.length).fill(true); // 初始化验证结果
+		  this.runCheck();
         },
         fail: (err) => {
-          console.error('Failed to fetch data:', err); // 打印错误信息
+          console.error('Failed to fetch data:', err);
         }
       });
     },
-    onCiTitleInput(e) {
-      this.ciTitle = e.detail.value;
-      // 这里可以添加其他逻辑，例如保存ciTitle
+	
+	onInputBlur(e) {
+      // 保存输入值
+      this.currentSearchValue = e.detail.value;
     },
-    onTuneInput(index, event) {
-      const inputValue = event.detail.value;
-      
-      // 更新 tempInput 为当前输入框的内容
-      this.tempInput[index] = inputValue.split(''); // 每个字符单独存储
 
-      console.log('Temp storage after input change:', this.tempInput);
+    performSearch() {
+      // 使用uni.createSelectorQuery获取输入值
+      uni.createSelectorQuery()
+        .select('.search-input')
+        .fields({
+          properties: ['value']
+        })
+        .exec(res => {
+          const searchText = res[0] ? res[0].value : '';
 
-      // 处理输入文字：如果有输入内容，就逐个填入相应的填词框
-      if (this.tempInput[index].length > 0) {
-        for (let i = 0; i < this.tempInput[index].length; i++) {
-          const targetIndex = index + i;
-          if (targetIndex < this.ciContent.length) {
-            this.$set(this.ciContent, targetIndex, this.tempInput[index][i]);
-          } else {
-            break;
+          if (!searchText) {
+            uni.showToast({
+              title: '请输入要搜索的汉字',
+              icon: 'none'
+            });
+            return;
           }
-        }
-      } else {
-        // 删除内容：如果删除时，删除一个字符
-        if (inputValue === '') {
-          // 删除时的逻辑：删除一个字，光标跳到前一个框
-          this.$set(this.ciContent, index, '');
-          this.focusedIndex = index - 1 >= 0 ? index - 1 : 0;
-        }
-      }
-      console.log('Updated ciContent:', this.ciContent);
-    },
-    // 清空整行
-    clearLine(lineIndex) {
-      const startIndex = this.globalIndex(lineIndex, 0);
-      const endIndex = this.globalIndex(lineIndex, this.lines[lineIndex].length - 1);
-      for (let i = startIndex; i <= endIndex; i++) {
-        this.$set(this.ciContent, i, '');
-        this.$set(this.tempInput, i, ''); // 清空临时储存器中的对应位置
-      }
-      console.log('Temp storage after line cleared:', this.tempInput);
-    },
-  addToCollection() {
-    if (!this.checkContentCompleted()) {
-      return;  // 如果没有完成创作，直接返回
-    }
-  
-    const contentArray = this.getContentArray();
-    const draftData = {
-      title: this.ciTitle || '未命名',  // 词的标题，默认为 '未命名'
-      cipai: [this.cipaiName],  // 词牌名数组
-      is_public: false,  // 默认不公开
-      content: contentArray,  // 作为数组的内容
-      prologue: '',  // 前言为空
-      tags: []  // 标签为空
-    };
-  
-    const requestData = {
-      token: this.token,
-      draft: draftData
-    };
-  
-    const baseurl = getApp().globalData.baseURL;
-  
-    uni.request({
-      url: `${baseurl}/putIntoDrafts`,
-      method: 'POST',
-      header: {
-        'Content-Type': 'application/json'
-      },
-      data: requestData,
-      success: (res) => {
-        if (res.data.message === 'Draft saved successfully') {
-          // 获取返回的 draft_id
-          const draftID = res.data.draft_id;
-  
-          // 调用 turnToFormal API，将草稿转为正式作品
-          uni.request({
-            url: `${baseurl}/turnToFormal`,
-            method: 'POST',
-            header: {
-              'Content-Type': 'application/json'
-            },
-            data: {
-              token: this.token,
-              draftID: draftID
-            },
-            success: (formalRes) => {
-              if (formalRes.data.message === 'Work saved successfully') {
-                // 提示用户加入作品集成功
-                uni.showToast({
-                  title: '已成功加入作品集',
-                  icon: 'success'
-                });
-              } else {
-                // 转为正式作品失败
-                uni.showToast({
-                  title: '加入作品集失败，请重试',
-                  icon: 'none'
+
+          this.hasSearched = true;
+          this.searchResults = [];
+
+          try {
+            // 获取平水韵数据
+            const pingshuiyun = uni.getStorageSync('pingshuiyun');
+            const yunshu = uni.getStorageSync('yunshu');
+            
+            if (!pingshuiyun || !yunshu || !yunshu.rhymes || !yunshu.rhymes[0]) {
+              console.error('数据获取失败');
+              return;
+            }
+
+            // 在pingshuiyun中查找输入的汉字
+            const charData = pingshuiyun.rhymes[0][searchText];
+            if (!charData) {
+              uni.showToast({
+                title: '未找到相关字',
+                icon: 'none'
+              });
+              return;
+            }
+
+            // 处理每个匹配的韵部信息
+            const results = [];
+            charData.forEach(item => {
+              const tone = item.Tone;
+              const rhyme = item.Rhyme;
+              
+              // 在yunshu中查找对应的字列表
+              if (yunshu.rhymes[0][tone] && yunshu.rhymes[0][tone][rhyme]) {
+                results.push({
+                  firstLevel: tone,
+                  secondLevel: rhyme,
+                  chars: yunshu.rhymes[0][tone][rhyme]
                 });
               }
-            },
-            fail: (formalErr) => {
-              // 请求失败处理
+            });
+
+            this.searchResults = results;
+            
+            // 如果没有找到结果，显示提示
+            if (results.length === 0) {
               uni.showToast({
-                title: '失败，请检查网络',
+                title: '未找到相关字',
                 icon: 'none'
               });
             }
+          } catch (e) {
+            console.error('搜索过程出错:', e);
+            uni.showToast({
+              title: '搜索出错，请重试',
+              icon: 'none'
+            });
+          }
+        });
+    },
+
+    onCiTitleInput(e) {
+      this.ciTitle = e.detail.value;
+    },
+
+    onTuneFocus(index) {
+      this.focusedIndex = index;
+    },
+
+    // 处理输入
+    onTuneInput(index, event) {
+      const inputValue = event.detail.value;
+      const chars = inputValue.split('');
+      
+      // 如果是删除操作（输入值为空）
+      if (inputValue === '') {
+        this.$set(this.ciContent, index, '');
+        
+        // 如果不是第一个输入框，将焦点移到前一个输入框
+        if (index > 0) {
+          this.focusedIndex = index - 1;
+          this.focusNextInput(index - 1);
+        }
+        return;
+      }
+
+      // 处理输入的字符
+      for (let i = 0; i < chars.length; i++) {
+        const targetIndex = index + i;
+        
+        // 确保目标索引在有效范围内
+        if (targetIndex < this.ciContent.length) {
+          this.$set(this.ciContent, targetIndex, chars[i]);
+        }
+      }
+
+      // 计算下一个焦点位置
+      const nextIndex = index + chars.length;
+      if (nextIndex < this.ciContent.length) {
+        this.focusedIndex = nextIndex;
+        this.focusNextInput(nextIndex);
+      }
+    },
+	
+	check(ciContentArray, cipai){
+	  console.log('content:', ciContentArray);
+      let isValid = [];
+      let possibleRhythms = []; // 截止到目前位置可以使用的韵
+      const tunes = cipai.format.tunes;
+	  console.log('tunes:', tunes);
+      
+      for (let i = 0; i < ciContentArray.length; ++i) {
+        const char = ciContentArray[i];
+		console.log('char:', char);
+        if (!char) {
+          isValid.push(true);
+          continue;
+        }
+        // 检查平仄是否符合
+        const tune = this.pingshuiyun.pingze[0][char];
+		console.log('tune:', tune);
+        const exactTune = tunes[i]['tune'];
+		console.log('exactTune:', exactTune);
+		if (exactTune === '中') {
+		  isValid.push(true);
+		  continue;
+		}
+        if (tune != '多' && tune != exactTune) {
+          isValid.push(false);
+          continue;
+        }
+		console.log(this.pingshuiyun.pingze[0]);
+        
+        // 检查押韵是否符合
+        const rhythms = this.pingshuiyun.rhymes[0][char] ? this.pingshuiyun.rhymes[0][char].map(entry => entry.Rhyme) : [];
+        const rhythmType = tunes[i]['rhythm'];
+        if (rhythmType && rhythmType === '韵') {
+          if (rhythms.length === 0) {
+            isValid.push(false);
+            continue;
+          }
+          if (possibleRhythms.length === 0) {
+            possibleRhythms = rhythms;
+          } else {
+            // 求交集
+            const consistentRhythms = possibleRhythms.filter(rhythm => rhythms.includes(rhythm));
+            if (consistentRhythms.length === 0) {
+              isValid.push(false);
+              continue;
+            } else {
+              possibleRhythms = consistentRhythms;
+            }
+          }
+        }
+        isValid.push(true);
+      }
+	  console.log('check:', isValid);
+      return isValid;
+    },
+	
+	runCheck() {
+      this.validationResults = this.check(this.ciContent, this.formatData);
+    },
+
+    // 处理输入
+    onTuneInput(index, event) {
+      const inputValue = event.detail.value;
+      const chars = inputValue.split('');
+      
+      // 更新 ciContent
+      if (inputValue === '') {
+        this.$set(this.ciContent, index, '');
+        
+        // 如果不是第一个输入框，将焦点移到前一个输入框
+        if (index > 0) {
+          this.focusedIndex = index - 1;
+          this.focusNextInput(index - 1);
+        }
+      } else {
+        for (let i = 0; i < chars.length; i++) {
+          const targetIndex = index + i;
+          if (targetIndex < this.ciContent.length) {
+            this.$set(this.ciContent, targetIndex, chars[i]);
+          }
+        }
+        const nextIndex = index + chars.length;
+        if (nextIndex < this.ciContent.length) {
+          this.focusedIndex = nextIndex;
+          this.focusNextInput(nextIndex);
+        }
+      }
+
+      // 每次输入或删除后调用 check 函数
+      this.runCheck();
+    },
+
+    // 聚焦到指定索引的输入框
+    focusNextInput(index) {
+      // 使用 nextTick 确保 DOM 更新后再聚焦
+      this.$nextTick(() => {
+        const query = uni.createSelectorQuery().in(this);
+        query.select(`#tune-input-${index}`).node().exec((res) => {
+          if (res[0] && res[0].node) {
+            res[0].node.focus();
+          }
+        });
+      });
+    },
+
+    // 清空某一行的内容
+    clearLine(lineIndex) {
+      const startIndex = this.globalIndex(lineIndex, 0);
+      const endIndex = this.globalIndex(lineIndex, this.lines[lineIndex].length - 1);
+      
+      // 清空该行所有输入框的内容
+      for (let i = startIndex; i <= endIndex; i++) {
+        this.$set(this.ciContent, i, '');
+      }
+      
+      // 焦点回到该行第一个输入框
+      this.focusedIndex = startIndex;
+      this.focusNextInput(startIndex);
+	  
+	  this.runCheck();
+    },
+
+    addToCollection() {
+      if (!this.checkContentCompleted()) {
+        return;
+      }
+      
+      const contentArray = this.getContentArray();
+      const draftData = {
+        title: this.ciTitle || '未命名',
+        cipai: [this.cipaiName],
+        is_public: false,
+        content: contentArray,
+        prologue: '',
+        tags: []
+      };
+    
+      const requestData = {
+        token: this.token,
+        draft: draftData
+      };
+    
+      const baseurl = getApp().globalData.baseURL;
+    
+      uni.request({
+        url: `${baseurl}/putIntoDrafts`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json'
+        },
+        data: requestData,
+        success: (res) => {
+          if (res.data.message === 'Draft saved successfully') {
+            uni.request({
+              url: `${baseurl}/turnToFormal`,
+              method: 'POST',
+              header: {
+                'Content-Type': 'application/json'
+              },
+              data: {
+                token: this.token,
+                draftID: res.data.draft_id
+              },
+              success: (formalRes) => {
+                if (formalRes.data.message === 'Work saved successfully') {
+                  uni.showToast({
+                    title: '已成功加入作品集',
+                    icon: 'success'
+                  });
+                } else {
+                  uni.showToast({
+                    title: '加入作品集失败，请重试',
+                    icon: 'none'
+                  });
+                }
+              },
+              fail: () => {
+                uni.showToast({
+                  title: '失败，请检查网络',
+                  icon: 'none'
+                });
+              }
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({
+            title: '失败，请检查网络',
+            icon: 'none'
           });
         }
-      },
-      fail: (err) => {
-        // 请求失败处理
-        uni.showToast({
-          title: '失败，请检查网络',
-          icon: 'none'
-        });
-      }
-    });
-  },
+      });
+    },
 
     addToDrafts() {
-	  const contentArray = this.getContentArray();
-	  console.log('contentArr:', contentArray);
+      const contentArray = this.getContentArray();
       const draftData = {
-		  title: this.ciTitle || '未命名', 
-		  cipai: [this.cipaiName], 
-		  is_public: false, 
-		  content: contentArray,
-		  prologue: '',
-		  tags: []
-		};
-	  const requestData = {
-		  token: this.token,
-		  draft: draftData
-	  };
-	  console.log('Request Data:', JSON.stringify(requestData));
-	  const baseurl = getApp().globalData.baseURL;
-	        uni.request({
-	          url: `${baseurl}/putIntoDrafts`,
-	          method: 'POST',
-			  data:requestData,
-	          success: (res) => {
-	            if (res.data.message === 'Draft saved successfully') {
-	              uni.showToast({
-	                title: '草稿保存成功',
-	                icon: 'success'
-	              });
-	            } else {
-	              uni.showToast({
-	                title: '保存失败，请重试',
-	                icon: 'none'
-	              });
-	            }
-	          },
-	          fail: () => {
-	            uni.showToast({
-	              title: '请求失败，请检查网络',
-	              icon: 'none'
-	            });
-	          }
-	        });
+        title: this.ciTitle || '未命名',
+        cipai: [this.cipaiName],
+        is_public: false,
+        content: contentArray,
+        prologue: '',
+        tags: []
+      };
+      
+      const requestData = {
+        token: this.token,
+        draft: draftData
+      };
+      
+      const baseurl = getApp().globalData.baseURL;
+      uni.request({
+        url: `${baseurl}/putIntoDrafts`,
+        method: 'POST',
+        data: requestData,
+        success: (res) => {
+          if (res.data.message === 'Draft saved successfully') {
+            uni.showToast({
+              title: '草稿保存成功',
+              icon: 'success'
+            });
+          } else {
+            uni.showToast({
+              title: '保存失败，请重试',
+              icon: 'none'
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请求失败，请检查网络',
+            icon: 'none'
+          });
+        }
+      });
     },
-	getContentArray() {
-	    let contentStr = '';
-	
-	    // 遍历填词框的每一行
-	    this.formatData.format.tunes.forEach((tune, index) => {
-	      // 获取每个 tune 的文本内容
-	      const tuneContent = this.ciContent[index] || '';
-	      
-	
-	      // 将 tuneContent 添加到 content 字符串中
-	      contentStr += tuneContent;
-	      
-	      // 根据 rhythm（韵、句、读）添加标点符号
-	      if (tune.rhythm === '读') {
-	        contentStr += '、';  // "读" 音节之间用 "、"
-	      } else if (tune.rhythm === '句') {
-	        contentStr += '，';  // "句" 用逗号 "，"
-	      } else if (tune.rhythm === '韵') {
-	        contentStr += '。';  // "韵" 用句号 "。"
-	      }
-	    });
-	
-	    // 使用正则表达式根据标点符号分割 content 字符串
-	    let contentArray = contentStr.split(/([，。、])/).filter(item => item.trim() !== '');
-	
-	    // 将标点符号加入到每一项的后面
-	    for (let i = 0; i < contentArray.length; i++) {
-	      // 如果当前项是标点符号，前一个元素拼接上标点符号
-	      if (['、', '，', '。'].includes(contentArray[i])) {
-	        contentArray[i - 1] += contentArray[i];
-	        contentArray.splice(i, 1);  // 删除标点符号
-	        i--;  // 由于删除了元素，需要调整索引
-	      }
-	    }
-	
-	    return contentArray;
-	  },
-	  // 检查 ciContent 是否完全创作完成
-	    checkContentCompleted() {
-	      // 检查 this.ciContent 中是否有空字符串
-	      for (let i = 0; i < this.ciContent.length; i++) {
-	        if (!this.ciContent[i].trim()) {
-	          uni.showToast({
-	            title: '你的词还没创作完成，不能加入作品集哦！',
-	            icon: 'none'
-	          });
-	          return false;  // 返回 false，表示内容不完整
-	        }
-	      }
-	      return true;  // 所有内容都填写完成，返回 true
-	    },
+
+    getContentArray() {
+      let contentStr = '';
+    
+      this.formatData.format.tunes.forEach((tune, index) => {
+        const tuneContent = this.ciContent[index] || '';
+        contentStr += tuneContent;
+        
+        if (tune.rhythm === '读') {
+          contentStr += '、';
+        } else if (tune.rhythm === '句') {
+          contentStr += '，';
+        } else if (tune.rhythm === '韵') {
+          contentStr += '。';
+        } else if (tune.rhythm === '叶') {
+          contentStr += '。';
+        }
+      });
+    
+      let contentArray = contentStr.split(/([，。、])/).filter(item => item.trim() !== '');
+    
+      for (let i = 0; i < contentArray.length; i++) {
+        if (['、', '，', '。'].includes(contentArray[i])) {
+          contentArray[i - 1] += contentArray[i];
+          contentArray.splice(i, 1);
+          i--;
+        }
+      }
+    
+      return contentArray;
+    },
+
+    checkContentCompleted() {
+      for (let i = 0; i < this.ciContent.length; i++) {
+        if (!this.ciContent[i].trim()) {
+          uni.showToast({
+            title: '你的词还没创作完成，不能加入作品集哦！',
+            icon: 'none'
+          });
+          return false;
+        }
+      }
+      return true;
+    }
   }
 }
 </script>
@@ -367,15 +636,157 @@ export default {
   align-items: center;
   height: 100vh;
   background-color: #f0f4f8;
-  overflow-y: auto; /* 允许上下滚动 */
-  padding: 20px; /* 添加内边距以防止内容紧贴边缘 */
+  overflow-y: auto;
+  padding: 20px;
+  position: relative;
+}
+
+.cipai-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 10px;
 }
 
 .cipai-name {
   font-size: 24px;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 10px;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.toggle-square {
+  width: 20px;
+  height: 20px;
+  background-color: #d3d3d3;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 300px;
+  height: 100vh;
+  background-color: white;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-content {
+  flex: 1;
+  padding: 15px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  gap: 10px;
+}
+
+.search-input {
+  flex: 1;
+  height: 36px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.search-button {
+  width: auto;
+  min-width: 80px;
+  height: 36px;
+  line-height: 36px;
+  font-size: 14px;
+  color: #fff;
+  background-color: #5677fc;
+  border: none;
+  border-radius: 4px;
+  padding: 0 15px;
+}
+
+.search-tip {
+  color: #999;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  padding: 0 15px;
+}
+
+.search-results {
+  margin-top: 15px;
+  height: calc(100vh - 150px);
+  padding: 0 15px;
+}
+
+.result-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.no-result {
+  text-align: center;
+  color: #999;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.first-level {
+  font-weight: bold;
+  color: #333;
+  margin-right: 10px;
+}
+
+.second-level {
+  color: #666;
+}
+
+.character-list {
+  line-height: 1.6;
+}
+
+.character {
+  display: inline-block;
+  margin-right: 8px;
+  color: #333;
+}
+
+.highlight {
+  color: #5677fc;
+  font-weight: bold;
+}
+
+.sidebar-open {
+  right: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.sidebar-close {
+  cursor: pointer;
+  color: #666;
 }
 
 .ci-title-container {
@@ -442,7 +853,10 @@ export default {
   font-size: 18px;
 }
 
-/* 清空按钮样式 */
+.invalid-border {
+  border-color: red !important;
+}
+
 .clear-button {
   background-color: #d3d3d3;
   color: white;
@@ -454,10 +868,9 @@ export default {
   position: absolute;
   right: -5px;
   top: 50%;
-  transform: translateY(-50%); /* 按钮垂直居中 */
+  transform: translateY(-50%);
 }
 
-/* 底部按钮样式 */
 .bottom-buttons {
   display: flex;
   justify-content: space-between;

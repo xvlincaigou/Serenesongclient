@@ -623,8 +623,7 @@ export default {
         }
       }
       return true;
-    }
-=======
+    },
 	addToDrafts() {
 	  const contentArray = this.getContentArray();
 	  console.log('contentArr:', contentArray);

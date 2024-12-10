@@ -128,8 +128,8 @@
 
     <!-- 底部按钮 -->
     <view class="bottom-buttons">
-      <button class="bottom-btn" @click="addToCollection">加入作品集</button>
-      <button class="bottom-btn" @click="addToDrafts">放入草稿箱</button>
+      <button class="bottom-btn" @click="turnToCollection">转为正式作品</button>
+      <button class="bottom-btn" @click="modifyDrafts">完成草稿修改</button>
     </view>
   </view>
 </template>
@@ -138,6 +138,7 @@
 export default {
   data() {
     return {
+	  draft:{},
       isSidebarOpen: false,
       token: '',
       cipaiName: '',
@@ -182,12 +183,22 @@ export default {
   },
 
   onLoad(options) {
-    this.cipaiName = decodeURIComponent(options.cipai_name) || '';
-    this.formatNum = options.format_num || 0;
+	console.log("Options received:", options);
+    const draftData = options.draft ? JSON.parse(decodeURIComponent(options.draft)) : {};
+    
+    // 检查传递的数据
+    console.log("Received draft data:", draftData);
+  
+    // 更新当前页面的 state
+    this.draft = draftData || {};
+    this.cipaiName = draftData.cipai ? draftData.cipai[0] : '';
+    this.formatNum = draftData.cipai ? draftData.cipai[1] : 0;
+    this.ciTitle = draftData.title || '';
     this.token = uni.getStorageSync('userToken');
-	this.pingshuiyun = uni.getStorageSync('pingshuiyun') || {};
+    this.pingshuiyun = uni.getStorageSync('pingshuiyun') || {};
     this.fetchFormatData(this.cipaiName, this.formatNum);
   },
+
   
   methods: {
     toggleSidebar() {
@@ -210,8 +221,8 @@ export default {
         method: 'GET',
         success: (res) => {
           this.formatData = res.data;
-          this.ciContent = Array(this.formatData.format.tunes.length).fill('');
-          this.tempInput = Array(this.ciContent.length).fill('');
+          this.ciContent = this.draft.content;
+          this.tempInput = this.draft.content;
 		  this.validationResults = Array(this.ciContent.length).fill(true); // 初始化验证结果
 		  this.runCheck();
         },
@@ -466,6 +477,7 @@ export default {
 	  
 	  this.runCheck();
     },
+
     getContentArray() {
       let contentStr = '';
     
@@ -509,7 +521,7 @@ export default {
       }
       return true;
     },
-	addToDrafts() {
+	modifyDrafts() {
 	  const contentArray = this.getContentArray();
 	  console.log('contentArr:', contentArray);
 	  const draftData = {
@@ -522,19 +534,20 @@ export default {
 	  };
 	  const requestData = {
 	    token: this.token,
+		draftID : this.draft._id,
 	    draft: draftData
 	  };
 	  console.log('Request Data:', JSON.stringify(requestData));
 	  const baseurl = getApp().globalData.baseURL;
 	  
 	  uni.request({
-	    url: `${baseurl}/putIntoDrafts`,
+	    url: `${baseurl}/modifyDraft`,
 	    method: 'POST',
 	    data: requestData,
 	    success: (res) => {
-	      if (res.data.message === 'Draft saved successfully') {
+	      if (res.data.message === 'Updated successfully') {
 	        uni.showToast({
-	          title: '草稿保存成功',
+	          title: '草稿修改成功',
 	          icon: 'success',
 	          duration: 1500,  // 持续时间
 	          success: () => {
@@ -548,7 +561,7 @@ export default {
 	        });
 	      } else {
 	        uni.showToast({
-	          title: '保存失败，请重试',
+	          title: '修改失败，请重试',
 	          icon: 'none'
 	        });
 	      }
@@ -562,43 +575,35 @@ export default {
 	  });
 	},
 
-	
-	addToCollection() {
+	turnToCollection() {
 		if (!this.checkContentCompleted()) {
 		return;  // 如果没有完成创作，直接返回
 		}
 		const contentArray = this.getContentArray();
 		console.log('contentArr:', contentArray);
 		const draftData = {
-		  title: this.ciTitle || '未命名',  // 词的标题，默认为 '未命名'
-		  cipai: [this.cipaiName,this.formatNum],  // 词牌名数组
-		  is_public: false,  // 默认不公开
-		  content: this.ciContent,  
-		  prologue: '',  
+		  title: this.ciTitle || '未命名', 
+		  cipai: [this.cipaiName, this.formatNum], 
+		  is_public: false, 
+		  content: this.ciContent,
+		  prologue: '',
 		  tags: []
 		};
-	  
 		const requestData = {
 		  token: this.token,
+				draftID : this.draft._id,
 		  draft: draftData
 		};
-	  
+		console.log('Request Data:', JSON.stringify(requestData));
 		const baseurl = getApp().globalData.baseURL;
-	  
+		
 		uni.request({
-		  url: `${baseurl}/putIntoDrafts`,
+		  url: `${baseurl}/modifyDraft`,
 		  method: 'POST',
-		  header: {
-			'Content-Type': 'application/json'
-		  },
 		  data: requestData,
 		  success: (res) => {
-			if (res.data.message === 'Draft saved successfully') {
-			  // 获取返回的 draft_id
-			  const draftID = res.data.draft_id;
-	  
-			  // 调用 turnToFormal API，将草稿转为正式作品
-			  uni.request({
+		    if (res.data.message === 'Updated successfully') {
+		      uni.request({
 				url: `${baseurl}/turnToFormal`,
 				method: 'POST',
 				header: {
@@ -606,7 +611,7 @@ export default {
 				},
 				data: {
 				  token: this.token,
-				  draftID: draftID
+				  draftID: this.draft._id
 				},
 				success: (formalRes) => {
 				  if (formalRes.data.message === 'Work saved successfully') {
@@ -616,12 +621,12 @@ export default {
 					  icon: 'success',
 					  duration: 1500,  // 持续时间
 					  success: () => {
-					    // 在通知显示后延迟 0.5 秒再执行返回操作
-					    setTimeout(() => {
-					      uni.switchTab({
-					        url: `/pages/write/index/index`
-					      });
-					    }, 500);  // 延迟 500 毫秒（0.5 秒）
+						// 在通知显示后延迟 0.5 秒再执行返回操作
+						setTimeout(() => {
+						  uni.switchTab({
+							url: `/pages/write/index/index`
+						  });
+						}, 500);  // 延迟 500 毫秒（0.5 秒）
 					  }
 					});
 				  } else {
@@ -630,28 +635,28 @@ export default {
 					  title: '加入作品集失败，请重试',
 					  icon: 'none'
 					});
-				  }
-				},
-				fail: (formalErr) => {
-				  // 请求失败处理
-				  uni.showToast({
-					title: '失败，请检查网络',
-					icon: 'none'
-				  });
-				}
-			  });
-			}
-		  },
-		  fail: (err) => {
-			// 请求失败处理
-			uni.showToast({
-			  title: '失败，请检查网络',
-			  icon: 'none'
+		        }
+			  },
+			  fail: () => {
+				uni.showToast({
+				  title: '请求失败，请检查网络',
+				  icon: 'none'
+				});
+			  },
 			});
-		  }
-		});
+					}
+				  },
+				  fail: (err) => {
+					// 请求失败处理
+					uni.showToast({
+					  title: '失败，请检查网络',
+					  icon: 'none'
+					});
+				  }
+				});
 	},
- }
+
+  }
 }
 </script>
 

@@ -14,7 +14,7 @@
 
       <!-- 操作按钮容器 -->
       <view class="UserWork-footer-container">
-        <button @click="deleteUserWork" class="button delete-button">修改作品</button>
+        <button @click="modifyUserWork" class="button delete-button">修改作品</button>
         <button @click="featureUserWork" class="button feature-button">推荐作品</button>
       </view>
     </view>
@@ -100,6 +100,12 @@ export default {
         }
         this.contentArray = contentArray;
       },
+	  modifyUserWork(){
+		uni.navigateTo({
+		  url: `/pages3_write/userWorkDetail/modifyUserWork?UserWork=${encodeURIComponent(JSON.stringify(this.UserWork))}`,
+		});  
+
+	  },
 	  featureUserWork(){},//发布逻辑
   },
 };

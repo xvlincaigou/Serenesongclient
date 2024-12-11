@@ -60,7 +60,7 @@ export default {
       }
     },
 
-    // 处理服务器返回的 token 和 pingshuiyun
+    // 处理服务器返回的 token
     processToken(data) {
       if (data && data.token) {
         console.log('Token:', data.token);
@@ -69,8 +69,8 @@ export default {
           key: 'userToken',
           data: data.token,
           success: () => {
-            // 登录成功后处理 pingshuiyun
-            this.checkPingshuiyun();
+            // 存储 token 成功后调用 getPersonalID 接口获取 personal_id
+            this.fetchPersonalID(data.token);
           },
           fail: () => {
             uni.showToast({ title: '存储 Token 失败', icon: 'none' });
@@ -79,6 +79,40 @@ export default {
       } else {
         uni.showToast({ title: '微信登陆失败4', icon: 'none' });
       }
+    },
+
+    // 新增：根据 token 获取 personal_id 并存储
+    fetchPersonalID(token) {
+	  let baseurl = getApp().globalData.baseURL;
+      uni.request({
+        url: `${baseurl}/getPersonalID?token=${token}`,
+        method: 'GET',
+        success: (res) => {
+          if (res.statusCode === 200 && res.data && res.data.personal_id) {
+            // 存储 personal_id
+			console.log('id:', res.data.personal_id);
+            uni.setStorage({
+              key: 'personal_id',
+              data: res.data.personal_id,
+              success: () => {
+                console.log('personal_id:', res.data.personal_id);
+                // personal_id 获取并存储完成后，继续检查 pingshuiyun
+                this.checkPingshuiyun();
+              },
+              fail: () => {
+                uni.showToast({ title: '存储 personal_id 失败', icon: 'none' });
+              }
+            });
+          } else {
+            console.error('获取 personal_id 失败，状态码:', res.statusCode);
+            uni.showToast({ title: '获取 personal_id 失败', icon: 'none' });
+          }
+        },
+        fail: () => {
+          console.error('getPersonalID API 请求失败');
+          uni.showToast({ title: '请求 personal_id 失败', icon: 'none' });
+        }
+      });
     },
 
     // 检查 pingshuiyun 是否存在于本地存储

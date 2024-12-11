@@ -16,6 +16,7 @@
       <view class="UserWork-footer-container">
         <button @click="deleteUserWork" class="button delete-button">修改作品</button>
         <button @click="featureUserWork" class="button feature-button">推荐作品</button>
+		<button @click="publishUserWork" class="button publish-button">{{ publishButtonText }}</button>
       </view>
     </view>
 
@@ -40,13 +41,25 @@ export default {
 	  		  }
 	  },
 	  contentArray : [],
+	  isPublished: false,
     };
   },
   onLoad(options) {
     const workData = options.UserWork ? JSON.parse(decodeURIComponent(options.UserWork)) : null;
     this.UserWork = workData;
+	console.log('workID:', this.UserWork.is_public);
 	this.token = uni.getStorageSync('userToken');
 	this.fetchFormatData(this.UserWork.cipai[0], this.UserWork.cipai[1]);
+  },
+  computed: {
+    // 计算属性，根据 UserWork.is_public 动态返回按钮文字
+    publishButtonText() {
+      if (this.UserWork && this.UserWork.is_public) {
+        return '取消公开';
+      } else {
+        return '公开作品';
+      }
+    }
   },
   methods: {
     fetchFormatData(cipaiName, formatNum) {
@@ -99,8 +112,55 @@ export default {
           }
         }
         this.contentArray = contentArray;
-      },
-	  featureUserWork(){},//发布逻辑
+    },
+	featureUserWork(){},//发布逻辑
+	publishUserWork() {
+	  const baseurl = getApp().globalData.baseURL;
+	  if (!this.UserWork || !this.token) {
+	    uni.showToast({
+	      title: '作品信息或用户令牌缺失',
+	      icon: 'none'
+	    });
+	    return;
+	  }
+	
+	  const newPrivacy = !this.UserWork.is_public;
+	  uni.request({
+	    url: `${baseurl}/changePrivacy`, // 不再在URL上拼接参数
+	    method: 'POST',
+	    header: {
+	        'Content-Type': 'application/json',
+	    },
+	    data: {
+	        work_id: this.UserWork._id,
+	        token: this.token,
+	        privacy: newPrivacy
+	    },
+	    success: (res) => {
+	      if (res.statusCode === 200) {
+	        // 更新本地的 is_public 状态
+	        this.UserWork.is_public = newPrivacy;
+	        uni.showToast({
+	          title: newPrivacy ? '作品已公开' : '作品已取消公开',
+	          icon: 'success'
+	        });
+	      } else {
+	        uni.showToast({
+	          title: res.data.message || '操作失败',
+	          icon: 'none'
+	        });
+	        console.error('API 返回错误:', res.data);
+	      }
+	    },
+	    fail: (err) => {
+	      uni.showToast({
+	        title: '请求失败，请稍后再试',
+	        icon: 'none'
+	      });
+	      console.error('API 请求失败:', err);
+	    }
+	  });
+	},
   },
 };
 </script>
@@ -174,7 +234,12 @@ export default {
 }
 
 .feature-button {
-  background-color: #777;
+  background-color: #555;
+  color: #fff;
+}
+
+.publish-button {
+  background-color: #555;
   color: #fff;
 }
 

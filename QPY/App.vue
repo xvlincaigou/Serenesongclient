@@ -1,7 +1,7 @@
 <script>
 	export default {
 		globalData:{
-			baseURL:'http://124.221.16.68:8080'
+			baseURL:'https://sss.xulincaigou.online'
 		},
 		onLaunch: function() {
 			console.log('App Launch');

@@ -104,7 +104,7 @@ export default {
 	  },
     editDraft() {
       uni.navigateTo({
-        url: `/pages3_write/write/write?draft=${encodeURIComponent(JSON.stringify(this.draft))}`,
+        url: `/pages3_write/draftDetail/continueWrite?draft=${encodeURIComponent(JSON.stringify(this.draft))}`,
       });
     },
     deleteDraft() {

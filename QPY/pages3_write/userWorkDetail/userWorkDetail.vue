@@ -14,7 +14,7 @@
 
       <!-- 操作按钮容器 -->
       <view class="UserWork-footer-container">
-        <button @click="deleteUserWork" class="button delete-button">修改作品</button>
+        <button @click="modifyUserWork" class="button delete-button">修改作品</button>
         <button @click="featureUserWork" class="button feature-button">推荐作品</button>
 		<button @click="publishUserWork" class="button publish-button">{{ publishButtonText }}</button>
       </view>

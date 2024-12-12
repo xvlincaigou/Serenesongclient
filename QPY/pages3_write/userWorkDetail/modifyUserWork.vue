@@ -128,8 +128,7 @@
 
     <!-- 底部按钮 -->
     <view class="bottom-buttons">
-      <button class="bottom-btn" @click="addToCollection">加入作品集</button>
-      <button class="bottom-btn" @click="addToDrafts">放入草稿箱</button>
+      <button class="bottom-btn" @click="modifyUserWork">完成作品修改</button>
     </view>
   </view>
 </template>
@@ -138,6 +137,7 @@
 export default {
   data() {
     return {
+	  UserWork:{},
       isSidebarOpen: false,
       token: '',
       cipaiName: '',
@@ -182,12 +182,22 @@ export default {
   },
 
   onLoad(options) {
-    this.cipaiName = decodeURIComponent(options.cipai_name) || '';
-    this.formatNum = options.format_num || 0;
+	console.log("Options received:", options);
+    const UserWorkData = options.UserWork ? JSON.parse(decodeURIComponent(options.UserWork)) : {};
+    
+    // 检查传递的数据
+    console.log("Received data:", UserWorkData);
+  
+    // 更新当前页面的 state
+    this.UserWork = UserWorkData || {};
+    this.cipaiName = UserWorkData.cipai ? UserWorkData.cipai[0] : '';
+    this.formatNum = UserWorkData.cipai ? UserWorkData.cipai[1] : 0;
+    this.ciTitle = UserWorkData.title || '';
     this.token = uni.getStorageSync('userToken');
-	this.pingshuiyun = uni.getStorageSync('pingshuiyun') || {};
+    this.pingshuiyun = uni.getStorageSync('pingshuiyun') || {};
     this.fetchFormatData(this.cipaiName, this.formatNum);
   },
+
   
   methods: {
     toggleSidebar() {
@@ -210,8 +220,8 @@ export default {
         method: 'GET',
         success: (res) => {
           this.formatData = res.data;
-          this.ciContent = Array(this.formatData.format.tunes.length).fill('');
-          this.tempInput = Array(this.ciContent.length).fill('');
+          this.ciContent = this.UserWork.content;
+          this.tempInput = this.UserWork.content;
 		  this.validationResults = Array(this.ciContent.length).fill(true); // 初始化验证结果
 		  this.runCheck();
         },
@@ -346,19 +356,24 @@ export default {
     },
 	
 	check(ciContentArray, cipai){
+	  console.log('content:', ciContentArray);
       let isValid = [];
       let possibleRhythms = []; // 截止到目前位置可以使用的韵
       const tunes = cipai.format.tunes;
+	  console.log('tunes:', tunes);
       
       for (let i = 0; i < ciContentArray.length; ++i) {
         const char = ciContentArray[i];
+		console.log('char:', char);
         if (!char) {
           isValid.push(true);
           continue;
         }
         // 检查平仄是否符合
         const tune = this.pingshuiyun.pingze[0][char];
+		console.log('tune:', tune);
         const exactTune = tunes[i]['tune'];
+		console.log('exactTune:', exactTune);
 		if (exactTune === '中') {
 		  isValid.push(true);
 		  continue;
@@ -367,6 +382,7 @@ export default {
           isValid.push(false);
           continue;
         }
+		console.log(this.pingshuiyun.pingze[0]);
         
         // 检查押韵是否符合
         const rhythms = this.pingshuiyun.rhymes[0][char] ? this.pingshuiyun.rhymes[0][char].map(entry => entry.Rhyme) : [];
@@ -391,6 +407,7 @@ export default {
         }
         isValid.push(true);
       }
+	  console.log('check:', isValid);
       return isValid;
     },
 	
@@ -459,6 +476,7 @@ export default {
 	  
 	  this.runCheck();
     },
+
     getContentArray() {
       let contentStr = '';
     
@@ -502,10 +520,14 @@ export default {
       }
       return true;
     },
-	addToDrafts() {
+	modifyUserWork() {
+		
+	  if (!this.checkContentCompleted()) {
+		return;  // 如果没有完成创作，直接返回
+	  }
 	  const contentArray = this.getContentArray();
 	  console.log('contentArr:', contentArray);
-	  const draftData = {
+	  const UserWorktData = {
 	    title: this.ciTitle || '未命名', 
 	    cipai: [this.cipaiName, this.formatNum], 
 	    is_public: false, 
@@ -515,19 +537,20 @@ export default {
 	  };
 	  const requestData = {
 	    token: this.token,
-	    draft: draftData
+		workID : this.UserWork._id,
+	    work: UserWorktData
 	  };
 	  console.log('Request Data:', JSON.stringify(requestData));
 	  const baseurl = getApp().globalData.baseURL;
 	  
 	  uni.request({
-	    url: `${baseurl}/putIntoDrafts`,
+	    url: `${baseurl}/modifyWork`,
 	    method: 'POST',
 	    data: requestData,
 	    success: (res) => {
-	      if (res.data.message === 'Draft saved successfully') {
+	      if (res.data.message === 'Updated successfully') {
 	        uni.showToast({
-	          title: '草稿保存成功',
+	          title: '创作修改成功',
 	          icon: 'success',
 	          duration: 1500,  // 持续时间
 	          success: () => {
@@ -541,7 +564,7 @@ export default {
 	        });
 	      } else {
 	        uni.showToast({
-	          title: '保存失败，请重试',
+	          title: '修改失败，请重试',
 	          icon: 'none'
 	        });
 	      }
@@ -555,96 +578,7 @@ export default {
 	  });
 	},
 
-	
-	addToCollection() {
-		if (!this.checkContentCompleted()) {
-		return;  // 如果没有完成创作，直接返回
-		}
-		const contentArray = this.getContentArray();
-		console.log('contentArr:', contentArray);
-		const draftData = {
-		  title: this.ciTitle || '未命名',  // 词的标题，默认为 '未命名'
-		  cipai: [this.cipaiName,this.formatNum],  // 词牌名数组
-		  is_public: false,  // 默认不公开
-		  content: this.ciContent,  
-		  prologue: '',  
-		  tags: []
-		};
-	  
-		const requestData = {
-		  token: this.token,
-		  draft: draftData
-		};
-	  
-		const baseurl = getApp().globalData.baseURL;
-	  
-		uni.request({
-		  url: `${baseurl}/putIntoDrafts`,
-		  method: 'POST',
-		  header: {
-			'Content-Type': 'application/json'
-		  },
-		  data: requestData,
-		  success: (res) => {
-			if (res.data.message === 'Draft saved successfully') {
-			  // 获取返回的 draft_id
-			  const draftID = res.data.draft_id;
-	  
-			  // 调用 turnToFormal API，将草稿转为正式作品
-			  uni.request({
-				url: `${baseurl}/turnToFormal`,
-				method: 'POST',
-				header: {
-				  'Content-Type': 'application/json'
-				},
-				data: {
-				  token: this.token,
-				  draftID: draftID
-				},
-				success: (formalRes) => {
-				  if (formalRes.data.message === 'Work saved successfully') {
-					// 提示用户加入作品集成功
-					uni.showToast({
-					  title: '已成功加入作品集',
-					  icon: 'success',
-					  duration: 1500,  // 持续时间
-					  success: () => {
-					    // 在通知显示后延迟 0.5 秒再执行返回操作
-					    setTimeout(() => {
-					      uni.switchTab({
-					        url: `/pages/write/index/index`
-					      });
-					    }, 500);  // 延迟 500 毫秒（0.5 秒）
-					  }
-					});
-				  } else {
-					// 转为正式作品失败
-					uni.showToast({
-					  title: '加入作品集失败，请重试',
-					  icon: 'none'
-					});
-				  }
-				},
-				fail: (formalErr) => {
-				  // 请求失败处理
-				  uni.showToast({
-					title: '失败，请检查网络',
-					icon: 'none'
-				  });
-				}
-			  });
-			}
-		  },
-		  fail: (err) => {
-			// 请求失败处理
-			uni.showToast({
-			  title: '失败，请检查网络',
-			  icon: 'none'
-			});
-		  }
-		});
-	},
- }
+  }
 }
 </script>
 

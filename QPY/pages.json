@@ -117,6 +117,18 @@
             "navigationBarTitleText": "作品详情"
           }
         },
+		{
+		  "path": "draftDetail/continueWrite",
+		  "style": {
+		    "navigationBarTitleText": "继续创作"
+		  }
+		},
+		{
+		  "path": "userWorkDetail/modifyUserWork",
+		  "style": {
+		    "navigationBarTitleText": "修改作品"
+		  }
+		},
         {
           "path": "write/write",
           "style": {

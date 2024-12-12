@@ -61,10 +61,38 @@ export default {
   },
   onLoad(option) {
     this.token = uni.getStorageSync('userToken') || '';
-    // 初始化时将当前头像转换为 Base64
-    this.convertImageToBase64(this.avatarUrl);
+    this.token = uni.getStorageSync('userToken') || '';
+        if (this.token) {
+          this.getUserID();
+	}
   },
   methods: {
+	getUserID() {
+	      uni.request({
+	        url: `https://sss.xulincaigou.online/getPersonalID?token=${this.token}`,
+	        method: 'GET',
+	        success: (res) => {
+	          if (res.statusCode === 200 && res.data) {
+	            this.user_id = res.data.personal_id;
+	            this.getUserInfo();
+	          }
+	        }
+	      });
+	},
+	getUserInfo() {
+	  uni.request({
+		url: `https://sss.xulincaigou.online/getUserInfo?user_id=${this.user_id}&token=${this.token}`,
+		method: 'GET',
+		success: (res) => {
+		  if (res.statusCode === 200 && res.data) {
+			this.avatarUrl = 'data:image/png;base64,' + res.data.avatar;
+			this.nickname = res.data.name;
+			this.signature = res.data.signature;
+			this.avatarData = res.data.avatar;
+		  }
+		}
+	  });
+	},
     bindblur(e) {
       this.nickname = e.detail.value; // 获取昵称
     },
@@ -76,7 +104,8 @@ export default {
       if (e.detail.avatarUrl) {
         this.avatarUrl = e.detail.avatarUrl;
         await this.convertImageToBase64(this.avatarUrl);
-      }
+      };
+	  console.log("token",this.token,"name",this.nickname,"avatar",this.avatarData,"sig",this.signature);
     },
     convertImageToBase64(url) {
       return new Promise((resolve, reject) => {
@@ -123,14 +152,22 @@ export default {
 
       try {
         const response = await this.sendSaveRequest();
-        if (response.statusCode === 200 && response.data.success) {
+        if (response.statusCode === 200 ) {
           uni.showToast({
-            title: '资料已保存',
+            title: '保存成功',
             icon: 'success',
+            duration: 1500,
+            success: () => {
+              setTimeout(() => {
+                uni.switchTab({
+                  url: `/pages/user/index/index`
+                });
+              }, 500);
+            }
           });
         } else {
           uni.showToast({
-            title: response.data.message || '保存失败',
+            title: '保存失败',
             icon: 'none',
           });
         }

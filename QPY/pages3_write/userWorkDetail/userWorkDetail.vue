@@ -14,7 +14,7 @@
 
       <!-- 操作按钮容器 -->
       <view class="UserWork-footer-container">
-        <button @click="modifyUserWork" class="button delete-button">修改作品</button>
+        <button @click="modifyUserWork" class="button edit-button">修改作品</button>
         <button @click="featureUserWork" class="button feature-button">推荐作品</button>
 		<button @click="publishUserWork" class="button publish-button">{{ publishButtonText }}</button>
       </view>
@@ -113,6 +113,11 @@ export default {
         }
         this.contentArray = contentArray;
     },
+	modifyUserWork(){
+		uni.navigateTo({
+		  url: `/pages3_write/userWorkDetail/modifyUserWork?UserWork=${encodeURIComponent(JSON.stringify(this.UserWork))}`,
+		});
+	},
 	featureUserWork(){},//发布逻辑
 	publishUserWork() {
 	  const baseurl = getApp().globalData.baseURL;
@@ -228,10 +233,6 @@ export default {
   color: #fff;
 }
 
-.delete-button {
-  background-color: #555;
-  color: #fff;
-}
 
 .feature-button {
   background-color: #555;

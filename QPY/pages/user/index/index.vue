@@ -3,8 +3,7 @@
     <!-- Profile Section -->
     <view class="section">
       <view class="avatar-wrapper">
-        <image v-if="avatar" :src="avatar" @click="changeAvatar" class="avatar" />
-        <view v-else class="avatar-placeholder" @click="changeAvatar"></view>
+        <image  :src="avatar"  class="avatar" />
       </view>
       <view class="stats">
         <view class="stat-item" @click="navigateToWork()">
@@ -22,9 +21,8 @@
       </view>
     </view>
     <view class="info">
-      <text class="name">无尘\n</text>
-      <text class="email">qingpingle@google.com\n</text>
-      <text class="signature">个性签名...</text>
+      <text class="name">{{name}}\n</text>
+      <text class="signature">{{signature}}</text>
     </view>
 
     <!-- Edit Profile Button -->
@@ -101,8 +99,10 @@ export default {
   data() {
     return {
       baseurl: getApp().globalData.baseURL,
-      avatar: '',  // 默认未选择头像
-      name: "我",
+	  user_id:'',
+      avatar: '',  
+      name: "",
+	  signature: "",
       favoritesCount: 0,       // 收藏数量
       creationCount: 0,        // 创作数量
       friendsCount: 0,         // 词友数量
@@ -160,20 +160,75 @@ export default {
     }
   },
   onShow() {
+	this.getUserID();
     this.getFavoritesCount(); // 获取收藏数量
     this.getWorksCount();     // 获取作品数量
     this.fetchResults();      // 获取所有作品
   },
   methods: {
-    changeAvatar() {
-      uni.chooseImage({
-        count: 1,
-        sourceType: ['album'],
-        success: (res) => {
-          this.avatar = res.tempFilePaths[0];
+	getUserID() {
+        const token = uni.getStorageSync('userToken');
+        if (!token) {
+          uni.showToast({
+            title: '请先登录',
+            icon: 'none',
+          });
+          return;
         }
-      });
-    },
+        uni.request({
+          url: `${this.baseurl}/getPersonalID?token=${token}`,
+          method: 'GET',
+          success: (res) => {
+            if (res.statusCode === 200) {
+              console.log('User ID:', res.data.personal_id);
+              this.user_id = res.data.personal_id; 
+			  console.log('User ID2:', this.user_id);
+              this.getUserInfo();
+            } else {
+              uni.showToast({
+                title: '获取用户ID失败',
+                icon: 'none',
+              });
+            }
+          },
+          fail: () => {
+            uni.showToast({
+              title: '请求失败',
+              icon: 'none',
+            });
+          }
+        });
+	},
+    
+	getUserInfo() {
+        const token = uni.getStorageSync('userToken');
+        if (!token || !this.user_id) {
+          return;
+        }
+        uni.request({
+          url: `${this.baseurl}/getUserInfo?user_id=${this.user_id}&token=${token}`,
+          method: 'GET',
+          success: (res) => {
+            if (res.statusCode === 200 && res.data) {
+              console.log('用户信息:', res.data);
+              this.avatar = 'data:image/png;base64,' + res.data.avatar;
+              this.name = res.data.name;
+              this.signature = res.data.signature;
+            } else {
+              uni.showToast({
+                title: '获取用户信息失败',
+                icon: 'none',
+              });
+            }
+          },
+          fail: () => {
+            uni.showToast({
+              title: '请求失败',
+              icon: 'none',
+            });
+          }
+        });
+	},
     navigateTo(page) {
       uni.navigateTo({ url: `/pages5_user/${page}/${page}` });
     },
@@ -360,13 +415,11 @@ export default {
 .name {
   font-size: 18px;
   font-weight: bold;
-}
-.email {
-  font-size: 14px;
-  color: grey;
+  margin-left: 10px;
 }
 .signature {
   font-size: 12px;
+  margin-left:10px;
   color: grey;
 }
 
@@ -396,7 +449,7 @@ export default {
 .edit-profile {
   width: 100%;
   margin: 12px 0;
-  padding: 10px 0;
+  padding: 0px 0;
   font-size: 14px;
   background-color: white;
   color: black;

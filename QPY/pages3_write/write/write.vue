@@ -346,24 +346,19 @@ export default {
     },
 	
 	check(ciContentArray, cipai){
-	  console.log('content:', ciContentArray);
       let isValid = [];
       let possibleRhythms = []; // 截止到目前位置可以使用的韵
       const tunes = cipai.format.tunes;
-	  console.log('tunes:', tunes);
       
       for (let i = 0; i < ciContentArray.length; ++i) {
         const char = ciContentArray[i];
-		console.log('char:', char);
         if (!char) {
           isValid.push(true);
           continue;
         }
         // 检查平仄是否符合
         const tune = this.pingshuiyun.pingze[0][char];
-		console.log('tune:', tune);
         const exactTune = tunes[i]['tune'];
-		console.log('exactTune:', exactTune);
 		if (exactTune === '中') {
 		  isValid.push(true);
 		  continue;
@@ -372,7 +367,6 @@ export default {
           isValid.push(false);
           continue;
         }
-		console.log(this.pingshuiyun.pingze[0]);
         
         // 检查押韵是否符合
         const rhythms = this.pingshuiyun.rhymes[0][char] ? this.pingshuiyun.rhymes[0][char].map(entry => entry.Rhyme) : [];
@@ -397,7 +391,6 @@ export default {
         }
         isValid.push(true);
       }
-	  console.log('check:', isValid);
       return isValid;
     },
 	

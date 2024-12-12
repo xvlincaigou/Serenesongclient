@@ -1,56 +1,47 @@
 <template>
   <view class="profile-container">
-    <view class="profile-section">
-      <view class="profile-avatar-wrapper">
-        <image v-if="avatar" :src="avatar" class="profile-avatar" @click="changeAvatar" />
-        <view v-else class="profile-avatar-placeholder" @click="changeAvatar"></view>
-      </view>
-      <view class="change-avatar-text" @click="changeAvatar">修改头像</view>
+      
+    <view class="avatarUrl">
+      <button
+        class="avabutton"
+        type="balanced"
+        open-type="chooseAvatar"
+        @chooseavatar="onChooseavatar"
+      >
+        <image :src="avatarUrl" class="refreshIcon"></image>
+      </button>
     </view>
 
     <view class="form">
       <view class="form-item">
         <text class="label">名称</text>
-        <input v-model="nickname" placeholder="请输入名称" class="input-box" />
+        <input
+          type="nickname"
+		  :value="nickname"
+          @blur="bindblur"
+          placeholder="请输入新昵称"
+          class="input-box"
+          @input="bindinput"
+        />
       </view>
 
       <view class="form-item">
         <text class="label">个性签名</text>
-        <input v-model="signature" placeholder="请输入个性签名" class="input-box" />
+        <input
+          v-model="signature"
+          placeholder="请输入个性签名"
+          class="input-box"
+        />
       </view>
 
-      <view class="form-item">
-        <text class="label">电话</text>
-        <input v-model="phone" placeholder="请输入电话" class="input-box" />
-      </view>
-
-      <view class="form-item">
-        <text class="label">邮箱</text>
-        <input v-model="email" placeholder="请输入邮箱" class="input-box" />
-      </view>
-
-      <view class="options">
-        <view class="option-item">
-          <text>允许陌生人搜到自己</text>
-          <switch :checked="allowSearch" @change="toggleAllowSearch" />
-        </view>
-        <view class="option-item">
-          <text>允许陌生人发送好友邀请</text>
-          <switch :checked="allowInvite" @change="toggleAllowInvite" />
-        </view>
-        <view class="option-item">
-          <text>允许陌生人浏览自己主页</text>
-          <switch :checked="allowViewProfile" @change="toggleAllowViewProfile" />
-        </view>
-      </view>
-
-      <button class="save-button" @click="saveProfile">保存</button>
+      <button
+        class="save-button"
+        @click="saveProfile"
+        :disabled="isSaving"
+      >
+        {{ isSaving ? '保存中...' : '保存' }}
+      </button>
       
-      <!-- 新增切换账号和退出登录按钮 -->
-      <view class="action-buttons">
-        <button class="switch-account-button" @click="switchAccount">切换账号</button>
-        <button class="logout-button" @click="logout">退出登录</button>
-      </view>
     </view>
   </view>
 </template>
@@ -59,45 +50,126 @@
 export default {
   data() {
     return {
-      avatar: '',
+      token: '',
+      avatarUrl:
+        'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
       nickname: '',
       signature: '',
-      phone: '',
-      email: '',
-      allowSearch: false,
-      allowInvite: false,
-      allowViewProfile: false
+      avatarData: '',
+      isSaving: false, // 用于控制保存按钮状态
     };
   },
+  onLoad(option) {
+    this.token = uni.getStorageSync('userToken') || '';
+    // 初始化时将当前头像转换为 Base64
+    this.convertImageToBase64(this.avatarUrl);
+  },
   methods: {
-    changeAvatar() {
-      uni.chooseImage({
-        count: 1,
-        sourceType: ['album'],
-        success: (res) => {
-          this.avatar = res.tempFilePaths[0];
-        }
+    bindblur(e) {
+      this.nickname = e.detail.value; // 获取昵称
+    },
+    bindinput(e) {
+      this.nickname = e.detail.value; // 处理输入
+    },
+    async onChooseavatar(e) {
+      console.log('选择的头像信息:', e.detail);
+      if (e.detail.avatarUrl) {
+        this.avatarUrl = e.detail.avatarUrl;
+        await this.convertImageToBase64(this.avatarUrl);
+      }
+    },
+    convertImageToBase64(url) {
+      return new Promise((resolve, reject) => {
+        // 获取图片信息
+        uni.getImageInfo({
+          src: url,
+          success: (res) => {
+            // 读取文件为Base64
+            const fs = uni.getFileSystemManager();
+            fs.readFile({
+              filePath: res.path,
+              encoding: 'base64',
+              success: (fileRes) => {
+                this.avatarData = fileRes.data;
+                resolve();
+              },
+              fail: (err) => {
+                console.error('读取文件失败:', err);
+                reject(err);
+              },
+            });
+          },
+          fail: (err) => {
+            console.error('获取图片信息失败:', err);
+            reject(err);
+          },
+        });
       });
     },
-    saveProfile() {
-      uni.showToast({ title: '资料已保存', icon: 'success' });
+    async saveProfile() {
+		
+      if (!this.nickname.trim()) {
+        uni.showToast({
+          title: '昵称不能为空',
+          icon: 'none',
+        });
+        return;
+      }
+
+      this.isSaving = true; // 开始保存，禁用按钮
+      uni.showLoading({
+        title: '保存中...',
+      });
+
+      try {
+        const response = await this.sendSaveRequest();
+        if (response.statusCode === 200 && response.data.success) {
+          uni.showToast({
+            title: '资料已保存',
+            icon: 'success',
+          });
+        } else {
+          uni.showToast({
+            title: response.data.message || '保存失败',
+            icon: 'none',
+          });
+        }
+      } catch (error) {
+        console.error('保存资料时出错:', error);
+        uni.showToast({
+          title: '保存失败，请稍后重试',
+          icon: 'none',
+        });
+      } finally {
+        this.isSaving = false; // 恢复按钮状态
+        uni.hideLoading();
+      }
     },
-    toggleAllowSearch(event) {
-      this.allowSearch = event.detail.value;
+    sendSaveRequest() {
+	  console.log("token",this.token,"name",this.nickname,"avatar",this.avatarData,"sig",this.signature);
+      return new Promise((resolve, reject) => {
+        uni.request({
+          url: 'https://sss.xulincaigou.online/saveUserInfo',
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            token: this.token,
+            name: this.nickname,
+            avatar: this.avatarData,
+            signature: this.signature,
+          },
+          success: (res) => {
+            resolve(res);
+          },
+          fail: (err) => {
+            reject(err);
+          },
+        });
+      });
     },
-    toggleAllowInvite(event) {
-      this.allowInvite = event.detail.value;
-    },
-    toggleAllowViewProfile(event) {
-      this.allowViewProfile = event.detail.value;
-    },
-    switchAccount() {
-      uni.showToast({ title: '切换账号功能待实现', icon: 'none' });
-    },
-    logout() {
-      uni.showToast({ title: '退出登录功能待实现', icon: 'none' });
-    }
-  }
+  },
 };
 </script>
 
@@ -108,37 +180,35 @@ export default {
   flex-direction: column;
   align-items: center;
 }
-.profile-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+
+.avatarUrl {
+  margin-top: 20px;
   margin-bottom: 20px;
 }
-.profile-avatar-wrapper {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 8px;
+
+/* 限定按钮的宽度和高度，并防止其扩展 */
+.avabutton {
+  display: inline-block; /* 或者使用 display: flex; */
+  width: 150px;
+  height: 150px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  cursor: pointer; /* 提示用户这是一个可点击的元素 */
+  overflow: hidden; /* 防止内容溢出 */
 }
-.profile-avatar {
+
+.refreshIcon {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 0%;
+  object-fit: cover;
 }
-.profile-avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background-color: grey;
-}
-.change-avatar-text {
-  font-size: 12px;
-  color: #007aff;
-  text-decoration: underline;
-  cursor: pointer;
-}
+
 .form {
   width: 80%;
-  margin-top: 10px;
+  margin-top: 40px;
 }
 .form-item {
   display: flex;
@@ -181,30 +251,10 @@ export default {
   margin-top: 40px;
   margin-bottom: 30px;
 }
-.action-buttons {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 10px;
-  width: 100%;
-}
-.switch-account-button {
-  width: 100px;
-  padding: 6px;
-  background-color: #007aff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  text-align: center;
-}
-.logout-button {
-  width: 100px;
-  padding: 6px;
-  background-color: #ff3b30;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  text-align: center;
+.save-button:disabled {
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  border-color: #d0d0d0;
+  cursor: not-allowed;
 }
 </style>

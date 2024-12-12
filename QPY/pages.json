@@ -204,12 +204,6 @@
           "style": {
             "navigationBarTitleText": "帖子详情"
           }
-        },
-        {
-          "path": "workDetail/workDetail",
-          "style": {
-            "navigationBarTitleText": "作品详情"
-          }
         }
       ]
     },

@@ -12,12 +12,12 @@
           <text class="format-header">韵律版本{{ index + 1 }}：{{ format.author }}</text>
           <button class="compose-button" @click="goToCompose(cipaiDetail.name, index)">以此韵律创作</button>
         </view>
-        <text v-if="format.desc" class="format-desc-title">古人点评:\n</text>
+        <text v-if="format.desc" class="format-desc-title">古人点评\n</text>
         <text v-if="format.desc" class="format-desc">{{ format.desc }}\n\n</text>
-        <text v-if="format.sketch" class="format-sketch-title">韵律特征:\n</text>
+        <text v-if="format.sketch" class="format-sketch-title">韵律特征\n</text>
         <text v-if="format.sketch" class="format-sketch">{{ format.sketch }}\n\n</text>
         <view class="tune-section">
-          <text class="tune-desc-title">韵律内容:\n</text>
+          <text class="tune-desc-title">韵律内容\n</text>
           <text class="tunes">{{ formatTunes(format.tunes) }}</text>
         </view>
       </view>
@@ -58,7 +58,7 @@ export default {
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  background-color: #f0f4f8;
+  background-color: #fefdf9;
   padding: 20px;
 }
 
@@ -91,6 +91,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 .format-header {
@@ -100,11 +101,13 @@ export default {
 }
 
 .compose-button {
-  color: #909090;
+  color: #7a7a7a;
+  background-color: #fefdf9;
   padding: 0px 6px;
   margin-right: 0px;
   border-radius: 5px;
   font-size: 14px;
+  border: none;
 }
 
 .desc-text, .format-desc, .format-sketch, .tunes {
@@ -120,12 +123,13 @@ export default {
 }
 
 .tunes {
-  color: #444;
+  color: #7a7a7a;
 }
 
 .format-desc-title, .format-sketch-title, .tune-desc-title {
   font-size: 16px;
   text-decoration: underline;
+  line-height: 2.0;
   font-weight: bold; 
 }
 </style>

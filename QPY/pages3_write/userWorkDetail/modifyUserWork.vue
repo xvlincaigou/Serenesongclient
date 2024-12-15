@@ -195,7 +195,15 @@ export default {
     this.ciTitle = UserWorkData.title || '';
     this.token = uni.getStorageSync('userToken');
     this.pingshuiyun = uni.getStorageSync('pingshuiyun') || {};
-    this.fetchFormatData(this.cipaiName, this.formatNum);
+     if (UserWorkData.content && Array.isArray(UserWorkData.content)) {
+            let tmp = [];
+            UserWorkData.content.forEach(sentence => {
+                const characters = sentence.split('').filter(char => !['，', '。', '、'].includes(char)); // 拆分每句话并过滤标点
+                tmp = tmp.concat(characters);
+            });
+            this.ciContent = tmp;
+	}
+	this.fetchFormatData(this.cipaiName, this.formatNum);
   },
 
   
@@ -220,8 +228,7 @@ export default {
         method: 'GET',
         success: (res) => {
           this.formatData = res.data;
-          this.ciContent = this.UserWork.content;
-          this.tempInput = this.UserWork.content;
+          this.tempInput = this.ciContent;
 		  this.validationResults = Array(this.ciContent.length).fill(true); // 初始化验证结果
 		  this.runCheck();
         },
@@ -531,7 +538,7 @@ export default {
 	    title: this.ciTitle || '未命名', 
 	    cipai: [this.cipaiName, this.formatNum], 
 	    is_public: false, 
-	    content: this.ciContent,
+	    content: contentArray,
 	    prologue: '',
 	    tags: []
 	  };

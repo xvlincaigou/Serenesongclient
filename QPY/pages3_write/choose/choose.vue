@@ -25,15 +25,16 @@
 
     <!-- 推荐词牌展示区域 -->
     <view class="recommendation-container">
-      <!-- 推荐标题，点击显示提示 -->
-      <view class="triangle-container">
+      <view class="title-container">
         <view class="triangle" @click="showRefreshLogic">今日推荐词牌</view>
       </view>
 
       <!-- 词牌矩形展示 -->
       <view class="tags-container">
         <view class="tag-item" v-for="tag in displayTags" :key="tag.name" @click="navigateToDetail(tag.name)">
-          <view class="tag-title">{{ tag.name }}</view>
+          <view class ="tag-o"></view>
+		  <view class="tag-title">{{ tag.name }}</view>
+		  <view class ="tag-line"></view>
           <view class="tag-description">{{ tag.description }}</view>
         </view>
       </view>
@@ -51,7 +52,6 @@ export default {
       tags: [
        { name: '满江红', description: '激昂深沉\n英雄气概\n人生感悟' },
        { name: '清平乐', description: '简洁明快\n安静和谐\n悠闲自得' },
-       { name: '水调歌头', description: '音韵优美\n美好向往\n时光流逝' },
        { name: '江城子', description: '节奏鲜明\n春日风光\n离别情愁' },
        { name: '念奴娇', description: '旋律婉转\n情感细腻\n思念爱恋' },
        { name: '浣溪沙', description: '短小精悍\n轻松愉快\n美好瞬间' },
@@ -80,11 +80,9 @@ export default {
        { name: '好事近', description: '喜悦心情\n美好祝愿\n幸福憧憬' },
        { name: '醉花阴', description: '秋日思念\n细腻感伤\n孤独寂寞' },
        { name: '相见欢', description: '离合悲欢\n情感纠葛\n相思之苦' },
-       { name: '八声甘州', description: '怀古幽思\n情感深沉\n历史沧桑' },
        { name: '武陵春', description: '春日景象\n思念故人\n感慨人生' },
        { name: '贺新郎', description: '雄浑壮阔\n抱负理想\n人生豪情' },
        { name: '望海潮', description: '壮美风光\n豪情壮志\n胸怀天下' },
-       { name: '减字木兰花', description: '精炼简洁\n情感浓缩\n含蓄隽永' },
        { name: '玉蝴蝶', description: '优美浪漫\n爱情憧憬\n情感缠绵' }
       ],
       filteredResults: [],
@@ -126,7 +124,7 @@ export default {
 	
 	refreshRecommendations() {
          const shuffled = [...this.tags].sort(() => 0.5 - Math.random());
-         this.displayTags = shuffled.slice(0, 8); // 随机选择8个词牌
+         this.displayTags = shuffled.slice(0, 6); // 随机选择8个词牌
     },
 	
      navigateToDetail(name) {
@@ -184,27 +182,25 @@ export default {
 .search-bar {
   width:100%;
   position: relative;
-  padding: 8px;
-  background-color: #f8f8f8;
-  border-bottom: 1px solid #dddddd;
 }
 
 input {
   width: 95%;
   padding: 8px;
   border: 1px solid #cccccc;
-  border-radius: 8px;
+  border-radius: 12px;
   background-color: #ffffff;
 }
 
 .search-dropdown {
   position: absolute;
-  top: 56px; 
-  left: 0;
-  right: 0;
+  top: 42px; 
+  left: 2px;
+  right: 2px;
   background-color: #ffffff;
   border: 1px solid #cccccc;
   max-height: 200px;
+  border-radius: 2px;
   overflow-y: auto;
   z-index: 1000;
 }
@@ -238,24 +234,24 @@ input {
   background-color: #f5f5f5;
   border-radius: 12px;
   padding: 20px;
-  margin-top: 20px;
+  margin-top: 40px;
   position: relative;
 }
 
-.triangle-container {
+.title-container {
   display: flex;
   justify-content: center;
+  margin-up: 25px;
   margin-bottom: 20px;
 }
 
 .triangle {
   width: 150px;
   height: 40px;
-  background-color: #ddd;
+  background-color: #eaeaea;
   text-align: center;
   font-size: 16px;
-  border-radius: 10px;
-  line-height: 20px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -270,25 +266,39 @@ input {
 
 .tag-item {
   width: 50px;
-  height: 150px;
-  margin-bottom: 30px;
+  height: 170px;
+  margin:12px;
+  margin-bottom: 20px;
   padding: 10px;
   background-color: #ffffff;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
+.tag-o{
+	width: 12px;
+	height: 12px;
+	margin-left:19px;
+	margin-bottom: 8px;
+	background-color: #ececec;
+	border-radius:6px;
+}
 .tag-title {
   font-size: 14px;
   font-weight: bold;
-  margin-bottom: 8px;
 }
-
+.tag-line{
+	width:50px;
+	height: 1px;
+	background-color: #a8a8a8;
+	margin-top: 8px;
+	margin-bottom: 18px;
+}
 .tag-description {
   font-size: 12px;
   color: #666;
-  line-height: 20px;
+  line-height: 25px;
   overflow: hidden;
 }
 </style>

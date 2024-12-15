@@ -585,7 +585,7 @@ export default {
 		  title: this.ciTitle || '未命名', 
 		  cipai: [this.cipaiName, this.formatNum], 
 		  is_public: false, 
-		  content: this.ciContent,
+		  content: contentArray ,
 		  prologue: '',
 		  tags: []
 		};

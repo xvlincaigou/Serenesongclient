@@ -31,7 +31,7 @@ export default {
   align-items: flex-start;
   justify-content: flex-start;
   min-height: 100vh;
-  background-color: #f0f4f8;
+  background-color: #fefdf9;
   padding: 20px;
 }
 

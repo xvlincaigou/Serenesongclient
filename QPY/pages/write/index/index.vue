@@ -66,6 +66,7 @@ export default {
   color: #808080;
   text-align: center;
   cursor: pointer;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px  rgba(144, 144, 144, 0.3);
 }
 </style>

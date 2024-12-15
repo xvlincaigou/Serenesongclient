@@ -199,7 +199,7 @@ export default {
   align-items: flex-start;
   justify-content: flex-start;
   min-height: 100vh;
-  background-color: #f0f4f8;
+  background-color: #fefdf9;
   padding: 20px;
 }
 
@@ -239,8 +239,8 @@ export default {
 .cont-text {
   font-size: 16px;
   color: #666;
-  line-height: 1.6;
-  text-align: justify;
+  line-height: 1.8;
+  justify-content: center;
 }
 
 .button-container {
@@ -257,7 +257,7 @@ export default {
   padding: 5px 0;
   background-color: #ffffff;
   color: #555555;
-  border: none;
+  box-shadow: #aaa;
   border-radius: 10px;
   text-align: center;
   font-size: 16px;

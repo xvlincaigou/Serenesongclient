@@ -4,14 +4,14 @@
     <view class="cipai-header">
       <text class="cipai-name">{{ cipaiName }}</text>
       <view class="sidebar-toggle" @click="toggleSidebar">
-        <view class="toggle-square"></view>
+        <view class="toggle-square">平</view>
       </view>
     </view>
 
     <!-- 侧边栏 -->
     <view class="sidebar" :class="{ 'sidebar-open': isSidebarOpen }">
       <view class="sidebar-header">
-        <text>平水韵</text>
+        <text class = "sidebar-title">平水韵</text>
         <view class="sidebar-close" @click="toggleSidebar">返回</view>
       </view>
       <view class="sidebar-content">
@@ -117,7 +117,6 @@
               :id="'tune-input-' + globalIndex(lineIndex, index)"
             />
           </view>
-          <!-- 标点符号 -->
           <text v-if="tune.rhythm === '读'">、</text>
           <text v-else-if="tune.rhythm === '句'">，</text>
           <text v-else-if="tune.rhythm === '韵'">。</text>
@@ -563,10 +562,10 @@ export default {
 		const contentArray = this.getContentArray();
 		console.log('contentArr:', contentArray);
 		const draftData = {
-		  title: this.ciTitle || '未命名',  // 词的标题，默认为 '未命名'
-		  cipai: [this.cipaiName,this.formatNum],  // 词牌名数组
-		  is_public: false,  // 默认不公开
-		  content: this.ciContent,  
+		  title: this.ciTitle || '未命名',
+		  cipai: [this.cipaiName,this.formatNum],
+		  is_public: false,
+		  content: contentArray,  
 		  prologue: '',  
 		  tags: []
 		};
@@ -654,7 +653,7 @@ export default {
   flex-direction: column;
   align-items: center;
   height: 100vh;
-  background-color: #f0f4f8;
+  background-color: #fefdf9;
   overflow-y: auto;
   padding: 20px;
   position: relative;
@@ -684,9 +683,12 @@ export default {
 }
 
 .toggle-square {
-  width: 20px;
-  height: 20px;
-  background-color: #d3d3d3;
+  width: 22px;
+  height: 22px;
+  text-align: center;
+  color: #fff;
+  background-color: #d0d0d0;
+  border-radius: 10px;
 }
 
 .sidebar {
@@ -701,6 +703,11 @@ export default {
   z-index: 1000;
   display: flex;
   flex-direction: column;
+}
+
+.sidebar-title{
+	font-size: 16px;
+	font-weight: bold; 
 }
 
 .sidebar-content {
@@ -733,8 +740,8 @@ export default {
   height: 36px;
   line-height: 36px;
   font-size: 14px;
-  color: #fff;
-  background-color: #5677fc;
+  color:  #aaaaaa;
+  background-color: #fefdf9;
   border: none;
   border-radius: 4px;
   padding: 0 15px;

@@ -19,23 +19,22 @@
     <!-- 按钮容器 -->
     <view class="button-container">
       <button @click="saveComment">保存批注</button>
-      <button @click="startCreating">我也要创作</button>
+      <button @click="sendCollection">分享收藏</button>
     </view>
   </view>
 </template>
-
 
 <script>
 export default {
   data() {
     return {
-	  baseurl:getApp().globalData.baseURL,
+      baseurl: getApp().globalData.baseURL,
       favoriteTitle: '',
       favoriteAuthor: '',
       favoriteContent: [],
       favoriteContentStr: '',
       favoriteAnalysis: '',
-	  collectionID: '',
+      collectionID: '',
       ciID: '',
       token: '',
     };
@@ -47,7 +46,7 @@ export default {
     this.favoriteAnalysis = decodeURIComponent(options.comment) || '';
     // 将内容数组拼接成字符串，每句后添加换行符
     this.favoriteContentStr = this.favoriteContent.join('\n');
-	this.collectionID = options.collectionID;
+    this.collectionID = options.collectionID;
     this.ciID = options.ciID;
     // 从本地存储中获取 token
     this.token = uni.getStorageSync('userToken') || '';
@@ -57,12 +56,53 @@ export default {
         icon: 'none',
       });
     }
-	console.log('获取到的token:', this.token);
+    console.log('获取到的token:', this.token);
   },
   methods: {
-    startCreating() {
-      // 开始创作逻辑
+    sendCollection() {
+      if (!this.token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none',
+        });
+        return;
+      }
+      uni.request({
+        url: `${this.baseurl}/publishDynamic`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          token: this.token,
+          Type: 2,
+          _id: this.collectionID,
+          _id2: this.ciID,
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            uni.showToast({
+              title: '已发布动态',
+              icon: 'success',
+            });
+          } else {
+            uni.showToast({
+              title: res.data.message || '发布失败',
+              icon: 'none',
+            });
+            console.error('API 返回错误:', res.data);
+          }
+        },
+        fail: (err) => {
+          uni.showToast({
+            title: '请求失败，请稍后再试',
+            icon: 'none',
+          });
+          console.error('API 请求失败:', err);
+        },
+      });
     },
+    
     // 保存批注方法
     saveComment() {
       if (!this.token) {
@@ -104,9 +144,18 @@ export default {
 </script>
 
 <style>
-.fD-container { padding: 16px; }
-.favorite-title { font-size: 18px; font-weight: bold; }
-.favorite-author { font-size: 14px; color: grey; margin-top: 4px; }
+.fD-container { 
+  padding: 16px; 
+}
+.favorite-title { 
+  font-size: 18px; 
+  font-weight: bold; 
+}
+.favorite-author { 
+  font-size: 14px; 
+  color: grey; 
+  margin-top: 4px; 
+}
 
 .favorite-content-box {
   margin-top: 20px;

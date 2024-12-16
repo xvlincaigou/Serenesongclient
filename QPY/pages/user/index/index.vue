@@ -3,7 +3,7 @@
     <!-- Profile Section -->
     <view class="section">
       <view class="avatar-wrapper">
-        <image  :src="avatar"  class="avatar" />
+        <image :src="avatar" class="avatar" />
       </view>
       <view class="stats">
         <view class="stat-item" @click="navigateToWork()">
@@ -21,8 +21,9 @@
       </view>
     </view>
     <view class="info">
-      <text class="name">{{name}}\n</text>
-      <text class="signature">{{signature}}</text>
+      <text class="name">{{ name }}\n</text>
+      <text class="signature">{{ signature }}\n</text>
+	  <text class="id">{{ user_id }}</text>
     </view>
 
     <!-- Edit Profile Button -->
@@ -30,42 +31,68 @@
 
     <!-- Tabs for 动态 and 作品 -->
     <view class="tabs">
-      <text :class="{active: selectedTab === 'dynamic'}" @click="selectTab('dynamic')">我的动态</text>
-      <text :class="{active: selectedTab === 'works'}" @click="selectTab('works')">代表作品</text>
+      <text :class="{ active: selectedTab === 'dynamic' }" @click="selectTab('dynamic')">我的动态</text>
+      <text :class="{ active: selectedTab === 'works' }" @click="selectTab('works')">代表作品</text>
     </view>
 
     <!-- Content Displayed Based on Tab Selection -->
     <scroll-view v-if="selectedTab === 'dynamic'" class="content" scroll-y="true">
-      <view v-for="(post, index) in dynamicPosts" :key="index">
-        <!-- Display post time outside of the post box -->
-        <!-- 发动态的人的头像和昵称 -->
-        <view class="post-header">
-          <image :src="avatar" class="post-avatar"></image>
-          <view class="post-info">
-            <text class="post-nickname">{{ name }}</text>
-            <view class="post-meta">
-              <text class="post-category">{{ post.category }}</text>
-              <text class="post-time">{{ formatDate(post.date) }}</text>
+      <view v-if="dynamicPosts">
+        <view v-for="(post, index) in dynamicPosts" :key="index">
+          <!-- Display post time outside of the post box -->
+          <!-- 发动态的人的头像和昵称 -->
+          <view class="post-header">
+            <image :src="avatar" class="post-avatar"></image>
+            <view class="post-info">
+              <text class="post-nickname">{{ name }}</text>
+              <view class="post-meta">
+                <text class="post-category">{{ getCategory(post.Type) }}</text>
+              </view>
             </view>
           </view>
-        </view>
-        <!-- 动态内容 -->
-        <view class="post" @click="viewPost(post)">
-          <!-- 动态标题和内容 -->
-          <view v-if="post.title">
-            <text class="post-title">{{ post.title }}\n</text>
-            <text class="post-content">{{ post.content }}</text>
+          <!-- 动态内容 -->
+          <view class="post" @click="viewPost(post)">
+            <!-- 动态内容根据Type渲染 -->
+            <view v-if="post.Type === 0">
+              <text class="post-title">{{ post.Classic.cipai[0] }}\n</text>
+              <text class="post-author">{{ post.Classic.author }}</text>
+              <view class="post-content">
+                <text v-for="(line, idx) in post.Classic.content" :key="idx">{{ line }}\n</text>
+              </view>
+            </view>
+            <view v-else-if="post.Type === 1">
+              <text class="post-title">{{ post.Modern.cipai[0] }} · {{ post.Modern.title }}</text>
+              <view class="post-content">
+                <text v-for="(line, idx) in post.Modern.content" :key="idx">{{ line }}\n</text>
+              </view>
+            </view>
+            <view v-else-if="post.Type === 2">
+              <text class="post-title">{{ post.CollectionCi.cipai[0] }}\n</text>
+              <text class="post-author">{{ post.CollectionCi.author }}</text>
+              <view class="post-content">
+                <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
+              </view>
+              <text class="post-comment">\n词评：\n{{ formatComment(post.Comment) }}</text>
+            </view>
+            <view v-else>
+              <text class="post-content">{{ post.content }}</text>
+            </view>
           </view>
-          <view v-else>
-            <text class="post-content">{{ post.content }}</text>
+          <!-- 动态操作按钮 -->
+          <view class="post-actions">
+            <button @click.stop="del(post)">删除</button>
+            <button @click.stop="comment(post)">评论</button>
+            <button
+              @click.stop="love(post)"
+              :style="{ backgroundColor: isLiked(post) ? 'red' : 'white', color: isLiked(post) ? 'white' : 'grey' }"
+            >
+              点赞
+            </button>
           </view>
         </view>
-        <!-- 动态操作按钮 -->
-        <view class="post-actions">
-          <button @click.stop="share(post)">分享 1788</button>
-          <button @click.stop="comment(post)">评论 5000+</button>
-          <button @click.stop="love(post)" :style="{backgroundColor: post.liked ? 'red' : 'white', color: post.liked ? 'white' : 'grey'}">点赞 1w+</button>
-        </view>
+      </view>
+      <view v-else class="no-dynamicPosts">
+        <text>哎呀，您还没有发过动态~</text>
       </view>
     </scroll-view>
 
@@ -99,58 +126,17 @@ export default {
   data() {
     return {
       baseurl: getApp().globalData.baseURL,
-	  user_id:'',
-      avatar: '',  
+      user_id: '',
+      avatar: '',
       name: "",
-	  signature: "",
-      favoritesCount: 0,       // 收藏数量
-      creationCount: 0,        // 创作数量
-      friendsCount: 0,         // 词友数量
-      selectedTab: 'dynamic',  // 默认选择的标签
+      signature: "",
+      favoritesCount: 0, // 收藏数量
+      creationCount: 0,  // 创作数量
+      friendsCount: 0,    // 词友数量
+      selectedTab: 'dynamic', // 默认选择的标签
       token: "",
-      userWorks: [],            // 用户所有作品
-      dynamicPosts: [
-        {
-          title: "钗头凤--陆游",
-          content: "酥手为何而红？",
-          date: "2023-12-18",
-          category: '词评',
-          liked: false,
-          detail: "红酥手，黄縢酒，满城春色宫墙柳。",
-        },
-        {
-          title: "春夜喜雨",
-          content: "好雨知时节，当春乃发生。\n随风潜入夜，润物细无声。\n野径云俱黑，江船火独明。\n晓看红湿处，花重锦官城。",
-          date: "2024-4-5",
-          category: '作品',
-          liked: false,
-          detail: "",
-        },
-        {
-          title: "将进酒",
-          content: "君不见，黄河之水天上来，奔流到海不复回。",
-          date: "2024-6-9",
-          category: '作品',
-          liked: false,
-          detail: "",
-        },
-        {
-          title: "",
-          content: "《七律·长征》真是一首好诗！在这首诗中，伟人用极高的革命乐观主义精神和极高的大无畏精神，绘就了一幅“红军不怕远征难”的壮阔画卷，时至今日，依然令人深受感动、备受鼓舞。",
-          date: "2024-10-18",
-          category: '观点',
-          liked: false,
-          detail: "",
-        },
-        {
-          title: "长恨歌--白居易",
-          content: "",
-          date: "2024-11-5",
-          category: '推荐',
-          liked: false,
-          detail: "汉皇重色思倾国，御宇多年求不得。",
-        },
-      ]
+      userWorks: [],        // 用户所有作品
+      dynamicPosts: []      // 动态列表
     };
   },
   computed: {
@@ -160,75 +146,82 @@ export default {
     }
   },
   onShow() {
-	this.getUserID();
+    this.getUserID();
     this.getFavoritesCount(); // 获取收藏数量
     this.getWorksCount();     // 获取作品数量
     this.fetchResults();      // 获取所有作品
+    // 注意：getDynamics 已在 getUserID 成功后调用
   },
   methods: {
-	getUserID() {
-        const token = uni.getStorageSync('userToken');
-        if (!token) {
+    getUserID() {
+      const token = uni.getStorageSync('userToken');
+      if (!token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none',
+        });
+        return;
+      }
+      uni.request({
+        url: `${this.baseurl}/getPersonalID`,
+        method: 'GET',
+        data: { token },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.personal_id) {
+            console.log('User ID:', res.data.personal_id);
+            this.user_id = res.data.personal_id;
+            console.log('User ID2:', this.user_id);
+            this.getUserInfo();
+            this.getDynamics(); // 获取动态列表
+          } else {
+            uni.showToast({
+              title: '获取用户ID失败',
+              icon: 'none',
+            });
+          }
+        },
+        fail: () => {
           uni.showToast({
-            title: '请先登录',
+            title: '请求失败',
             icon: 'none',
           });
-          return;
         }
-        uni.request({
-          url: `${this.baseurl}/getPersonalID?token=${token}`,
-          method: 'GET',
-          success: (res) => {
-            if (res.statusCode === 200) {
-              console.log('User ID:', res.data.personal_id);
-              this.user_id = res.data.personal_id; 
-			  console.log('User ID2:', this.user_id);
-              this.getUserInfo();
-            } else {
-              uni.showToast({
-                title: '获取用户ID失败',
-                icon: 'none',
-              });
-            }
-          },
-          fail: () => {
+      });
+    },
+
+    getUserInfo() {
+      const token = this.token || uni.getStorageSync('userToken');
+      if (!token || !this.user_id) {
+        return;
+      }
+      uni.request({
+        url: `${this.baseurl}/getUserInfo`,
+        method: 'GET',
+        data: {
+          user_id: this.user_id,
+          token: token
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            console.log('用户信息:', res.data);
+            this.avatar = res.data.avatar ? 'data:image/png;base64,' + res.data.avatar : '';
+            this.name = res.data.name || "";
+            this.signature = res.data.signature || "";
+          } else {
             uni.showToast({
-              title: '请求失败',
+              title: '获取用户信息失败',
               icon: 'none',
             });
           }
-        });
-	},
-    
-	getUserInfo() {
-        const token = uni.getStorageSync('userToken');
-        if (!token || !this.user_id) {
-          return;
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请求失败',
+            icon: 'none',
+          });
         }
-        uni.request({
-          url: `${this.baseurl}/getUserInfo?user_id=${this.user_id}&token=${token}`,
-          method: 'GET',
-          success: (res) => {
-            if (res.statusCode === 200 && res.data) {
-              console.log('用户信息:', res.data);
-              this.avatar = 'data:image/png;base64,' + res.data.avatar;
-              this.name = res.data.name;
-              this.signature = res.data.signature;
-            } else {
-              uni.showToast({
-                title: '获取用户信息失败',
-                icon: 'none',
-              });
-            }
-          },
-          fail: () => {
-            uni.showToast({
-              title: '请求失败',
-              icon: 'none',
-            });
-          }
-        });
-	},
+      });
+    },
     navigateTo(page) {
       uni.navigateTo({ url: `/pages5_user/${page}/${page}` });
     },
@@ -243,8 +236,9 @@ export default {
         this.token = token;
         console.log('token:', token);
         uni.request({
-          url: `${this.baseurl}/getCollectionItemCount?token=${this.token}`,
+          url: `${this.baseurl}/getCollectionItemCount`,
           method: 'GET',
+          data: { token: this.token },
           success: (res) => {
             if (res.statusCode === 200) {
               console.log('收藏数量:', res.data.count);
@@ -271,14 +265,18 @@ export default {
       }
     },
     getWorksCount() {
-      const token = uni.getStorageSync('userToken');
+      const token = this.token || uni.getStorageSync('userToken');
       if (token) {
         this.token = token;
         uni.request({
-          url: `${this.baseurl}/getMyWorks?token=${this.token}&kind=UserWorks`,
+          url: `${this.baseurl}/getMyWorks`,
           method: 'GET',
+          data: {
+            token: this.token,
+            kind: 'UserWorks'
+          },
           success: (res) => {
-            if (res.statusCode === 200) {
+            if (res.statusCode === 200 && res.data.UserWorks) {
               console.log('作品:', res.data.UserWorks.length);
               this.creationCount = res.data.UserWorks.length;
             } else {
@@ -316,8 +314,12 @@ export default {
       const baseurl = this.baseurl;
       console.log('Fetching user works with token:', this.token);
       uni.request({
-        url: `${baseurl}/getMyWorks?token=${this.token}&kind=UserWorks`,
+        url: `${baseurl}/getMyWorks`,
         method: 'GET',
+        data: {
+          token: this.token,
+          kind: 'UserWorks'
+        },
         success: (res) => {
           console.log('API response:', res);
           if (res.statusCode === 200 && res.data) {
@@ -340,28 +342,141 @@ export default {
         },
       });
     },
+    getDynamics() {
+      if (!this.token) {
+        this.token = uni.getStorageSync('userToken');
+      }
+      if (!this.token || !this.user_id) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none',
+        });
+        return;
+      }
+      uni.request({
+        url: `${this.baseurl}/getDynamics`,
+        method: 'GET',
+        data: {
+          token: this.token,
+          user_id: this.user_id
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            // 直接赋值动态列表，不再添加 liked 属性
+            this.dynamicPosts = res.data.dynamics;
+            console.log('获取到的动态列表:', this.dynamicPosts);
+          } else {
+            uni.showToast({
+              title: '获取动态列表失败',
+              icon: 'none',
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请求失败',
+            icon: 'none',
+          });
+        }
+      });
+    },
     selectTab(tab) {
       this.selectedTab = tab;
     },
     viewPost(post) {
-      uni.navigateTo({
-        url: `/pages5_user/postDetail/postDetail?title=${encodeURIComponent(post.title)}&date=${post.date}&content=${encodeURIComponent(post.content)}&avatar=${encodeURIComponent(this.avatar)}&nickname=${encodeURIComponent(this.name)}&category=${encodeURIComponent(post.category)}&detail=${encodeURIComponent(post.detail)}`
+      const params = `post=${encodeURIComponent(JSON.stringify(post))}`;
+      uni.navigateTo({ url: `/pages2_community/postDetail/postDetail?${params}` });
+    },
+    del(post) {
+      uni.showModal({
+        title: '确认删除',
+        content: '您确定要删除这条动态吗？',
+        success: (res) => {
+          if (res.confirm) {
+            uni.request({
+              url: `${this.baseurl}/withdrawPost`,
+              method: 'POST',
+              data: {
+                token: this.token,
+                post_id: post.ID
+              },
+              success: (response) => {
+                if (response.statusCode === 200) {
+                  uni.showToast({
+                    title: '删除成功',
+                    icon: 'success'
+                  });
+                  // 重新获取动态列表
+                  this.getDynamics();
+                } else {
+                  uni.showToast({
+                    title: '删除失败',
+                    icon: 'none'
+                  });
+                }
+              },
+              fail: () => {
+                uni.showToast({
+                  title: '请求失败',
+                  icon: 'none'
+                });
+              }
+            });
+          }
+        }
       });
     },
-    share(item) {
-      uni.showToast({
-        title: '分享逻辑',
-        icon: 'none',
-        duration: 3000
+    comment(post) {
+      const params = `post=${encodeURIComponent(JSON.stringify(post))}`;
+      uni.navigateTo({ url: `/pages2_community/postDetail/postDetail?${params}` });
+    },
+    love(post) {
+      if (!this.token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none',
+        });
+        return;
+      }
+
+      const isLikeAction = this.isLiked(post);
+	  console.log('isLiked:', isLikeAction);
+	  
+      const apiUrl = isLikeAction ? `${this.baseurl}/withdrawLike` : `${this.baseurl}/likePost`;
+
+      uni.request({
+        url: apiUrl,
+        method: 'POST',
+        data: {
+          token: this.token,
+          post_id: post.ID
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            // 重新获取动态列表以更新点赞状态
+			this.getDynamics();
+            uni.showToast({
+              title: !isLikeAction ? '点赞成功' : '取消点赞成功',
+              icon: 'success'
+            });
+          } else {
+            uni.showToast({
+              title: !isLikeAction ? '点赞失败' : '取消点赞失败',
+              icon: 'none'
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请求失败',
+            icon: 'none'
+          });
+        }
       });
     },
-    comment(item) {
-      uni.navigateTo({
-        url: `/pages5_user/postDetail/postDetail?title=${encodeURIComponent(item.title)}&date=${item.date}&content=${encodeURIComponent(item.content)}&avatar=${encodeURIComponent(this.avatar)}&nickname=${encodeURIComponent(this.name)}&category=${encodeURIComponent(item.category)}&detail=${encodeURIComponent(item.detail)}`
-      });
-    },
-    love(item) {
-      item.liked = !item.liked;
+    isLiked(post) {
+      // 检查当前用户是否已点赞该动态
+      return post.Likes.some(like => String(like) === String(this.user_id));
     },
     viewWork(work) {
       uni.navigateTo({ 
@@ -375,6 +490,20 @@ export default {
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     },
+    getCategory(type) {
+      const categories = {
+        0: '经典',
+        1: '创作',
+        2: '收藏'
+      };
+      return categories[type] || '其他';
+    },
+    formatComment(comment) {
+      if (!comment) return '';
+      // 将评论按每10个字符分割
+      const regex = /.{1,10}/g;
+      return comment.match(regex).join('\n');
+    }
   }
 };
 </script>
@@ -417,9 +546,10 @@ export default {
   font-weight: bold;
   margin-left: 10px;
 }
-.signature {
+.signature,
+.id {
   font-size: 12px;
-  margin-left:10px;
+  margin-left: 10px;
   color: grey;
 }
 
@@ -462,7 +592,6 @@ export default {
   display: flex;
   justify-content: space-around;
   margin: 16px 0;
-  border-bottom: 1px solid darkgray;
 }
 .tabs text {
   flex: 1;
@@ -470,11 +599,9 @@ export default {
   font-size: 16px;
   padding: 10px 0;
   color: black;
-  cursor: pointer;
 }
 .active {
   border-bottom: 2px solid black;
-  font-weight: bold;
 }
 
 .content {
@@ -534,14 +661,32 @@ export default {
   font-weight: bold;
   word-break: break-word;
 }
+.post-author {
+  font-size: 12px;
+  color: grey;
+  margin-top: 4px;
+}
+.post-name {
+  font-size: 12px;
+  color: grey;
+  margin-top: 4px;
+}
 .post-content {
   font-size: 14px;
   color: grey;
-  margin-top: 4px;
+  margin-top: 8px;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.5;
   max-width: 100%;
+}
+.post-comment {
+  font-size: 14px;
+  color: black;
+  margin-top: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
 }
 .post-actions {
   display: flex;
@@ -557,7 +702,14 @@ export default {
   cursor: pointer;
 }
 
-/* 新增的 UserWorks 样式 */
+/* 新增的提示信息样式 */
+.no-dynamicPosts {
+  padding: 12px;
+  text-align: center;
+  color: #999999;
+}
+
+/* Existing styles for UserWorks */
 .UserWorks-item {
   padding: 16px;
   margin-bottom: 20px;

@@ -12,13 +12,14 @@
     <!-- 收藏按钮 -->
     <view class="button-container">
       <button class="favorite-button" @click="onFavoriteClick">收藏词</button>
-	   <button class="review-button" @click="onReviewClick">我要写词评</button>
+      <button class="send-button" @click="onSendClick">分享词</button>
+      <!-- <button class="review-button" @click="onReviewClick">我要写词评</button> -->
     </view>
 
     <!-- 收藏夹悬浮框 -->
     <view v-if="showModal" class="modal">
       <view class="modal-header">
-		<button class="cancel-button" @click="onCancel">取消</button>
+        <button class="cancel-button" @click="onCancel">取消</button>
         <button class="confirm-button" @click="onConfirm">收藏</button>
       </view>
       <view class="modal-body">
@@ -35,7 +36,7 @@
         <view v-if="showCreateCollectionInput" class="new-collection-input">
           <input v-model="newCollectionName" placeholder="请输入收藏夹名称" />
           <view class="input-buttons">
-			<button @click="cancelCreateNewCollection">取消</button>
+            <button @click="cancelCreateNewCollection">取消</button>
             <button @click="confirmCreateNewCollection">确定</button>
           </view>
         </view>
@@ -55,7 +56,8 @@ export default {
       userToken: '',
       showCreateCollectionInput: false,
       newCollectionName: '',
-	  baseurl:getApp().globalData.baseURL,
+      baseurl: getApp().globalData.baseURL,
+      ciID: '', // 添加 ciID
     };
   },
   onLoad(options) {
@@ -71,10 +73,49 @@ export default {
     });
   },
   methods: {
-	  
-	onReviewClick() {
-	  // TODO:添加处理写词评的逻辑
-	},
+    onSendClick() {
+      if (!this.userToken) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none',
+        });
+        return;
+      }
+      uni.request({
+        url: `${this.baseurl}/publishDynamic`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          token: this.userToken,
+          Type: 0,
+          _id: this.ciID,
+          _id2: "0",
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            uni.showToast({
+              title: '已发布动态',
+              icon: 'success',
+            });
+          } else {
+            uni.showToast({
+              title: res.data.message || '发布失败',
+              icon: 'none',
+            });
+            console.error('API 返回错误:', res.data);
+          }
+        },
+        fail: (err) => {
+          uni.showToast({
+            title: '请求失败，请稍后再试',
+            icon: 'none',
+          });
+          console.error('API 请求失败:', err);
+        },
+      });
+    },
 
     onFavoriteClick() {
       if (!this.userToken) {
@@ -88,13 +129,13 @@ export default {
       this.fetchCollections();
     },
     fetchCollections() {
-	  console.log(this.userToken);
+      console.log(this.userToken);
       uni.request({
         url: `${this.baseurl}/getAllCollections?token=${this.userToken}`,
         method: 'GET',
         success: (res) => {
           if (res.data && res.data.collections) {
-			console.log(res)
+            console.log(res)
             this.collections = res.data.collections;
           } else {
             console.log('Failed to get collections:', res);
@@ -251,6 +292,7 @@ export default {
 }
 
 .favorite-button,
+.send-button,
 .review-button {
   flex: 1;
   margin: 0 10px;
@@ -269,7 +311,7 @@ export default {
   top: 20%;
   left: 5%;
   width: 90%;
-  background-color: rgba(255, 255, 255,0.95);
+  background-color: rgba(255, 255, 255, 0.95);
   border-radius: 10px;
   z-index: 1000;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -306,14 +348,14 @@ export default {
 .new-collection-button {
   width: 100%;
   padding: 3px 0;
-  background-color:  rgba(248, 248, 248, 0.8);
+  background-color: rgba(248, 248, 248, 0.8);
   border: none;
   text-align: center;
   font-size: 16px;
 }
 
 .new-collection-input {
-  width:95%;
+  width: 95%;
   margin-top: 10px;
 }
 
@@ -331,17 +373,16 @@ export default {
 }
 
 .input-buttons button {
-	flex: 0 1 auto;
-    margin: 0 50px; 
-    background-color: #ccc;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px; 
+  flex: 0 1 auto;
+  margin: 0 50px;
+  background-color: #ccc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
 .input-buttons button:last-child {
   background-color: #ccc;
 }
-
 </style>

@@ -1,9 +1,5 @@
 <template>
   <view class="favorite-container">
-    <!-- 创建收藏夹按钮 -->
-    <view class="create-collection">
-      <button @click="createCollection">创建收藏夹</button>
-    </view>
     <!-- 创建收藏夹的弹窗 -->
     <view v-if="showCreateModal" class="modal-overlay">
       <view class="modal-content">
@@ -25,6 +21,7 @@
         <button class="delete-button" @click.stop="deleteCollection(favorite.collectionID, index)">删除</button>
       </view>
     </view>
+	<button @click="createCollection" class = "create-button">创建收藏夹</button>
   </view>
 </template>
 
@@ -228,16 +225,24 @@ export default {
 .favorite-container {
   padding: 16px;
 }
-.create-collection {
+.create-button {
   margin-bottom: 16px;
-  text-align: center;
+  background-color: #fff;
+  padding: 8px;
+  border-radius: 12px;
+  color: #999;
+  box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
+}
+.create-button:active {
+  background-color: #c4c4c4; 
+  transform: translateY(2px);
 }
 .favorite-item {
   margin-bottom: 16px;
   background-color: #fff;
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
 }
 .favorite-header {
   display: flex;
@@ -245,6 +250,7 @@ export default {
   align-items: center;
 }
 .favorite-title {
+  margin-left: 7px;
   font-size: 16px;
   font-weight: bold;
   flex: 1;
@@ -252,7 +258,8 @@ export default {
 .delete-button {
   background-color: transparent;
   border: none;
-  color: red;
+  font-size: 14px;
+  color: #a6a6a6;
   flex-shrink: 0;
 }
 .modal-overlay {
@@ -269,7 +276,7 @@ export default {
 }
 .modal-content {
   width: 80%;
-  background-color: #fff;
+  background-color:  rgba(254, 253, 249, 0.9);
   padding: 16px;
   border-radius: 8px;
 }
@@ -278,27 +285,34 @@ export default {
 }
 .input-container input {
   width: 95%;
-  padding: 8px;
-  font-size: 16px;
+  padding: 10px;
+  font-size: 15px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 .button-container {
   display: flex;
-  justify-content: space-between;
+  gap:16px;
+  justify-content: 2;
 }
 .modal-button {
-  flex: 1;
-  margin: 0 4px;
-  padding: 8px 0;
+  width: 48%;
+  padding: 3px 0;
+  margin-left: 0px;
+  margin-right: 0px;
+  background: linear-gradient(145deg, #eaeaea, #fefdf9);
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  text-align: center;
   font-size: 16px;
-  background-color: #007AFF;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-}
-.modal-button:last-child {
-  background-color: #ccc;
   color: #333;
+  font-weight: 500;
+  box-shadow: 2px 2px 8px rgba(107, 107, 107, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.modal-button:active {
+  background: linear-gradient(145deg, #d8d8d8, #c8c8c8); 
+  transform: translateY(2px);
 }
 </style>

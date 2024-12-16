@@ -4,7 +4,7 @@
     <view v-for="(work, index) in works" :key="index" class="work-item" @click="viewWorkDetail(work)">
       <view class="work-header">
         <view class="work-info">
-          <text class="work-cipai">{{ work.cipai }}\n</text>
+          <text class="work-cipai">{{ work.cipai }}·{{ getFirstSentence(work.content) }}\n</text>
           <text class="work-author">{{ work.author }}</text>
         </view>
         <button class="delete-button" @click.stop="removeFromCollection(work.ciID, index)">删除</button>
@@ -46,6 +46,10 @@ export default {
     }
   },
   methods: {
+	getFirstSentence(text) {
+	  const sentences = text[0].split(/[，。\n]/);
+	  return sentences[0];
+	},
     // 获取收藏夹中的作品列表
     getCollectionItems() {
       uni.request({
@@ -193,9 +197,10 @@ export default {
 }
 .work-item {
   margin-bottom: 16px;
-  background-color: #f0f0f0;
-  padding: 12px;
-  border-radius: 8px;
+  background-color: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
 }
 .work-header {
   display: flex;
@@ -206,7 +211,7 @@ export default {
   flex: 1;
 }
 .work-cipai {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
 }
 .work-author {
@@ -217,7 +222,8 @@ export default {
 .delete-button {
   background-color: transparent;
   border: none;
-  color: red;
+  font-size: 15px;
+  color: #a6a6a6;
   flex-shrink: 0;
 }
 .work-content {

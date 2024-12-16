@@ -235,7 +235,7 @@
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "清平乐",
     "navigationBarBackgroundColor": "#F8F8F8",
-    "backgroundColor": "#F8F8F8"
+    "backgroundColor": "#fefdf9"
   },
   "tabBar": {
     "backgroundColor": "#f3f3f3",

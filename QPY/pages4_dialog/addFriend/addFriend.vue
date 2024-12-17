@@ -1,7 +1,7 @@
 <template>
   <view class="container">
     <view class="header">加好友</view>
-    <input class="search-input" placeholder="输入好友昵称或ID" v-model="searchInput" />
+    <input class="search-input" placeholder="输入好友ID" v-model="searchInput" />
     <view v-if="searchInput" class="result-list">
       <view class="result-item" v-for="(user, index) in searchResults" :key="index">
         <text>{{ user.nickname }}</text>
@@ -14,11 +14,10 @@
 export default {
   data() {
     return {
+	  baseurl: getApp().globalData.baseURL,
+	  token: "",
       searchInput: "",
-      searchResults: [
-        { nickname: "Tom" },
-        { nickname: "Jerry" }
-      ]
+      searchResults: []
     };
   }
 };

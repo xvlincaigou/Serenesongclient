@@ -71,6 +71,8 @@ export default {
           success: () => {
             // 存储 token 成功后调用 getPersonalID 接口获取 personal_id
             this.fetchPersonalID(data.token);
+			this.fetchSubscribers(data.token);
+			this.fetchSubscribedTo(data.token);
           },
           fail: () => {
             uni.showToast({ title: '存储 Token 失败', icon: 'none' });
@@ -257,6 +259,85 @@ export default {
       
       return processed;
     },
+	fetchSubscribedTo(token) {
+	  let baseurl = getApp().globalData.baseURL;
+	  uni.request({
+	    url: `${baseurl}/getSubscribedTo?token=${token}`,
+	    method: 'GET',
+	    success: res => {
+	      if (res.statusCode === 200 && res.data) {
+	        let subscribedToData = [];
+	
+	        // 检查 res.data.subscribed_to 是否为 null
+	        if (res.data.subscribed_to === null) {
+	          subscribedToData = [];  // 若为 null，则存入空数组
+	        } else if (res.data.subscribed_to && res.data.subscribed_to.length > 0) {
+	          subscribedToData = res.data.subscribed_to[0].SubscribedTo || [];  // 存入 SubscribedTo
+	        }
+	
+	        // 存储处理后的数据
+	        uni.setStorage({
+	          key: 'subscribedTo',
+	          data: subscribedToData,
+	          success: () => {
+	            console.log('用户关注列表存储成功');
+	            console.log('关注:', subscribedToData);
+	          },
+	          fail: () => {
+	            uni.showToast({ title: '存储关注列表失败', icon: 'none' });
+	          }
+	        });
+	
+	      } else {
+	        console.error('获取关注列表失败，状态码:', res.statusCode);
+	        uni.showToast({ title: '获取关注列表失败', icon: 'none' });
+	      }
+	    },
+	    fail: () => {
+	      console.error('获取关注列表请求失败');
+	      uni.showToast({ title: '请求关注列表失败', icon: 'none' });
+	    }
+	  });
+	},
+
+
+	fetchSubscribers(token) {
+	    let baseurl = getApp().globalData.baseURL;
+	    uni.request({
+	        url: `${baseurl}/getSubscribers?token=${token}`,
+	        method: 'GET',
+	        success: res => {
+	          if (res.statusCode === 200 && res.data) {
+				let subscribersData = [];
+					
+				if (res.data.subscribers === null) {
+				  subscribersData = [];  // 若为 null，则存入空数组
+				} else if (res.data.subscribers && res.data.subscribers.length > 0) {
+				  subscribersData = res.data.subscribers[0].Subscribers || [];
+				}
+				
+	            uni.setStorage({
+	              key: 'subscribers',
+	              data: subscribersData,
+	              success: () => {
+	                console.log('用户粉丝列表存储成功');
+					console.log('粉丝:', subscribersData);
+	              },
+	              fail: () => {
+	                uni.showToast({ title: '存储粉丝列表失败', icon: 'none' });
+	              }
+	            });
+	          } else {
+	            console.error('获取粉丝列表失败，状态码:', res.statusCode);
+	            uni.showToast({ title: '获取粉丝列表失败', icon: 'none' });
+	          }
+	        },
+	        fail: () => {
+	          console.error('获取粉丝列表请求失败');
+	          uni.showToast({ title: '请求粉丝列表失败', icon: 'none' });
+	        }
+	    });
+	},
 
     // 跳转到搜索页面
     redirectToSearch() {

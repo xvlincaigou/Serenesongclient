@@ -17,25 +17,24 @@
     </view>
     
     <!-- 按钮容器 -->
-    <view class="bottom-buttons">
-      <button @click="saveComment" class = "bottom-btn">保存批注</button>
-      <button @click="startCreating" class = "bottom-btn">我也要创作</button>
+    <view class="button-container">
+      <button @click="saveComment">保存批注</button>
+      <button @click="sendCollection">分享收藏</button>
     </view>
   </view>
 </template>
-
 
 <script>
 export default {
   data() {
     return {
-	  baseurl:getApp().globalData.baseURL,
+      baseurl: getApp().globalData.baseURL,
       favoriteTitle: '',
       favoriteAuthor: '',
       favoriteContent: [],
       favoriteContentStr: '',
       favoriteAnalysis: '',
-	  collectionID: '',
+      collectionID: '',
       ciID: '',
       token: '',
     };
@@ -47,7 +46,7 @@ export default {
     this.favoriteAnalysis = decodeURIComponent(options.comment) || '';
     // 将内容数组拼接成字符串，每句后添加换行符
     this.favoriteContentStr = this.favoriteContent.join('\n');
-	this.collectionID = options.collectionID;
+    this.collectionID = options.collectionID;
     this.ciID = options.ciID;
     // 从本地存储中获取 token
     this.token = uni.getStorageSync('userToken') || '';
@@ -57,18 +56,53 @@ export default {
         icon: 'none',
       });
     }
-	console.log('获取到的token:', this.token);
+    console.log('获取到的token:', this.token);
   },
   methods: {
-	getFirstSentence(text) {
-	  const sentences = text.split(/[，。\n]/);
-	  return sentences[0];
-	},  
-    startCreating() {
-      uni.navigateTo({
-        url: '/pages3_write/choose/choose'
+    sendCollection() {
+      if (!this.token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none',
+        });
+        return;
+      }
+      uni.request({
+        url: `${this.baseurl}/publishDynamic`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          token: this.token,
+          Type: 2,
+          _id: this.collectionID,
+          _id2: this.ciID,
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            uni.showToast({
+              title: '已发布动态',
+              icon: 'success',
+            });
+          } else {
+            uni.showToast({
+              title: res.data.message || '发布失败',
+              icon: 'none',
+            });
+            console.error('API 返回错误:', res.data);
+          }
+        },
+        fail: (err) => {
+          uni.showToast({
+            title: '请求失败，请稍后再试',
+            icon: 'none',
+          });
+          console.error('API 请求失败:', err);
+        },
       });
     },
+    
     // 保存批注方法
     saveComment() {
       if (!this.token) {
@@ -110,24 +144,17 @@ export default {
 </script>
 
 <style>
-.fD-container { padding: 20px; }
-.title-header {
-	width: 90%;
-	text-align: center;
-	padding: 20px;
-	background-color: #ffffff;
-	border-radius: 10px;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-	margin-bottom: 20px;
+.fD-container { 
+  padding: 16px; 
 }
 .favorite-title { 
-	font-size: 24px;
-    color: #333;
-	font-weight: 600; 
-	}
-.favorite-author {
-	font-size: 17px;
-	color: #aaa;
+  font-size: 18px; 
+  font-weight: bold; 
+}
+.favorite-author { 
+  font-size: 14px; 
+  color: grey; 
+  margin-top: 4px; 
 }
 
 .favorite-content-box {

@@ -5,7 +5,7 @@
     <scroll-view scroll-x="true" class="friend-list">
       <view class="friend-list-container">
         <view v-for="(friend, index) in friends" :key="index" class="friend-item">
-          <image :src="friend.avatar" class="friend-avatar" @click="viewFriend(friend)"></image>
+          <image :src="friend.avatar ? 'data:image/png;base64,' + friend.avatar : ''" class="friend-avatar" @click="viewFriend(friend)"></image>
           <text class="friend-name">{{ friend.name }}</text>
         </view>
       </view>
@@ -19,76 +19,123 @@
 
     <!-- 根据选择的标签显示内容 -->
     <scroll-view v-if="selectedTab === 'allPost'" class="content" scroll-y="true">
-      <view v-for="(apost, index) in allPosts" :key="index" class="post-container">
-        <!-- 发动态的人的头像和昵称 -->
-        <view class="post-header">
-          <image :src="apost.avatar" class="post-avatar"></image>
-          <view class="post-info">
-            <text class="post-nickname">{{ apost.nickname }}</text>
-            <view class="post-meta">
-              <text class="post-category">{{ apost.category }}</text>
-              <text class="post-time">{{ apost.date }}</text>
-            </view>
-          </view>
-        </view>
-        <!-- 动态内容 -->
-        <view class="post" @click="viewPost(apost)">
-          <!-- 动态标题和内容 -->
-          <view v-if="apost.title">
-            <text class="post-title">{{ apost.title }}\n</text>
-            <text class="post-content">{{ apost.content }}</text>
-          </view>
-          <view v-else>
-            <text class="post-content">{{ apost.content }}</text>
-          </view>
-        </view>
-        <!-- 动态操作按钮 -->
-        <view class="post-actions">
-          <button @click.stop="share(apost)">分享 1788</button>
-          <button @click.stop="comment(apost)">评论 5000+</button>
-          <button @click.stop="love(apost)" :style="{backgroundColor: apost.liked ? 'red' : 'white', color: apost.liked ? 'white' : 'grey'}">点赞 1w+</button>
-        </view>
-      </view>
+		<view v-if="allPosts">
+		  <view v-for="(post, index) in allPosts" :key="index">
+		    <!-- Display post time outside of the post box -->
+		    <!-- 发动态的人的头像和昵称 -->
+		    <view class="post-header">
+		      <image :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" class="post-avatar"></image>
+		      <view class="post-info">
+		        <text class="post-nickname">{{ post.name }}</text>
+		        <view class="post-meta">
+		          <text class="post-category">{{ getCategory(post.Type) }}</text>
+		        </view>
+		      </view>
+		    </view>
+		    <!-- 动态内容 -->
+		    <view class="post" @click="viewPost(post)">
+		      <!-- 动态内容根据Type渲染 -->
+		      <view v-if="post.Type === 0">
+		        <text class="post-title">{{ post.Classic.cipai[0] }}\n</text>
+		        <text class="post-author">{{ post.Classic.author }}</text>
+		        <view class="post-content">
+		          <text v-for="(line, idx) in post.Classic.content" :key="idx">{{ line }}\n</text>
+		        </view>
+		      </view>
+		      <view v-else-if="post.Type === 1">
+		        <text class="post-title">{{ post.Modern.cipai[0] }} · {{ post.Modern.title }}</text>
+		        <view class="post-content">
+		          <text v-for="(line, idx) in post.Modern.content" :key="idx">{{ line }}\n</text>
+		        </view>
+		      </view>
+		      <view v-else-if="post.Type === 2">
+		        <text class="post-title">{{ post.CollectionCi.cipai[0] }}\n</text>
+		        <text class="post-author">{{ post.CollectionCi.author }}</text>
+		        <view class="post-content">
+		          <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
+		        </view>
+		        <text class="post-comment">\n词评：\n{{ formatComment(post.Comment) }}</text>
+		      </view>
+		      <view v-else>
+		        <text class="post-content">{{ post.content }}</text>
+		      </view>
+		    </view>
+		    <!-- 动态操作按钮 -->
+		    <view class="post-actions">
+		      <button @click.stop="comment(post)">评论</button>
+		      <button
+		        @click.stop="love(post)"
+		        :style="{ backgroundColor: isLiked(post) ? 'red' : 'white', color: isLiked(post) ? 'white' : 'grey' }"
+		      >
+		        点赞
+		      </button>
+		    </view>
+		  </view>
+		</view>
+		<view v-else class="no-dynamicPosts">
+		  <text>当前还没有人发动态</text>
+		</view>
     </scroll-view>
 
     <!-- 词友动态 -->
     <scroll-view v-else class="content" scroll-y="true">
-      <view v-for="(fpost, index) in friendPost" :key="index" class="post-container">
-        <!-- 发动态的人的头像和昵称 -->
-        <view class="post-header">
-          <image :src="fpost.avatar" class="post-avatar"></image>
-          <view class="post-info">
-            <text class="post-nickname">{{ fpost.nickname }}</text>
-            <view class="post-meta">
-              <text class="post-category">{{ fpost.category }}</text>
-              <text class="post-time">{{ fpost.date }}</text>
+      <view v-if="friendPosts.length > 0">
+        <view v-for="(post, index) in friendPosts" :key="index">
+          <!-- Display post time outside of the post box -->
+          <!-- 发动态的人的头像和昵称 -->
+          <view class="post-header">
+            <image :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" class="post-avatar"></image>
+            <view class="post-info">
+              <text class="post-nickname">{{ post.name }}</text>
+              <view class="post-meta">
+                <text class="post-category">{{ getCategory(post.Type) }}</text>
+              </view>
             </view>
           </view>
-        </view>
-        <!-- 动态内容 -->
-        <view class="post" @click="viewPost(fpost)">
-          <!-- 动态标题和内容 -->
-          <view v-if="fpost.title">
-            <text class="post-title">{{ fpost.title }}\n</text>
-            <text class="post-content">{{ fpost.content }}</text>
+          <!-- 动态内容 -->
+          <view class="post" @click="viewPost(post)">
+            <!-- 动态内容根据Type渲染 -->
+            <view v-if="post.Type === 0">
+              <text class="post-title">{{ post.Classic.cipai[0] }}\n</text>
+              <text class="post-author">{{ post.Classic.author }}</text>
+              <view class="post-content">
+                <text v-for="(line, idx) in post.Classic.content" :key="idx">{{ line }}\n</text>
+              </view>
+            </view>
+            <view v-else-if="post.Type === 1">
+              <text class="post-title">{{ post.Modern.cipai[0] }} · {{ post.Modern.title }}</text>
+              <view class="post-content">
+                <text v-for="(line, idx) in post.Modern.content" :key="idx">{{ line }}\n</text>
+              </view>
+            </view>
+            <view v-else-if="post.Type === 2">
+              <text class="post-title">{{ post.CollectionCi.cipai[0] }}\n</text>
+              <text class="post-author">{{ post.CollectionCi.author }}</text>
+              <view class="post-content">
+                <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
+              </view>
+              <text class="post-comment">\n词评：\n{{ formatComment(post.Comment) }}</text>
+            </view>
+            <view v-else>
+              <text class="post-content">{{ post.content }}</text>
+            </view>
           </view>
-          <view v-else>
-            <text class="post-content">{{ fpost.content }}</text>
+          <!-- 动态操作按钮 -->
+          <view class="post-actions">
+            <button @click.stop="comment(post)">评论</button>
+            <button
+              @click.stop="love(post)"
+              :style="{ backgroundColor: isLiked(post) ? 'red' : 'white', color: isLiked(post) ? 'white' : 'grey' }"
+            >
+              点赞
+            </button>
           </view>
-        </view>
-        <!-- 动态操作按钮 -->
-        <view class="post-actions">
-          <button @click.stop="share(fpost)">分享 2000+</button>
-          <button @click.stop="comment(fpost)">评论 40</button>
-          <button @click.stop="love(fpost)" :style="{backgroundColor: fpost.liked ? 'red' : 'white', color: fpost.liked ? 'white' : 'grey'}">点赞 953</button>
         </view>
       </view>
+      <view v-else class="no-friendPosts">
+        <text>当前还没有好友发动态</text>
+      </view>
     </scroll-view>
-
-    <!-- 悬浮的蓝色圆形按钮 -->
-    <button class="floating-button" @click="createPost()">
-      <text class="plus-icon">+</text>
-    </button>
   </view>
 </template>
 
@@ -96,136 +143,259 @@
 export default {
   data() {
     return {
+	  baseurl: getApp().globalData.baseURL,
+	  user_id: '',
+	  token: "",
       selectedTab: 'allPost',  // 默认选择的标签
-      friends: [
-        { name: '好友1', avatar: '/static/dialog/avatar0.png' },
-        { name: '好友2', avatar: '/static/dialog/avatar0.png' },
-        { name: '好友3', avatar: '/static/dialog/avatar0.png'},
-        { name: '好友4', avatar: '/static/dialog/avatar0.png' },
-        { name: '好友5', avatar: '/static/dialog/avatar0.png'},
-        { name: '好友6', avatar: '/static/dialog/avatar0.png' },
-      ],
-      allPosts: [
-        {
-          title: "钗头凤--陆游",
-          content: "酥手为何而红？",
-          date: "2023-12-18",
-          avatar: '/static/dialog/avatar0.png',
-          nickname: '用户1',
-          category: '词评',
-          liked: false,
-          detail: "红酥手，黄縢酒，满城春色宫墙柳。",
-        },
-        {
-          title: "春夜喜雨",
-          content: "好雨知时节，当春乃发生。\n随风潜入夜，润物细无声。\n野径云俱黑，江船火独明。\n晓看红湿处，花重锦官城。",
-          date: "2024-4-5",
-          avatar: '/static/dialog/avatar0.png',
-          nickname: '用户2',
-          category: '作品',
-          liked: false,
-          detail: "",
-        },
-        {
-          title: "将进酒",
-          content: "君不见，黄河之水天上来，奔流到海不复回。",
-          date: "2024-6-9",
-          avatar: '/static/dialog/avatar0.png',
-          nickname: '用户3',
-          category: '作品',
-          liked: false,
-          detail: "",
-        },
-        {
-          title: "",
-          content: "《七律·长征》真是一首好诗！在这首诗中，伟人用极高的革命乐观主义精神和极高的大无畏精神，绘就了一幅“红军不怕远征难”的壮阔画卷，时至今日，依然令人深受感动、备受鼓舞。",
-          date: "2024-10-18",
-          avatar: '/static/dialog/avatar0.png',
-          nickname: '用户4',
-          category: '观点',
-          liked: false,
-          detail: "",
-        },
-        {
-          title: "长恨歌--白居易",
-          content: "",
-          date: "2024-11-5",
-          avatar: '/static/dialog/avatar0.png',
-          nickname: '用户5',
-          category: '推荐',
-          liked: false,
-          detail: "汉皇重色思倾国，御宇多年求不得。",
-        },
-      ],
-      friendPost: [
-        {
-          title: "蝶恋花·庭院深深深几许",
-          content: "庭院深深深几许，杨柳堆烟，帘幕无重数。",
-          date: "2024-11-03",
-          avatar: '/static/dialog/avatar0.png',
-          nickname: '好友A',
-          category: '作品',
-          liked: false,
-          detail: "",
-        },
-        {
-          title: "青玉案·元夕",
-          content: "东风夜放花千树，更吹落、星如雨。",
-          date: "2024-11-07",
-          avatar: '/static/dialog/avatar0.png',
-          nickname: '好友B',
-          category: '作品',
-          liked: false,
-          detail: "",
-        },
-        {
-          title: "水调歌头--苏轼",
-          content: "是怀月，亦是怀人。\n是怀子由，更是怀自己。",
-          date: "2024-11-11",
-          avatar: '/static/dialog/avatar0.png',
-          nickname: '好友C',
-          category: '词评',
-          liked: false,
-          detail: "明月几时有，把酒问青天。\n不知天上宫阙，今夕是何年？",
-        }
-      ]
+      friends: [],
+      allPosts: [],
+      friendPosts: [],
     };
   },
+  onShow() {
+    this.getUserID();
+	this.getFriends();
+	this.getAllDynamics(); // 获取动态列表
+	this.getFriendDynamics();
+  },
   methods: {
+	  getUserID() {
+	    const token = uni.getStorageSync('userToken');
+	    if (!token) {
+	      uni.showToast({
+	        title: '请先登录',
+	        icon: 'none',
+	      });
+	      return;
+	    }
+		this.token = token;
+	    uni.request({
+	      url: `${this.baseurl}/getPersonalID`,
+	      method: 'GET',
+	      data: { token },
+	      success: (res) => {
+	        if (res.statusCode === 200 && res.data.personal_id) {
+	          console.log('User ID:', res.data.personal_id);
+	          this.user_id = res.data.personal_id;
+	        } else {
+	          uni.showToast({
+	            title: '获取用户ID失败',
+	            icon: 'none',
+	          });
+	        }
+	      },
+	      fail: () => {
+	        uni.showToast({
+	          title: '请求失败',
+	          icon: 'none',
+	        });
+	      }
+	    });
+	  },
       selectTab(tab) {
         this.selectedTab = tab;
       },
+	  getFriends() {
+		  if (!this.token) {
+		      this.token = uni.getStorageSync('userToken');
+		  }
+		  	  
+		  // 获取关注列表
+		  const friend = uni.getStorageSync('subscribedTo');
+		  this.friends = [];
+		  	  
+		  // 如果关注列表为空或不是数组，则不做任何处理
+		  if (friend.length === 0) {
+		      return;
+		  }
+		  
+		  friend.forEach(user_id => {
+		      uni.request({
+		          url: `${this.baseurl}/getUserInfo`,
+		          method: 'GET',
+		          data: {
+		              token: this.token,
+		              user_id: user_id,
+		          },
+		          success: (res) => {
+		              if (res.statusCode === 200) {
+		                  // 将获取到的动态数据添加到 friendPosts 数组中
+		                  if (res.data) {
+		                      this.friends = this.friends.concat(res.data);
+		  					  console.log('friend:', this.friends);
+		                  }
+		              } else {
+		                  uni.showToast({
+		                      title: '获取动态列表失败',
+		                      icon: 'none',
+		                  });
+		              }
+		          },
+		          fail: () => {
+		              uni.showToast({
+		                  title: '请求失败',
+		                  icon: 'none',
+		              });
+		          }
+		      });
+		  });
+	  },
+	  getAllDynamics() {
+	    if (!this.token) {
+	        this.token = uni.getStorageSync('userToken');
+	    }
+	    uni.request({
+	        url: `${this.baseurl}/getRandomPosts`,
+	        method: 'GET',
+	        data: {
+	            token: this.token,
+	            value: '100',
+	        },
+	        success: (res) => {
+	            if (res.statusCode === 200) {
+	              this.allPosts = res.data.dynamics;
+	            } else {
+	              uni.showToast({
+	                title: '获取动态列表失败',
+	                icon: 'none',
+	              });
+	            }
+	        },
+	        fail: () => {
+	            uni.showToast({
+	              title: '请求失败',
+	              icon: 'none',
+	            });
+	        }
+	    });
+	  },
+	  getFriendDynamics() {
+	      // 获取用户 token，如果不存在则从本地存储中获取
+	      if (!this.token) {
+	          this.token = uni.getStorageSync('userToken');
+	      }
+	  
+	      // 获取关注列表
+	      const subscribedTo = uni.getStorageSync('subscribedTo');
+		  this.friendPosts = [];
+	  
+	      // 如果关注列表为空或不是数组，则不做任何处理
+	      if (subscribedTo.length === 0) {
+	          return;
+	      }
+	  
+	      // 遍历关注列表中的每个 user_id
+	      subscribedTo.forEach(user_id => {
+	          uni.request({
+	              url: `${this.baseurl}/getFollowingPosts`,
+	              method: 'GET',
+	              data: {
+	                  token: this.token,
+	                  user_id: user_id,
+	              },
+	              success: (res) => {
+					  console.log('id:', user_id);
+	                  if (res.statusCode === 200) {
+	                      // 将获取到的动态数据添加到 friendPosts 数组中
+	                      if (res.data && res.data.dynamics) {
+	                          this.friendPosts = this.friendPosts.concat(res.data.dynamics);
+							  console.log('fP:', this.friendPosts);
+	                      }
+	                  } else {
+	                      uni.showToast({
+	                          title: '获取动态列表失败',
+	                          icon: 'none',
+	                      });
+	                  }
+	              },
+	              fail: () => {
+	                  uni.showToast({
+	                      title: '请求失败',
+	                      icon: 'none',
+	                  });
+	              }
+	          });
+	      });
+	  },
       viewPost(post) {
-        // 根据post的内容构建跳转链接
-        const params = `title=${encodeURIComponent(post.title)}&date=${post.date}&content=${encodeURIComponent(post.content)}&avatar=${encodeURIComponent(post.avatar)}&nickname=${encodeURIComponent(post.nickname)}&category=${encodeURIComponent(post.category)}&detail=${encodeURIComponent(post.detail)}`;
+        const params = `post=${encodeURIComponent(JSON.stringify(post))}`;
         uni.navigateTo({ url: `/pages2_community/postDetail/postDetail?${params}` });
       },
-      share(item) {
-        // 分享逻辑
-        uni.showToast({
-          title: '分享逻辑',
-          icon: 'none',
-          duration: 3000
+      comment(post) {
+        const params = `post=${encodeURIComponent(JSON.stringify(post))}`;
+        uni.navigateTo({ url: `/pages2_community/postDetail/postDetail?${params}` });
+      },
+      love(post) {
+        if (!this.token) {
+          uni.showToast({
+            title: '请先登录',
+            icon: 'none',
+          });
+          return;
+        }
+      
+        const isLikeAction = this.isLiked(post);
+        console.log('isLiked:', isLikeAction);
+        
+        const apiUrl = isLikeAction ? `${this.baseurl}/withdrawLike` : `${this.baseurl}/likePost`;
+      
+        uni.request({
+          url: apiUrl,
+          method: 'POST',
+          data: {
+            token: this.token,
+            post_id: post.ID
+          },
+          success: (res) => {
+            if (res.statusCode === 200) {
+              // 重新获取动态列表以更新点赞状态
+      		  this.getAllDynamics();
+			  this.getFriendDynamics();
+              uni.showToast({
+                title: !isLikeAction ? '点赞成功' : '取消点赞成功',
+                icon: 'success'
+              });
+            } else {
+              uni.showToast({
+                title: !isLikeAction ? '点赞失败' : '取消点赞失败',
+                icon: 'none'
+              });
+            }
+          },
+          fail: () => {
+            uni.showToast({
+              title: '请求失败',
+              icon: 'none'
+            });
+          }
         });
       },
-      comment(item) {
-        // 根据item的内容构建跳转链接
-        const params = `title=${encodeURIComponent(item.title)}&date=${item.date}&content=${encodeURIComponent(item.content)}&avatar=${encodeURIComponent(item.avatar)}&nickname=${encodeURIComponent(item.nickname)}&category=${encodeURIComponent(item.category)}&detail=${encodeURIComponent(item.detail)}`;
-        uni.navigateTo({ url: `/pages2_community/postDetail/postDetail?${params}` });
-      },
-      love(item) {
-        // 点赞逻辑
-        item.liked = !item.liked;
+      isLiked(post) {
+        // 检查当前用户是否已点赞该动态
+        return post.Likes.some(like => String(like) === String(this.user_id));
       },
       viewFriend(friend) {
         // 查看好友资料逻辑
         const params = `name=${encodeURIComponent(friend.name)}&avatar=${encodeURIComponent(friend.avatar)}`;
         uni.navigateTo({ url: `/pages2_community/friendProfile/friendProfile?${params}` });
       },
-      createPost() {
-        // 创建新帖子逻辑
-        uni.navigateTo({ url: `/pages2_community/createPost/createPost` });
-      }
+	  getCategory(type) {
+	    const categories = {
+	      0: '经典',
+	      1: '创作',
+	      2: '收藏'
+	    };
+	    return categories[type] || '其他';
+	  },
+	  formatComment(comment) {
+	    if (!comment) return '';
+	    // 将评论按每10个字符分割
+	    const regex = /.{1,10}/g;
+	    return comment.match(regex).join('\n');
+	  },
+	  refreshPost() {
+		  console.log('refresh');
+	  }
     }
   };
 </script>
@@ -346,36 +516,53 @@ export default {
   padding: 16px;
   width: 100%;
   box-sizing: border-box;
+  border-radius: 8px;
 }
-
 .post-title {
   font-size: 18px;
   font-weight: bold;
   word-break: break-word;
 }
-
+.post-author {
+  font-size: 12px;
+  color: grey;
+  margin-top: 4px;
+}
+.post-name {
+  font-size: 12px;
+  color: grey;
+  margin-top: 4px;
+}
 .post-content {
   font-size: 14px;
   color: grey;
-  margin-top: 4px;
+  margin-top: 8px;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.5;
   max-width: 100%;
 }
-
+.post-comment {
+  font-size: 14px;
+  color: black;
+  margin-top: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
 /* 操作按钮样式 */
 .post-actions {
   display: flex;
   justify-content: space-around;
   margin-top: 10px;
 }
-
 .post-actions button {
   font-size: 12px;
   color: grey;
   background-color: white;
   border: none;
+  margin-bottom: 20px;
+  cursor: pointer;
 }
 
 /* 悬浮按钮样式 */
@@ -395,5 +582,18 @@ export default {
 .plus-icon {
   color: #fff;
   font-size: 36px;
+}
+
+/* 新增的提示信息样式 */
+.no-dynamicPosts {
+  padding: 12px;
+  text-align: center;
+  color: #999999;
+}
+
+.no-friendPosts {
+  padding: 12px;
+  text-align: center;
+  color: #999999;
 }
 </style>

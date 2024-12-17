@@ -8,15 +8,15 @@
       <!-- 作品内容容器 -->
       <view class="UserWork-content-container">
         <view v-for="(item, index) in UserWork.content" :key="index" class="UserWork-description">
-            {{ item }}
-          </view>
+          {{ item }}
+        </view>
       </view>
 
       <!-- 操作按钮容器 -->
       <view class="UserWork-footer-container">
         <button @click="modifyUserWork" class="button edit-button">修改作品</button>
-        <button @click="featureUserWork" class="button feature-button">推荐作品</button>
-		<button @click="publishUserWork" class="button publish-button">{{ publishButtonText }}</button>
+        <button @click="featureUserWork" class="button feature-button">分享作品</button>
+        <button @click="publishUserWork" class="button publish-button">{{ publishButtonText }}</button>
       </view>
     </view>
 
@@ -31,15 +31,16 @@ export default {
   data() {
     return {
       UserWork: null, 
-	  token:'',
-	  isPublished: false,
+      token: '',
+      isPublished: false,
+      baseurl: getApp().globalData.baseURL, // 添加 baseurl
     };
   },
   onLoad(options) {
     const workData = options.UserWork ? JSON.parse(decodeURIComponent(options.UserWork)) : null;
     this.UserWork = workData;
-	console.log('workID:', this.UserWork.is_public);
-	this.token = uni.getStorageSync('userToken');
+    console.log('workID:', this.UserWork.is_public);
+    this.token = uni.getStorageSync('userToken');
   },
   computed: {
     // 计算属性，根据 UserWork.is_public 动态返回按钮文字
@@ -52,59 +53,101 @@ export default {
     }
   },
   methods: {
-	modifyUserWork(){
-		uni.navigateTo({
-		  url: `/pages3_write/userWorkDetail/modifyUserWork?UserWork=${encodeURIComponent(JSON.stringify(this.UserWork))}`,
-		});
-	},
-	featureUserWork(){},//发布逻辑
-	publishUserWork() {
-	  const baseurl = getApp().globalData.baseURL;
-	  if (!this.UserWork || !this.token) {
-	    uni.showToast({
-	      title: '作品信息或用户令牌缺失',
-	      icon: 'none'
-	    });
-	    return;
-	  }
-	
-	  const newPrivacy = !this.UserWork.is_public;
-	  uni.request({
-	    url: `${baseurl}/changePrivacy`, // 不再在URL上拼接参数
-	    method: 'POST',
-	    header: {
-	        'Content-Type': 'application/json',
-	    },
-	    data: {
-	        work_id: this.UserWork._id,
-	        token: this.token,
-	        privacy: newPrivacy
-	    },
-	    success: (res) => {
-	      if (res.statusCode === 200) {
-	        // 更新本地的 is_public 状态
-	        this.UserWork.is_public = newPrivacy;
-	        uni.showToast({
-	          title: newPrivacy ? '作品已公开' : '作品已取消公开',
-	          icon: 'success'
-	        });
-	      } else {
-	        uni.showToast({
-	          title: res.data.message || '操作失败',
-	          icon: 'none'
-	        });
-	        console.error('API 返回错误:', res.data);
-	      }
-	    },
-	    fail: (err) => {
-	      uni.showToast({
-	        title: '请求失败，请稍后再试',
-	        icon: 'none'
-	      });
-	      console.error('API 请求失败:', err);
-	    }
-	  });
-	},
+    modifyUserWork(){
+      uni.navigateTo({
+        url: `/pages3_write/userWorkDetail/modifyUserWork?UserWork=${encodeURIComponent(JSON.stringify(this.UserWork))}`,
+      });
+    },
+    featureUserWork() {
+      if (!this.token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none',
+        });
+        return;
+      }
+      uni.request({
+        url: `${this.baseurl}/publishDynamic`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          token: this.token,
+          Type: 1,
+          _id: this.UserWork._id,
+          _id2: "0",
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            uni.showToast({
+              title: '已发布动态',
+              icon: 'success',
+            });
+          } else {
+            uni.showToast({
+              title: res.data.message || '发布失败',
+              icon: 'none',
+            });
+            console.error('API 返回错误:', res.data);
+          }
+        },
+        fail: (err) => {
+          uni.showToast({
+            title: '请求失败，请稍后再试',
+            icon: 'none',
+          });
+          console.error('API 请求失败:', err);
+        },
+      });
+    },
+    publishUserWork() {
+      const baseurl = this.baseurl;
+      if (!this.UserWork || !this.token) {
+        uni.showToast({
+          title: '作品信息或用户令牌缺失',
+          icon: 'none'
+        });
+        return;
+      }
+    
+      const newPrivacy = !this.UserWork.is_public;
+      uni.request({
+        url: `${baseurl}/changePrivacy`, // 不再在URL上拼接参数
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          work_id: this.UserWork._id,
+          token: this.token,
+          privacy: newPrivacy
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            // 更新本地的 is_public 状态
+            this.UserWork.is_public = newPrivacy;
+            uni.showToast({
+              title: newPrivacy ? '作品已公开' : '作品已取消公开',
+              icon: 'success'
+            });
+          } else {
+            uni.showToast({
+              title: res.data.message || '操作失败',
+              icon: 'none'
+            });
+            console.error('API 返回错误:', res.data);
+          }
+        },
+        fail: (err) => {
+          uni.showToast({
+            title: '请求失败，请稍后再试',
+            icon: 'none'
+          });
+          console.error('API 请求失败:', err);
+        }
+      });
+    },
   },
 };
 </script>
@@ -171,7 +214,6 @@ export default {
   background-color: #333;
   color: #fff;
 }
-
 
 .feature-button {
   background-color: #555;

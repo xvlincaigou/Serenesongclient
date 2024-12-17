@@ -1,44 +1,58 @@
 <!-- postDetail.vue -->
 <template>
   <view class="container">
-    <!-- 发动态的人的头像和昵称 -->
-    <view class="pd-post-header">
-      <image :src="avatar" class="pd-post-avatar"></image>
-      <view class="pd-post-info">
-        <text class="pd-post-nickname">{{ nickname }}</text>
-        <view class="pd-post-meta">
-          <text class="pd-post-category">{{ category }}</text>
-          <text class="pd-post-time">{{ postDate }}</text>
+    <view class="post-detail">
+        <!-- 显示动态的详细信息 -->
+        <view class="post-header">
+          <image :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" class="post-avatar"></image>
+          <view class="post-info">
+            <text class="post-nickname">{{ post.name }}</text>
+            <view class="post-meta">
+              <text class="post-category">{{ getCategory(post.Type) }}</text>
+            </view>
+          </view>
+		  <!-- 关注按钮 -->
+		  <button 
+		    class="follow-button" 
+		    :class="{ 'following': isFollowed, 'unfollow': !isFollowed }"
+		    @click="toggleFollow">
+		    {{ isFollowed ? '取关' : '关注' }}
+		  </button>
         </view>
-      </view>
-    </view>
-    <!-- 动态内容 -->
-    <view class="pd-post">
-      <!-- 动态标题和内容 -->
-      <view v-if="postTitle">
-        <text class="pd-post-title">{{ postTitle }}\n\n</text>
-      </view>
-      <!-- 使用 detail 内容替换原内容 -->
-      <text class="pd-post-content">{{ detailContent }}</text>
-    </view>
-    <!-- 如果 content 不为空并且 detail 不为空，则显示原始内容 -->
-    <view v-if="detailContent !== postContent && postContent" class="pd-post original-content">
-      <text class="pd-post-content">{{ postContent }}</text>
-    </view>
-    <!-- 操作按钮 -->
-    <view class="pd-post-actions">
-      <button @click="share">分享 1788</button>
-      <button @click="comment">评论 5000+</button>
-      <button @click="love" :style="{backgroundColor: liked ? 'red' : 'white', color: liked ? 'white' : 'grey'}">点赞 1w+</button>
+        <view class="post-content">
+          <view v-if="post.Type === 0">
+            <text class="post-title">{{ post.Classic.cipai[0] }}\n</text>
+            <text class="post-author">{{ post.Classic.author }}</text>
+            <view class="post-content">
+              <text v-for="(line, idx) in post.Classic.content" :key="idx">{{ line }}\n</text>
+            </view>
+          </view>
+          <view v-else-if="post.Type === 1">
+            <text class="post-title">{{ post.Modern.cipai[0] }} · {{ post.Modern.title }}</text>
+            <view class="post-content">
+              <text v-for="(line, idx) in post.Modern.content" :key="idx">{{ line }}\n</text>
+            </view>
+          </view>
+          <view v-else-if="post.Type === 2">
+            <text class="post-title">{{ post.CollectionCi.cipai[0] }}\n</text>
+            <text class="post-author">{{ post.CollectionCi.author }}</text>
+            <view class="post-content">
+              <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
+            </view>
+            <text class="post-comment">\n词评：\n{{ formatComment(post.Comment) }}</text>
+          </view>
+          <view v-else>
+            <text class="post-content">{{ post.content }}</text>
+          </view>
+        </view>
     </view>
 
     <!-- 评论输入框 -->
     <view class="comment-input-container">
         <textarea v-model="commentText"
-                class="comment-input"
-                placeholder="请输入评论内容..."
-                @input="adjustInputHeight($event, 'comment')"
-                :style="{ height: commentInputHeight + 'px', overflowY: commentInputOverflow }"></textarea>
+            class="comment-input"
+            placeholder="请输入评论内容...">
+        </textarea>
         <button class="send-button" @click="sendComment">发送</button>
     </view>
 
@@ -49,67 +63,17 @@
         <view class="comment-header">
           <image :src="comment.avatar" class="comment-avatar"></image>
           <view class="comment-info">
-            <text class="comment-nickname">{{ comment.nickname }}</text>
-            <text class="comment-time">{{ comment.time }}</text>
+            <text class="comment-nickname">{{ comment.Commenter }}</text>
           </view>
         </view>
         <!-- 评论内容 -->
         <view class="comment-content">
-          <text>{{ comment.content }}</text>
+          <text>{{ comment.Content }}</text>
         </view>
-        <!-- 操作按钮 -->
+
+        <!-- 删除按钮 -->
         <view class="comment-actions">
-          <button @click="shareComment(comment)">分享</button>
-          <button @click="likeComment(comment)" :style="{backgroundColor: comment.liked ? 'red' : 'white', color: comment.liked ? 'white' : 'grey'}">点赞</button>
-          <button @click="replyComment(comment)">回复</button>
-        </view>
-
-        <!-- 回复输入框 -->
-        <view v-if="comment.showReplyInput" class="reply-input-container">
-          <textarea v-model="comment.replyText"
-                    class="reply-input"
-                    placeholder="请输入回复内容..."
-                    @input="adjustInputHeight($event, comment)"
-                    :style="{ height: comment.replyInputHeight + 'px' }"></textarea>
-          <button class="send-button" @click="sendReply(comment)">发送</button>
-        </view>
-
-        <!-- 回复列表 -->
-        <view v-if="comment.replies && comment.replies.length" class="replies-list">
-          <view v-for="(reply, rIndex) in comment.replies" :key="rIndex" class="reply-item">
-            <!-- 回复者的头像和昵称 -->
-            <view class="reply-header">
-              <image :src="reply.avatar" class="reply-avatar"></image>
-              <view class="reply-info">
-                <text class="reply-nickname">{{ reply.nickname }}</text>
-                <text class="reply-time">{{ reply.time }}</text>
-              </view>
-            </view>
-            <!-- 回复内容 -->
-            <view class="reply-content">
-              <text>{{ reply.content }}</text>
-            </view>
-			<!-- 引用回复 -->
-			<view v-if="reply.quoteContent" class="quote-box">
-			  <text class="quote-text">{{ reply.quoteNickname }}: {{ reply.quoteContent }}</text>
-			</view>
-            <!-- 操作按钮 -->
-            <view class="reply-actions">
-              <button @click="shareReply(reply)">分享</button>
-              <button @click="likeReply(reply)" :style="{backgroundColor: reply.liked ? 'red' : 'white', color: reply.liked ? 'white' : 'grey'}">点赞</button>
-              <button @click="replyToReply(comment, reply)">回复</button>
-            </view>
-
-            <!-- 回复输入框 -->
-            <view v-if="reply.showReplyInput" class="reply-input-container">
-              <textarea v-model="reply.replyText"
-                        class="reply-input"
-                        placeholder="请输入回复内容..."
-                        @input="adjustInputHeight($event, reply)"
-                        :style="{ height: reply.replyInputHeight + 'px', overflowY: reply.replyInputOverflow }"></textarea>
-              <button class="send-button" @click="sendReplyToReply(comment, reply)">发送</button>
-            </view>
-          </view>
+          <button @click="deleteComment(index)">删除</button>
         </view>
       </view>
     </view>
@@ -120,191 +84,181 @@
 export default {
   data() {
     return {
-      postTitle: '',
-      postDate: '',
-      postContent: '',
-      avatar: '',
-      nickname: '',
-      category: '',
-      detail: '',
-      detailContent: '',
-      liked: false,
+	  baseurl: getApp().globalData.baseURL,
+      post: null,
+      user_id: '',
+      token: '',
       commentText: '',
       commentInputHeight: 20,
       commentInputOverflow: 'hidden',
       comments: [],
+	  isFollowed: false,
     };
   },
+  onShow() {
+	  this.fetchComments(); 
+  },
   onLoad(options) {
-    this.postTitle = decodeURIComponent(options.title);
-    this.postDate = options.date;
-    this.postContent = decodeURIComponent(options.content);
-    this.avatar = decodeURIComponent(options.avatar);
-    this.nickname = decodeURIComponent(options.nickname);
-    this.category = decodeURIComponent(options.category);
-    this.detail = decodeURIComponent(options.detail);
-    // 如果 detail 不为空，则使用 detail 内容替换原内容
-    if (this.detail) {
-      this.detailContent = this.detail;
-    } else {
-      this.detailContent = this.postContent;
+    if (options.post) {
+        this.post = JSON.parse(decodeURIComponent(options.post));
+		console.log(this.post);
     }
+	const token = uni.getStorageSync('userToken');
+	if (!token) {
+	  uni.showToast({
+	    title: '请先登录',
+	    icon: 'none',
+	  });
+	  return;
+	}
+	this.token = token;
+	this.checkFollowStatus();
+	this.fetchComments();
   },
   methods: {
-    share() {
-      uni.showToast({
-        title: '分享逻辑',
-        icon: 'none',
-        duration: 3000
-      });
+    getCategory(type) {
+        const categories = {
+            0: '经典',
+            1: '创作',
+            2: '收藏'
+        };
+        return categories[type] || '其他';
     },
-    comment() {
-      // 评论逻辑
-    },
-    love() {
-      this.liked = !this.liked;
-    },
-    adjustInputHeight(event, item) {
-      const textarea = event.target;
-      const lineHeight = 20;
-      const maxHeight = 140;
-      const minHeight = 20;
-    
-      textarea.style.height = 'auto';
-      let newHeight = textarea.scrollHeight;
-      newHeight = Math.ceil(newHeight / lineHeight) * lineHeight;
-    
-      if (newHeight > maxHeight) {
-        newHeight = maxHeight;
-      } else if (newHeight < minHeight) {
-        newHeight = minHeight;
-      }
-    
-      if (item === 'comment') {
-        this.commentInputHeight = newHeight;
-        this.commentInputOverflow = newHeight >= maxHeight ? 'auto' : 'hidden';
-      } else {
-        this.$set(item, 'replyInputHeight', newHeight);
-        this.$set(item, 'replyInputOverflow', newHeight >= maxHeight ? 'auto' : 'hidden');
-      }
+    formatComment(comment) {
+        if (!comment) return '';
+        const regex = /.{1,10}/g;
+        return comment.match(regex).join('\n');
     },
     sendComment() {
-      if (this.commentText.trim() === '') {
-        uni.showToast({
-          title: '评论内容不能为空',
-          icon: 'none'
+        if (this.commentText.trim() === '') {
+            uni.showToast({
+              title: '评论内容不能为空',
+              icon: 'none',
+            });
+            return;
+        }
+    
+        // 调用API发送评论
+        uni.request({
+            url: `${this.baseurl}/commentPost`,
+            method: 'POST',
+            data: {
+              token: this.token,
+              post_id: this.post.ID,
+              content: this.commentText,
+            },
+            success: (res) => {
+				console.log(this.token);
+				console.log(this.post.ID);
+				console.log(this.commentText);
+				console.log(res.data);
+				if (!Array.isArray(this.comments)) {
+				    this.comments = [];
+				}
+				const newComment = {
+				    Commenter: res.data.comment.Commenter,
+				    Content: this.commentText,
+				};
+				this.comments.unshift(newComment);
+				console.log(this.comments);
+				this.commentText = '';  // 清空评论输入框
+				this.commentInputHeight = 20;  // 重置输入框高度
+            },
+            fail: () => {
+              uni.showToast({
+                title: '请求失败，请稍后重试',
+                icon: 'none',
+              });
+            },
         });
-        return;
-      }
-      const newComment = {
-        avatar: '/static/dialog/avatar0.png', // 这里使用默认头像，实际项目中应使用当前用户的头像
-        nickname: '我', // 当前用户昵称
-        time: this.getCurrentTime(),
-        content: this.commentText,
-        liked: false,
-        showReplyInput: false,
-        replyText: '',
-        replyInputHeight: 20,
-        replies: [],
-      };
-      this.comments.unshift(newComment);
-      this.commentText = '';
-      this.commentInputHeight = 20; // 重置高度
     },
-    shareComment(comment) {
-      uni.showToast({
-        title: '分享逻辑',
-        icon: 'none',
-        duration: 3000
-      });
-    },
-    likeComment(comment) {
-      comment.liked = !comment.liked;
-    },
-    replyComment(comment) {
-      comment.showReplyInput = !comment.showReplyInput;
-      if (comment.showReplyInput) {
-        comment.replyInputHeight = 20; // 初始化高度
-      }
-    },
-    sendReply(comment) {
-      if (comment.replyText.trim() === '') {
-        uni.showToast({
-          title: '回复内容不能为空',
-          icon: 'none'
+    deleteComment(index) {
+        const commentID = this.comments[index].id;
+    
+        // 调用API删除评论
+        uni.request({
+            url: `${this.baseurl}/withdrawComment`,
+            method: 'POST',
+            data: {
+              token: this.token,
+              commentID: commentID,
+            },
+            success: (res) => {
+              if (res.data.success) {
+                uni.showToast({
+                  title: '删除成功',
+                  icon: 'success',
+                });
+                this.fetchComments();  // 重新获取评论列表
+              } else {
+                uni.showToast({
+                  title: '删除失败，请重试',
+                  icon: 'none',
+                });
+              }
+            },
+            fail: () => {
+              uni.showToast({
+                title: '请求失败，请稍后重试',
+                icon: 'none',
+              });
+            },
         });
-        return;
-      }
-      const newReply = {
-        avatar: '/static/dialog/avatar0.png',
-        nickname: '我',
-        time: this.getCurrentTime(),
-        content: comment.replyText,
-        liked: false,
-        showReplyInput: false,
-        replyText: '',
-        replyInputHeight: 20,
-        quoteNickname: comment.nickname,
-        quoteContent: comment.content,
-      };
-      if (!comment.replies) {
-        comment.replies = [];
-      }
-      comment.replies.push(newReply);
-      comment.replyText = '';
-      comment.replyInputHeight = 20; // 重置高度
-      comment.showReplyInput = false;
     },
-    shareReply(reply) {
-      uni.showToast({
-        title: '分享逻辑',
-        icon: 'none',
-        duration: 3000
-      });
+    fetchComments() {
+        this.comments = this.post.Comments;
     },
-    likeReply(reply) {
-      reply.liked = !reply.liked;
-    },
-    replyToReply(comment, reply) {
-      reply.showReplyInput = !reply.showReplyInput;
-      if (reply.showReplyInput) {
-        reply.replyInputHeight = 20; // 初始化高度
-      }
-    },
-    sendReplyToReply(comment, reply) {
-      if (reply.replyText.trim() === '') {
-        uni.showToast({
-          title: '回复内容不能为空',
-          icon: 'none'
-        });
-        return;
-      }
-      const newReply = {
-        avatar: '/static/dialog/avatar0.png',
-        nickname: '我',
-        time: this.getCurrentTime(),
-        content: reply.replyText,
-        liked: false,
-        showReplyInput: false,
-        replyText: '',
-        replyInputHeight: 20,
-        quoteNickname: reply.nickname,
-        quoteContent: reply.content,
-      };
-      comment.replies.push(newReply);
-      reply.replyText = '';
-      reply.replyInputHeight = 20;
-      reply.showReplyInput = false;
-    },
-    getCurrentTime() {
-      const now = new Date();
-      const month = now.getMonth() + 1;
-      const day = now.getDate();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      return `${now.getFullYear()}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day} ${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
-    }
-  }
+	// 检查是否已关注
+	checkFollowStatus() {
+	    const subscribedTo = uni.getStorageSync('subscribedTo') || [];
+		console.log('first:', subscribedTo);
+		if(subscribedTo === []) {
+			this.isFollowed = false;
+		}
+		else {
+			this.isFollowed = subscribedTo.includes(this.post.author);
+		}
+		console.log('isF?:', this.isFollowed);
+	},
+	// 切换关注状态
+	toggleFollow() {
+	    let subscribedTo = uni.getStorageSync('subscribedTo') || [];
+	      
+	    // 判断是关注还是取关
+	    const isSubscribing = !this.isFollowed;
+	      
+	    // 调用API更新关注状态
+	    uni.request({
+	        url: `${this.baseurl}/subscribeOthers`,
+	        method: 'POST',
+	        data: {
+	          token: this.token,
+	          receiver: this.post.author,
+	          subscribeOrCancel: isSubscribing,
+	        },
+	        success: (res) => {
+	          if (isSubscribing) {
+	            subscribedTo.push(this.post.author);  // 关注
+	          } else {
+	            subscribedTo = subscribedTo.filter(item => item !== this.post.author);  // 取关
+	          }
+	          uni.setStorageSync('subscribedTo', subscribedTo);  // 更新本地存储
+			  console.log('now:', subscribedTo);
+	          this.isFollowed = isSubscribing;  // 更新按钮显示
+	          uni.showToast({
+	            title: isSubscribing ? '已关注' : '已取关',
+	            icon: 'success',
+	          });
+	        },
+	        fail: () => {
+	          uni.showToast({
+	            title: '请求失败，请稍后重试',
+	            icon: 'none',
+	          });
+	        },
+	    });
+	},
+  },
 };
 </script>
 
@@ -312,91 +266,101 @@ export default {
 .container {
   padding: 20px;
 }
+
 /* 发动态的人的信息 */
-.pd-post-header {
+.post-header {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
-.pd-post-avatar {
-  width: 60px;
-  height: 60px;
+.post-avatar {
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
 }
 
-.pd-post-info {
+.post-info {
   display: flex;
   flex-direction: column;
-  margin-left: 16px;
+  margin-left: 12px;
 }
 
-.pd-post-nickname {
-  font-size: 20px;
+.post-nickname {
+  font-size: 16px;
 }
 
-.pd-post-meta {
+.post-meta {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.pd-post-category {
-  font-size: 14px;
+.post-category {
+  font-size: 12px;
   color: grey;
-  margin-right: 12px;
+  margin-right: 8px;
 }
 
-.pd-post-time {
-  font-size: 14px;
+.post-time {
+  font-size: 12px;
   color: grey;
 }
 
 /* 动态内容样式 */
-.pd-post {
+.post {
   background-color: #f0f0f0;
-  padding: 20px;
+  padding: 16px;
   width: 100%;
   box-sizing: border-box;
-  margin-bottom: 20px;
+  border-radius: 8px;
 }
-
-.pd-post-title {
-  font-size: 20px;
+.post-title {
+  font-size: 18px;
   font-weight: bold;
   word-break: break-word;
 }
-
-.pd-post-content {
-  font-size: 16px;
+.post-author {
+  font-size: 12px;
   color: grey;
-  margin-top: 6px;
+  margin-top: 4px;
+}
+.post-name {
+  font-size: 12px;
+  color: grey;
+  margin-top: 4px;
+}
+.post-content {
+  font-size: 14px;
+  color: grey;
+  margin-top: 8px;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.5;
   max-width: 100%;
 }
-
-/* 原始内容样式 */
-.original-content {
-  background-color: #e0e0e0;
-  padding: 20px;
-  margin-bottom: 20px;
+.post-comment {
+  font-size: 14px;
+  color: black;
+  margin-top: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
 }
-
 /* 操作按钮样式 */
-.pd-post-actions {
+.post-actions {
   display: flex;
   justify-content: space-around;
-  margin-top: 16px;
+  margin-top: 10px;
 }
-
-.pd-post-actions button {
-  font-size: 14px;
+.post-actions button {
+  font-size: 12px;
   color: grey;
   background-color: white;
   border: none;
+  margin-bottom: 20px;
+  cursor: pointer;
 }
 
 /* 评论输入框 */
@@ -409,7 +373,7 @@ export default {
 .comment-input {
   flex: 1;
   min-height: 20px;
-  max-height: 140px;
+  max-height: 20px;
   overflow-y: hidden;
   border: 1px solid #ccc;
   padding: 4px;
@@ -591,5 +555,29 @@ export default {
   background-color: white;
   border: none;
   margin-right: 10px;
+}
+
+/* 关注按钮样式 */
+.follow-button {
+  border-right: 6px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid;
+  background-color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.following {
+  border-color: gray;
+  color: gray;
+}
+
+.unfollow {
+  border-color: red;
+  color: red;
 }
 </style>

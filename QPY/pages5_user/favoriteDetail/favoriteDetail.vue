@@ -1,19 +1,19 @@
 <template>
   <view class="fD-container">
-    <text class="favorite-title">{{ favoriteTitle }}\n</text>
-    <text class="favorite-author">{{ favoriteAuthor }}</text>
-    
+	  
+	<view class="title-header">
+		<text class="favorite-title">{{ favoriteTitle }}·{{getFirstSentence(favoriteContentStr)}}\n</text>
+		<text class="favorite-author">{{ favoriteAuthor }}</text>
+    </view>
     <!-- 作品原文框 -->
     <view class="favorite-content-box">
       <text class="favorite-content">{{ favoriteContentStr }}</text>
     </view>
     
-    <!-- 作品原文和作品赏析之间的白色缝隙 -->
-    <view class="gap"></view>
-    
     <!-- 作品赏析框 -->
     <view class="favorite-analysis-box">
-      <textarea v-model="favoriteAnalysis" class="favorite-analysis" placeholder="请输入评论"></textarea>
+	  <text class="analysis-title">批注</text>
+      <textarea v-model="favoriteAnalysis" class="favorite-analysis" placeholder="请输入批注"></textarea>
     </view>
     
     <!-- 按钮容器 -->
@@ -121,12 +121,12 @@ export default {
         success: (res) => {
           if (res.statusCode === 200) {
             uni.showToast({
-              title: res.data.message || '批注保存成功',
+              title:  '批注保存成功',
               icon: 'success',
             });
           } else {
             uni.showToast({
-              title: res.data.message || '批注保存失败',
+              title:  '批注不能为空！',
               icon: 'none',
             });
           }
@@ -158,47 +158,80 @@ export default {
 }
 
 .favorite-content-box {
-  margin-top: 20px;
-  background-color: #333; /* 深灰色背景 */
-  padding: 12px;
-  border-radius: 8px;
+  width: 90%;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .favorite-content {
-  font-size: 16px; /* 比作品赏析大 */
-  color: white;
-  white-space: pre-wrap; /* 支持换行 */
-}
-
-.gap {
-  height: 8px; /* 调整缝隙高度 */
-  background-color: white;
+  font-size: 16px;
+  color: #666;
+  line-height: 2.5;
+  justify-content: center;
 }
 
 .favorite-analysis-box {
-  background-color: #ddd; /* 浅灰色背景 */
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 8px;
+  width: 90%;
+  background-color: #ffffff;
+  padding: 20px;
+  margin-top: 20px;
   margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.analysis-title{
+	font-size: 16px;
+	text-decoration: underline;
+	line-height: 3.0;
+	font-weight: bold; 
 }
 .favorite-analysis {
   font-size: 14px; /* 较小字体 */
-  color: black;
+  color: #444;
   width: 100%;
   height: 100px;
+  line-height: 1.5;
   border: none;
   resize: none;
   overflow-y: auto; /* 使文本域可上下滚动 */
 }
 
-.button-container {
+.bottom-buttons {
   display: flex;
   justify-content: space-between;
+  width: 100%;
+  margin-top: 20px;
 }
 
-.button-container button {
-  margin: 10px 0;
-  padding: 8px;
-  width: 45%; /* 调整按钮宽度以适应容器 */
+.bottom-btn {
+  width: 80%;
+  padding: 6px 0;
+  margin-left: 10px;
+  margin-right: 20px;
+  background: linear-gradient(145deg, #ffffff, #efefef);
+  border: none;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 16px;
+  color: #333;
+  box-shadow: 2px 2px 8px rgba(107, 107, 107, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bottom-btn:hover {
+  background: linear-gradient(145deg, #e0e0e0, #f8f8f8);
+  transform: translateY(-3px);
+  box-shadow: 2px 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.bottom-btn:active {
+  transform: translateY(1px);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bottom-btn:focus {
+  outline: none;
 }
 </style>

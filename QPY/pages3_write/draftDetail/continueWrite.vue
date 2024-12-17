@@ -4,7 +4,7 @@
     <view class="cipai-header">
       <text class="cipai-name">{{ cipaiName }}</text>
       <view class="sidebar-toggle" @click="toggleSidebar">
-        <view class="toggle-square"></view>
+        <view class="toggle-square">平</view>
       </view>
     </view>
 
@@ -666,7 +666,7 @@ export default {
   flex-direction: column;
   align-items: center;
   height: 100vh;
-  background-color: #f0f4f8;
+  background-color: #fefdf9;
   overflow-y: auto;
   padding: 20px;
   position: relative;
@@ -696,9 +696,16 @@ export default {
 }
 
 .toggle-square {
-  width: 20px;
-  height: 20px;
-  background-color: #d3d3d3;
+  width: 22px;
+  height: 22px;
+  text-align: center;
+  color: #fff;
+  background-color: #d0d0d0;
+  border-radius: 10px;
+}
+
+.toggle-square:active{
+	background:  linear-gradient(145deg, #defbff, #77b9ff);
 }
 
 .sidebar {
@@ -713,6 +720,11 @@ export default {
   z-index: 1000;
   display: flex;
   flex-direction: column;
+}
+
+.sidebar-title{
+	font-size: 16px;
+	font-weight: bold; 
 }
 
 .sidebar-content {
@@ -745,8 +757,8 @@ export default {
   height: 36px;
   line-height: 36px;
   font-size: 14px;
-  color: #fff;
-  background-color: #5677fc;
+  color:  #aaaaaa;
+  background-color: #fefdf9;
   border: none;
   border-radius: 4px;
   padding: 0 15px;
@@ -889,18 +901,35 @@ export default {
 }
 
 .clear-button {
-  background-color: #d3d3d3;
-  color: white;
-  width: 15px;
-  height: 15px;
+  background: linear-gradient(145deg, #f0f0f0, #e4e4e4); 
+  color: #333; 
+  width: 6px; 
+  height: 27px; 
   border: none;
-  border-radius: 5px;
+  border-radius: 50%; 
   cursor: pointer;
   position: absolute;
   right: -5px;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease; 
 }
+
+.clear-button:active {
+  background:  linear-gradient(145deg, #ff5938, #ffae99); 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+}
+
+.clear-button:before {
+  content: "×"; 
+  font-size: 16px;
+  font-weight: bold;
+}
+
 
 .bottom-buttons {
   display: flex;
@@ -910,20 +939,43 @@ export default {
 }
 
 .bottom-btn {
-  background-color: #d3d3d3;
-  color: black;
-  width: 35%;
-  padding: 10px;
-  font-size: 16px;
+  width: 80%;
+  padding: 6px 0;
+  margin-left: 10px;
+  margin-right: 20px;
+  background: linear-gradient(145deg, #f8f8f8, #e8e8e8);
   border: none;
-  border-radius: 5px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+  box-shadow: 2px 2px 8px rgba(107, 107, 107, 0.1);
   cursor: pointer;
+  transition: all 0.3s ease;
 }
+
+.bottom-btn:hover {
+  background: linear-gradient(145deg, #e0e0e0, #f8f8f8);
+  transform: translateY(-3px);
+  box-shadow: 2px 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.bottom-btn:active {
+  transform: translateY(1px);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bottom-btn:focus {
+  outline: none;
+}
+
 
 @media (max-width: 600px) {
   .tune-box {
     width: 30px;
     height: 30px;
+	border-radius: 5px;
   }
 }
 </style>

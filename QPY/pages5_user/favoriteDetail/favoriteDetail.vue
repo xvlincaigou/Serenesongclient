@@ -18,8 +18,8 @@
     
     <!-- 按钮容器 -->
     <view class="button-container">
-      <button @click="saveComment">保存批注</button>
-      <button @click="sendCollection">分享收藏</button>
+      <button @click="saveComment" class="bottom-btn">保存批注</button>
+      <button @click="sendCollection" class = "bottom-btn">分享收藏</button>
     </view>
   </view>
 </template>
@@ -59,6 +59,10 @@ export default {
     console.log('获取到的token:', this.token);
   },
   methods: {
+	getFirstSentence(text) {
+	  const sentences = text.split(/[，。\n]/);
+	  return sentences[0];
+	},  
     sendCollection() {
       if (!this.token) {
         uni.showToast({
@@ -144,17 +148,24 @@ export default {
 </script>
 
 <style>
-.fD-container { 
-  padding: 16px; 
+.fD-container { padding: 20px; }
+.title-header {
+	width: 90%;
+	text-align: center;
+	padding: 20px;
+	background-color: #ffffff;
+	border-radius: 10px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	margin-bottom: 20px;
 }
 .favorite-title { 
-  font-size: 18px; 
-  font-weight: bold; 
-}
-.favorite-author { 
-  font-size: 14px; 
-  color: grey; 
-  margin-top: 4px; 
+	font-size: 24px;
+    color: #333;
+	font-weight: 600; 
+	}
+.favorite-author {
+	font-size: 17px;
+	color: #aaa;
 }
 
 .favorite-content-box {

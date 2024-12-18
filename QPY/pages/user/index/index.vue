@@ -72,7 +72,7 @@
               <view class="post-content">
                 <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
               </view>
-              <text class="post-comment">\n词评：\n{{ formatComment(post.Comment) }}</text>
+              <text class="post-comment">\n批注：\n{{ formatComment(post.Comment) }}</text>
             </view>
             <view v-else>
               <text class="post-content">{{ post.content }}</text>
@@ -149,6 +149,7 @@ export default {
     this.getUserID();
     this.getFavoritesCount(); // 获取收藏数量
     this.getWorksCount();     // 获取作品数量
+	this.getFriendsCount();   // 获取词友数量
     this.fetchResults();      // 获取所有作品
     // 注意：getDynamics 已在 getUserID 成功后调用
   },
@@ -170,7 +171,6 @@ export default {
           if (res.statusCode === 200 && res.data.personal_id) {
             console.log('User ID:', res.data.personal_id);
             this.user_id = res.data.personal_id;
-            console.log('User ID2:', this.user_id);
             this.getUserInfo();
             this.getDynamics(); // 获取动态列表
           } else {
@@ -207,11 +207,6 @@ export default {
             this.avatar = res.data.avatar ? 'data:image/png;base64,' + res.data.avatar : '';
             this.name = res.data.name || "";
             this.signature = res.data.signature || "";
-          } else {
-            uni.showToast({
-              title: '获取用户信息失败',
-              icon: 'none',
-            });
           }
         },
         fail: () => {
@@ -243,11 +238,6 @@ export default {
             if (res.statusCode === 200) {
               console.log('收藏数量:', res.data.count);
               this.favoritesCount = res.data.count;
-            } else {
-              uni.showToast({
-                title: '获取收藏数失败',
-                icon: 'none',
-              });
             }
           },
           fail: () => {
@@ -279,11 +269,6 @@ export default {
             if (res.statusCode === 200 && res.data.UserWorks) {
               console.log('作品:', res.data.UserWorks.length);
               this.creationCount = res.data.UserWorks.length;
-            } else {
-              uni.showToast({
-                title: '获取作品数失败',
-                icon: 'none',
-              });
             }
           },
           fail: () => {
@@ -300,6 +285,11 @@ export default {
         });
       }
     },
+	getFriendsCount() {
+	  const token = this.token || uni.getStorageSync('userToken');
+	  const subscribedTo = uni.getStorageSync('subscribedTo');
+	  this.friendsCount = subscribedTo.length;
+	},
     fetchResults() {
       if (!this.token) {
         this.token = uni.getStorageSync('userToken');

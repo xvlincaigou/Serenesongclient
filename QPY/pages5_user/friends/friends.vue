@@ -13,24 +13,24 @@
       </view>
       <view v-else>
         <view v-if="selectedTab === 'follow'">
-          <view v-if="friends.length === 0">
+          <view v-if="subscribedTo.length === 0">
             <text>当前还没有关注</text>
           </view>
           <view v-else>
-            <view v-for="(friend, index) in friends" :key="index" class="friend-item" @click="viewFriendProfile(friend)">
-              <image :src="friend.avatar" class="friend-avatar" />
+            <view v-for="(friend, index) in subscribedTo" :key="index" class="friend-item" @click="viewFriendProfile(friend)">
+              <image :src="friend.avatar ? 'data:image/png;base64,' + friend.avatar : ''" class="friend-avatar" />
               <text class="friend-name">{{ friend.name }}</text>
             </view>
           </view>
         </view>
         
         <view v-else-if="selectedTab === 'fans'">
-          <view v-if="friends.length === 0">
+          <view v-if="subscribers.length === 0">
             <text>当前还没有粉丝</text>
           </view>
           <view v-else>
-            <view v-for="(friend, index) in friends" :key="index" class="friend-item" @click="viewFriendProfile(friend)">
-              <image :src="friend.avatar" class="friend-avatar" />
+            <view v-for="(friend, index) in subscribers" :key="index" class="friend-item" @click="viewFriendProfile(friend)">
+              <image :src="friend.avatar ? 'data:image/png;base64,' + friend.avatar : ''" class="friend-avatar" />
               <text class="friend-name">{{ friend.name }}</text>
             </view>
           </view>
@@ -44,93 +44,114 @@
 export default {
   data() {
     return {
+      baseurl: getApp().globalData.baseURL,
       selectedTab: 'follow', // 默认选中“我的关注”
-      friends: [],
-	  token: "",
+      subscribedTo: [],
+      subscribers: [],
+      token: "",
       loading: false
     };
   },
   onLoad() {
     // 页面加载时默认加载关注列表
-    this.fetchFriendsList();
+    this.fetchSubscribers();
+    this.fetchSubscribedTo();
+  },
+  onShow() {
+	this.fetchSubscribers();
+	this.fetchSubscribedTo();
   },
   methods: {
     selectTab(tab) {
       if (this.selectedTab !== tab) {
         this.selectedTab = tab;
-        this.fetchFriendsList();
+        this.fetchSubscribers();
+        this.fetchSubscribedTo();
       }
     },
-    fetchFriendsList() {
-	  let baseurl = getApp().globalData.baseURL;
-      this.loading = true;
-      const that = this;
-	  const token = uni.getStorageSync('userToken');
-      if (token) {
-		this.token = token;
-        if (that.selectedTab === 'follow') {
-            // 我的关注列表
-			uni.request({
-			  url: `${baseurl}/getSubscribedTo?token=${token}`,
-			  method: 'GET',
-			  success: (response) => {
-			    // 根据接口返回格式进行适配
-			    // 假设返回数据格式为：{ code: 200, data: [...], msg: '成功' }
-				console.log('follow');
-			    if (response.statusCode === 200 && response.data && Array.isArray(response.data.data)) {
-			      that.friends = response.data.data.map(item => {
-			        return {
-			          name: item.name || '匿名用户', // 根据实际字段修改
-			          avatar: item.avatar || '/static/dialog/avatar0.png' // 若无头像则设为默认
-			        };
-			      });
-			    } else {
-			      that.friends = [];
-			    }
-			  },
-			  fail: (err) => {
-			    console.error('请求失败', err);
-			    that.friends = [];
-			  },
-			  complete: () => {
-			    that.loading = false;
-			  }
-			});
-        } else {
-            // 我的粉丝列表
-			uni.request({
-			  url: `${baseurl}/getSubscribers?token=${token}`,
-			  method: 'GET',
-			  success: (response) => {
-			    // 根据接口返回格式进行适配
-			    // 假设返回数据格式为：{ code: 200, data: [...], msg: '成功' }
-				console.log('fans');
-			    if (response.statusCode === 200 && response.data && Array.isArray(response.data.data)) {
-			      that.friends = response.data.data.map(item => {
-			        return {
-			          name: item.name || '匿名用户', // 根据实际字段修改
-			          avatar: item.avatar || '/static/dialog/avatar0.png' // 若无头像则设为默认
-			        };
-			      });
-			    } else {
-			      that.friends = [];
-			    }
-			  },
-			  fail: (err) => {
-			    console.error('请求失败', err);
-			    that.friends = [];
-			  },
-			  complete: () => {
-			    that.loading = false;
-			  }
-			});
+    // 通用的获取用户信息函数
+    fetchUserInfo(user_id, targetArray) {
+      uni.request({
+        url: `${this.baseurl}/getUserInfo`,
+        method: 'GET',
+        data: {
+          token: this.token,
+          user_id: user_id,
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            if (res.data) {
+              // 将 user_id 添加到用户信息对象中
+              const friendWithId = { user_id: user_id, ...res.data };
+              targetArray.push(friendWithId);
+              this.$set(targetArray, targetArray.length - 1, friendWithId); // 确保响应式
+              console.log('friend:', targetArray);
+            }
+          } else {
+            uni.showToast({
+              title: '获取用户信息失败',
+              icon: 'none',
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请求失败',
+            icon: 'none',
+          });
         }
+      });
+    },
+    fetchSubscribers() {
+      if (!this.token) {
+        this.token = uni.getStorageSync('userToken');
       }
+      
+      // 获取粉丝列表
+      const subscribers = uni.getStorageSync('subscribers');
+      console.log('粉丝列表:', subscribers);
+      this.subscribers = [];
+      
+      // 如果粉丝列表为空或不是数组，则不做任何处理
+      if (!Array.isArray(subscribers) || subscribers.length === 0) {
+        return;
+      }
+      
+      subscribers.forEach(user_id => {
+        this.fetchUserInfo(user_id, this.subscribers);
+      });
+    },
+    fetchSubscribedTo() {
+      if (!this.token) {
+        this.token = uni.getStorageSync('userToken');
+      }
+      
+      // 获取关注列表
+      const subscribedTo = uni.getStorageSync('subscribedTo');
+      console.log('关注列表:', subscribedTo);
+      this.subscribedTo = [];
+      
+      // 如果关注列表为空或不是数组，则不做任何处理
+      if (!Array.isArray(subscribedTo) || subscribedTo.length === 0) {
+        return;
+      }
+      
+      subscribedTo.forEach(user_id => {
+        this.fetchUserInfo(user_id, this.subscribedTo);
+      });
     },
     viewFriendProfile(friend) {
-      uni.navigateTo({ 
-        url: `/pages5_user/friendProfile/friendProfile?name=${friend.name}&avatar=${encodeURIComponent(friend.avatar)}`
-      });
+      console.log('好友信息:', friend);
+      if (friend.user_id) {
+        uni.navigateTo({ 
+          url: `/pages5_user/friendProfile/friendProfile?user_id=${friend.user_id}`
+        });
+      } else {
+        uni.showToast({
+          title: '用户ID不存在',
+          icon: 'none',
+        });
+      }
     },
   }
 }

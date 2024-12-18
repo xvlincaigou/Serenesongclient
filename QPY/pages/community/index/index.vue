@@ -4,10 +4,10 @@
     <!-- 好友列表 -->
     <scroll-view scroll-x="true" class="friend-list">
       <view class="friend-list-container">
-        <view v-for="(friend, index) in friends" :key="index" class="friend-item">
-          <image :src="friend.avatar ? 'data:image/png;base64,' + friend.avatar : ''" class="friend-avatar" @click="viewFriend(friend)"></image>
-          <text class="friend-name">{{ friend.name }}</text>
-        </view>
+		<view v-for="(friend, index) in friends" :key="index" class="friend-item">
+		  <image :src="friend.avatar ? 'data:image/png;base64,' + friend.avatar : ''" class="friend-avatar" @click="viewFriend(friend)"></image>
+		  <text class="friend-name">{{ friend.name }}</text>
+		</view>
       </view>
     </scroll-view>
 
@@ -54,7 +54,7 @@
 		        <view class="post-content">
 		          <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
 		        </view>
-		        <text class="post-comment">\n词评：\n{{ formatComment(post.Comment) }}</text>
+		        <text class="post-comment">\n批注：\n{{ formatComment(post.Comment) }}</text>
 		      </view>
 		      <view v-else>
 		        <text class="post-content">{{ post.content }}</text>
@@ -114,7 +114,7 @@
               <view class="post-content">
                 <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
               </view>
-              <text class="post-comment">\n词评：\n{{ formatComment(post.Comment) }}</text>
+              <text class="post-comment">\n批注：\n{{ formatComment(post.Comment) }}</text>
             </view>
             <view v-else>
               <text class="post-content">{{ post.content }}</text>
@@ -195,50 +195,56 @@ export default {
       selectTab(tab) {
         this.selectedTab = tab;
       },
+	  fetchUserInfo(user_id, targetArray) {
+	    uni.request({
+	      url: `${this.baseurl}/getUserInfo`,
+	      method: 'GET',
+	      data: {
+	        token: this.token,
+	        user_id: user_id,
+	      },
+	      success: (res) => {
+	        if (res.statusCode === 200) {
+	          if (res.data) {
+	            // 将 user_id 添加到用户信息对象中
+	            const friendWithId = { user_id: user_id, ...res.data };
+	            targetArray.push(friendWithId);
+	            this.$set(targetArray, targetArray.length - 1, friendWithId); // 确保响应式
+	            console.log('friend:', targetArray);
+	          }
+	        } else {
+	          uni.showToast({
+	            title: '获取用户信息失败',
+	            icon: 'none',
+	          });
+	        }
+	      },
+	      fail: () => {
+	        uni.showToast({
+	          title: '请求失败',
+	          icon: 'none',
+	        });
+	      }
+	    });
+	  },
 	  getFriends() {
-		  if (!this.token) {
-		      this.token = uni.getStorageSync('userToken');
-		  }
-		  	  
-		  // 获取关注列表
-		  const friend = uni.getStorageSync('subscribedTo');
-		  this.friends = [];
-		  	  
-		  // 如果关注列表为空或不是数组，则不做任何处理
-		  if (friend.length === 0) {
-		      return;
-		  }
-		  
-		  friend.forEach(user_id => {
-		      uni.request({
-		          url: `${this.baseurl}/getUserInfo`,
-		          method: 'GET',
-		          data: {
-		              token: this.token,
-		              user_id: user_id,
-		          },
-		          success: (res) => {
-		              if (res.statusCode === 200) {
-		                  // 将获取到的动态数据添加到 friendPosts 数组中
-		                  if (res.data) {
-		                      this.friends = this.friends.concat(res.data);
-		  					  console.log('friend:', this.friends);
-		                  }
-		              } else {
-		                  uni.showToast({
-		                      title: '获取动态列表失败',
-		                      icon: 'none',
-		                  });
-		              }
-		          },
-		          fail: () => {
-		              uni.showToast({
-		                  title: '请求失败',
-		                  icon: 'none',
-		              });
-		          }
-		      });
-		  });
+		if (!this.token) {
+		  this.token = uni.getStorageSync('userToken');
+		}
+		
+		// 获取关注列表
+		const subscribedTo = uni.getStorageSync('subscribedTo');
+		console.log('关注列表:', subscribedTo);
+		this.friends = [];
+		
+		// 如果关注列表为空或不是数组，则不做任何处理
+		if (!Array.isArray(subscribedTo) || subscribedTo.length === 0) {
+		  return;
+		}
+		
+		subscribedTo.forEach(user_id => {
+		  this.fetchUserInfo(user_id, this.friends);
+		});
 	  },
 	  getAllDynamics() {
 	    if (!this.token) {
@@ -375,9 +381,17 @@ export default {
         return post.Likes.some(like => String(like) === String(this.user_id));
       },
       viewFriend(friend) {
-        // 查看好友资料逻辑
-        const params = `name=${encodeURIComponent(friend.name)}&avatar=${encodeURIComponent(friend.avatar)}`;
-        uni.navigateTo({ url: `/pages2_community/friendProfile/friendProfile?${params}` });
+        console.log('好友信息:', friend);
+        if (friend.user_id) {
+          uni.navigateTo({ 
+            url: `/pages5_user/friendProfile/friendProfile?user_id=${friend.user_id}`
+          });
+        } else {
+          uni.showToast({
+            title: '用户ID不存在',
+            icon: 'none',
+          });
+        }
       },
 	  getCategory(type) {
 	    const categories = {

@@ -39,7 +39,7 @@
             <view class="post-content">
               <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
             </view>
-            <text class="post-comment">\n词评：\n{{ formatComment(post.Comment) }}</text>
+            <text class="post-comment">\n批注：\n{{ formatComment(post.Comment) }}</text>
           </view>
           <view v-else>
             <text class="post-content">{{ post.content }}</text>
@@ -61,19 +61,19 @@
       <view v-for="(comment, index) in comments" :key="index" class="comment-item">
         <!-- 评论者的头像和昵称 -->
         <view class="comment-header">
-          <image :src="comment.avatar" class="comment-avatar"></image>
+          <image :src="comment.Avatar ? 'data:image/png;base64,' + comment.Avatar : ''" class="comment-avatar"></image>
           <view class="comment-info">
-            <text class="comment-nickname">{{ comment.Commenter }}</text>
+            <text class="comment-nickname">{{ comment.Name }}</text>
           </view>
         </view>
         <!-- 评论内容 -->
         <view class="comment-content">
-          <text>{{ comment.Content }}</text>
+          <text>{{ comment.Comment.Content }}</text>
         </view>
 
-        <!-- 删除按钮 -->
-        <view class="comment-actions">
-          <button @click="deleteComment(index)">删除</button>
+        <!-- 删除按钮（仅当前用户的评论显示） -->
+        <view class="comment-actions" v-if="comment.Comment.Commenter === user_id">
+          <button @click="deleteComment(comment)">删除</button>
         </view>
       </view>
     </view>
@@ -112,6 +112,7 @@ export default {
 	  return;
 	}
 	this.token = token;
+	this.user_id = uni.getStorageSync('personal_id');
 	this.checkFollowStatus();
 	this.fetchComments();
   },
@@ -148,19 +149,15 @@ export default {
               content: this.commentText,
             },
             success: (res) => {
-				console.log(this.token);
-				console.log(this.post.ID);
-				console.log(this.commentText);
-				console.log(res.data);
+				// console.log(this.token);
+				// console.log(this.post.ID);
+				// console.log(this.commentText);
+				// console.log(res.data);
 				if (!Array.isArray(this.comments)) {
 				    this.comments = [];
 				}
-				const newComment = {
-				    Commenter: res.data.comment.Commenter,
-				    Content: this.commentText,
-				};
-				this.comments.unshift(newComment);
-				console.log(this.comments);
+				this.comments.unshift(res.data.comment);
+				// console.log(this.comments);
 				this.commentText = '';  // 清空评论输入框
 				this.commentInputHeight = 20;  // 重置输入框高度
             },
@@ -172,39 +169,37 @@ export default {
             },
         });
     },
-    deleteComment(index) {
-        const commentID = this.comments[index].id;
+    deleteComment(comment) {
+        const commentID = comment.CommentId;
+        console.log(`删除的评论ID: ${commentID}`);
     
         // 调用API删除评论
         uni.request({
             url: `${this.baseurl}/withdrawComment`,
             method: 'POST',
             data: {
-              token: this.token,
-              commentID: commentID,
+                token: this.token,
+                comment_id: commentID,
             },
             success: (res) => {
-              if (res.data.success) {
+                console.log('API响应数据:', res.data);
+                // 使用filter方法过滤掉要删除的评论，并更新this.comments
+                this.comments = this.comments.filter(item => item.CommentId !== res.data.comment_id);
+                console.log('更新后的评论列表:', this.comments);
                 uni.showToast({
-                  title: '删除成功',
-                  icon: 'success',
+                    title: '评论删除成功',
+                    icon: 'success',
                 });
-                this.fetchComments();  // 重新获取评论列表
-              } else {
-                uni.showToast({
-                  title: '删除失败，请重试',
-                  icon: 'none',
-                });
-              }
             },
             fail: () => {
-              uni.showToast({
-                title: '请求失败，请稍后重试',
-                icon: 'none',
-              });
+                uni.showToast({
+                    title: '请求失败，请稍后重试',
+                    icon: 'none',
+                });
             },
         });
     },
+
     fetchComments() {
         this.comments = this.post.Comments;
     },
@@ -416,9 +411,9 @@ export default {
 }
 
 .comment-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 25px;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
 }
 
 .comment-info {
@@ -428,7 +423,7 @@ export default {
 }
 
 .comment-nickname {
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .comment-time {

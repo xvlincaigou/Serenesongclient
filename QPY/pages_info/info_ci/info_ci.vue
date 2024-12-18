@@ -13,7 +13,6 @@
     <view class="button-container">
       <button class="favorite-button" @click="onFavoriteClick">收藏词</button>
       <button class="send-button" @click="onSendClick">分享词</button>
-      <!-- <button class="review-button" @click="onReviewClick">我要写词评</button> -->
     </view>
 
     <!-- 收藏夹悬浮框 -->

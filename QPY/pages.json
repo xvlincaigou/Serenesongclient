@@ -199,6 +199,12 @@
             "navigationBarTitleText": "我的好友"
           }
         },
+		{
+		  "path": "friendWork/friendWork",
+		  "style": {
+		    "navigationBarTitleText": "好友作品"
+		  }
+		},
         {
           "path": "postDetail/postDetail",
           "style": {

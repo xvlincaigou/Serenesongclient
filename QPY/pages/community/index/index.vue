@@ -24,7 +24,7 @@
 		    <!-- Display post time outside of the post box -->
 		    <!-- 发动态的人的头像和昵称 -->
 		    <view class="post-header">
-		      <image :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" class="post-avatar"></image>
+		      <image :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" class="post-avatar" @click="viewFriendByIcon(post.author)"></image>
 		      <view class="post-info">
 		        <text class="post-nickname">{{ post.name }}</text>
 		        <view class="post-meta">
@@ -323,6 +323,18 @@ export default {
 	          });
 	      });
 	  },
+	  viewFriendByIcon(friend) {
+		  if(friend === this.user_id) {
+		  	uni.navigateTo({
+		  	  // url: `/pages/user/index/index`
+			  url: `/pages5_user/friendProfile/friendProfile?user_id=${friend}`
+		  	});
+		  } else {
+		  	uni.navigateTo({
+		  	  url: `/pages5_user/friendProfile/friendProfile?user_id=${friend}`
+		  	});
+		  }
+	  },
       viewPost(post) {
         const params = `post=${encodeURIComponent(JSON.stringify(post))}`;
         uni.navigateTo({ url: `/pages2_community/postDetail/postDetail?${params}` });
@@ -383,9 +395,15 @@ export default {
       viewFriend(friend) {
         console.log('好友信息:', friend);
         if (friend.user_id) {
-          uni.navigateTo({ 
-            url: `/pages5_user/friendProfile/friendProfile?user_id=${friend.user_id}`
-          });
+          if(friend.user_id === this.user_id) {
+          	uni.switchTab({
+          	  url: `/pages/user/index/index`
+          	});
+          } else {
+          	uni.navigateTo({
+          	  url: `/pages5_user/friendProfile/friendProfile?user_id=${friend.user_id}`
+          	});
+          }
         } else {
           uni.showToast({
             title: '用户ID不存在',

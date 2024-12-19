@@ -27,6 +27,8 @@
       <text class="signature">{{ signature }}\n</text>
 	  <text class="id">{{ user_id }}</text>
     </view>
+	
+	<button class="send-message" @click="sendMessage()">发消息</button>
 
     <!-- Tabs for 动态 and 作品 -->
     <view class="tabs">
@@ -90,7 +92,7 @@
         </view>
       </view>
       <view v-else class="no-dynamicPosts">
-        <text>他还没有发过动态</text>
+        <text>他/她还没有发过动态</text>
       </view>
     </scroll-view>
 
@@ -112,7 +114,7 @@
           </view>
         </view>
         <view v-else class="no-UserWorks">
-          <text>他没有公开的作品</text>
+          <text>他/她没有公开的作品</text>
         </view>
       </view>
     </scroll-view>
@@ -124,6 +126,7 @@ export default {
   data() {
     return {
       baseurl: getApp().globalData.baseURL,
+	  personal_id: '',
       user_id: '',
       avatar: '',
       name: "",
@@ -157,6 +160,7 @@ export default {
   methods: {
     getToken() {
       this.token = uni.getStorageSync('userToken');
+	  this.personal_id = uni.getStorageSync('personal_id');
 	  this.getUserInfo();
 	  this.getDynamics();
     },
@@ -388,6 +392,9 @@ export default {
 	        },
 	    });
 	},
+	sendMessage() {
+	  uni.navigateTo({ url: `/pages4_dialog/sendMessage/sendMessage?name=${this.name}&user_id=${this.user_id}` });
+	},
     selectTab(tab) {
       this.selectedTab = tab;
     },
@@ -445,7 +452,7 @@ export default {
     },
     isLiked(post) {
       // 检查当前用户是否已点赞该动态
-      return post.Likes.some(like => String(like) === String(this.user_id));
+      return post.Likes.some(like => String(like) === String(this.personal_id));
     },
     viewWork(work) {
       uni.navigateTo({ 
@@ -545,7 +552,7 @@ export default {
   margin-top: 4px;
 }
 
-.edit-profile {
+.send-message {
   width: 100%;
   margin: 12px 0;
   padding: 0px 0;

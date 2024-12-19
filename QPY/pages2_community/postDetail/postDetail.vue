@@ -4,7 +4,7 @@
     <view class="post-detail">
         <!-- 显示动态的详细信息 -->
         <view class="post-header">
-          <image :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" class="post-avatar"></image>
+          <image :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" class="post-avatar" @click="viewFriend(post.author)"></image>
           <view class="post-info">
             <text class="post-nickname">{{ post.name }}</text>
             <view class="post-meta">
@@ -98,6 +98,7 @@ export default {
   },
   onShow() {
 	  this.fetchComments(); 
+	  this.checkFollowStatus();
   },
   onLoad(options) {
     if (options.post) {
@@ -118,6 +119,17 @@ export default {
 	this.fetchComments();
   },
   methods: {
+	viewFriend(friend) {
+		if(friend === this.user_id) {
+			uni.switchTab({
+			  url: `/pages/user/index/index`
+			});
+		} else {
+			uni.navigateTo({
+			  url: `/pages5_user/friendProfile/friendProfile?user_id=${friend}`
+			});
+		}
+	},
     getCategory(type) {
         const categories = {
             0: '经典',

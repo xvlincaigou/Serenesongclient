@@ -2,7 +2,7 @@
   <view class="container">
 	  
 	<view class="title-header">
-		<text class="receiver-title">寄信人：{{ message.senderName }}</text>
+		<text class="receiver-title">收信人：{{ message.receiverName }}</text>
 		<text class="time">\n {{ formatDate(message.time) }}</text>
     </view>
 
@@ -11,14 +11,13 @@
     </view>
 	
 	<view class="message-box">
-	  <text class="message-title">回复</text>
-	  <textarea v-model="messageContent" class="message" placeholder="请输入回复内容"></textarea>
+	  <text class="message-title">消息内容</text>
+	  <textarea v-model="messageContent" class="message" placeholder="请输入新消息内容"></textarea>
 	</view>
     
     <!-- 按钮容器 -->
     <view class="button-container">
-      <button @click="checkFriend" class="bottom-btn">查看寄信人</button>
-	  <button @click="sendMessage" class="bottom-btn">回复消息</button>
+      <button @click="sendMessage" class="bottom-btn">再发一条</button>
     </view>
   </view>
 </template>
@@ -29,7 +28,6 @@ export default {
     return {
       baseurl: getApp().globalData.baseURL,
       token: '',
-	  personal_id: '',
 	  message: [],
 	  messageContent: '',
     };
@@ -37,20 +35,9 @@ export default {
   onLoad(options) {
     this.token = uni.getStorageSync('userToken');
 	this.message = JSON.parse(decodeURIComponent(options.message));
-	this.personal_id = uni.getStorageSync('personal_id');
+	console.log(this.message);
   },
   methods: {  
-	checkFriend() {
-		if(this.message.sender === this.personal_id) {
-			uni.switchTab({
-			  url: `/pages/user/index/index`
-			});
-		} else {
-			uni.navigateTo({
-			  url: `/pages5_user/friendProfile/friendProfile?user_id=${this.message.sender}`
-			});
-		}
-	},
     sendMessage() {
       if (!this.token) {
         uni.showToast({
@@ -72,7 +59,7 @@ export default {
 	        token: this.token,
 	        receiver: this.message.receiver,
 	        content: this.messageContent,
-			replyToMessageId: this.message._id,
+			replyToMessageId: "",
 	      },
 	      success: (res) => {
 	        uni.showToast({

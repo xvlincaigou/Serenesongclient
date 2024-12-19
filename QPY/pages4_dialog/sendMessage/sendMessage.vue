@@ -2,23 +2,17 @@
   <view class="container">
 	  
 	<view class="title-header">
-		<text class="receiver-title">寄信人：{{ message.senderName }}</text>
-		<text class="time">\n {{ formatDate(message.time) }}</text>
+		<text class="receiver-title">收信人：{{ name }}</text>
     </view>
 
     <view class="message-box">
-      <text class="message">{{ message.content }}</text>
+	  <text class="message-title">消息内容</text>
+      <textarea v-model="messageContent" class="message" placeholder="请输入消息内容"></textarea>
     </view>
-	
-	<view class="message-box">
-	  <text class="message-title">回复</text>
-	  <textarea v-model="messageContent" class="message" placeholder="请输入回复内容"></textarea>
-	</view>
     
     <!-- 按钮容器 -->
     <view class="button-container">
-      <button @click="checkFriend" class="bottom-btn">查看寄信人</button>
-	  <button @click="sendMessage" class="bottom-btn">回复消息</button>
+      <button @click="sendMessage" class="bottom-btn">发送</button>
     </view>
   </view>
 </template>
@@ -28,29 +22,18 @@ export default {
   data() {
     return {
       baseurl: getApp().globalData.baseURL,
+      name: '',
+      user_id: '',
+      messageContent: '',
       token: '',
-	  personal_id: '',
-	  message: [],
-	  messageContent: '',
     };
   },
   onLoad(options) {
     this.token = uni.getStorageSync('userToken');
-	this.message = JSON.parse(decodeURIComponent(options.message));
-	this.personal_id = uni.getStorageSync('personal_id');
+	this.name = options.name;
+	this.user_id = options.user_id;
   },
   methods: {  
-	checkFriend() {
-		if(this.message.sender === this.personal_id) {
-			uni.switchTab({
-			  url: `/pages/user/index/index`
-			});
-		} else {
-			uni.navigateTo({
-			  url: `/pages5_user/friendProfile/friendProfile?user_id=${this.message.sender}`
-			});
-		}
-	},
     sendMessage() {
       if (!this.token) {
         uni.showToast({
@@ -70,9 +53,9 @@ export default {
 	      method: 'POST',
 	      data: {
 	        token: this.token,
-	        receiver: this.message.receiver,
+	        receiver: this.user_id,
 	        content: this.messageContent,
-			replyToMessageId: this.message._id,
+			replyToMessageId: "",
 	      },
 	      success: (res) => {
 	        uni.showToast({
@@ -94,13 +77,6 @@ export default {
 	      },
 	  });
     },
-	formatDate(dateString) {
-	    const date = new Date(dateString);
-	    const year = date.getFullYear();
-	    const month = String(date.getMonth() + 1).padStart(2, '0');
-	    const day = String(date.getDate()).padStart(2, '0');
-	    return `${year}-${month}-${day}`;
-	},
   },
 };
 </script>
@@ -120,10 +96,6 @@ export default {
 	font-size: 24px;
     color: #333;
 	font-weight: 600; 
-}
-.time {
-	font-size: 17px;
-	color: #aaa;
 }
 
 .message-box {

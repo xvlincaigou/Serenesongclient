@@ -8,10 +8,6 @@
     
     <!-- 列表区域 -->
     <scroll-view class="content" scroll-y="true">
-      <view v-if="loading" class="loading-text">
-        <text>加载中...</text>
-      </view>
-      <view v-else>
         <view v-if="selectedTab === 'follow'">
           <view v-if="subscribedTo.length === 0">
             <text>当前还没有关注</text>
@@ -35,7 +31,6 @@
             </view>
           </view>
         </view>
-      </view>
     </scroll-view>
   </view>
 </template>
@@ -49,6 +44,7 @@ export default {
       subscribedTo: [],
       subscribers: [],
       token: "",
+	  personal_id: "",
       loading: false
     };
   },
@@ -56,6 +52,7 @@ export default {
     // 页面加载时默认加载关注列表
     this.fetchSubscribers();
     this.fetchSubscribedTo();
+	this.personal_id = uni.getStorageSync('personal_id');
   },
   onShow() {
 	this.fetchSubscribers();
@@ -143,9 +140,15 @@ export default {
     viewFriendProfile(friend) {
       console.log('好友信息:', friend);
       if (friend.user_id) {
-        uni.navigateTo({ 
-          url: `/pages5_user/friendProfile/friendProfile?user_id=${friend.user_id}`
-        });
+		if (friend.user_id === this.personal_id) {
+			uni.switchTab({
+			  url: `/pages/user/index/index`
+			});
+		} else {
+			uni.navigateTo({
+			  url: `/pages5_user/friendProfile/friendProfile?user_id=${friend.user_id}`
+			});
+		}
       } else {
         uni.showToast({
           title: '用户ID不存在',

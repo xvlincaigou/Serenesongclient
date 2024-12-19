@@ -143,13 +143,25 @@
         {
           "path": "addFriend/addFriend",
           "style": {
-            "navigationBarTitleText": "添加好友"
+            "navigationBarTitleText": "发消息"
           }
         },
+		{
+		  "path": "sendMessage/sendMessage",
+		  "style": {
+		    "navigationBarTitleText": "发消息"
+		  }
+		},
+		{
+		  "path": "messageDetail/messageDetail",
+		  "style": {
+		    "navigationBarTitleText": "消息详情"
+		  }
+		},
         {
           "path": "chat/chat",
           "style": {
-            "navigationBarTitleText": "聊天"
+            "navigationBarTitleText": "消息详情"
           }
         }
       ]

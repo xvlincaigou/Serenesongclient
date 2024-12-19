@@ -23,7 +23,7 @@
     <view class="info">
       <text class="name">{{ name }}\n</text>
       <text class="signature">{{ signature }}\n</text>
-	  <text class="id">{{ user_id }}</text>
+	  <text class="id">id : {{ user_id }}</text>
     </view>
 
     <!-- Edit Profile Button -->
@@ -72,7 +72,8 @@
               <view class="post-content">
                 <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
               </view>
-              <text class="post-comment">\n批注：\n{{ formatComment(post.Comment) }}</text>
+              <text class="post-comment">\n批注\n</text>
+			  <text class="post-comment-content">{{ formatComment(post.Comment) }}</text>
             </view>
             <view v-else>
               <text class="post-content">{{ post.content }}</text>
@@ -501,8 +502,8 @@ export default {
 <style scoped>
 .container {
   padding: 16px;
-  background-color: #ffffff;
   min-height: 100vh;
+  background-color: #ffffff;
 }
 
 /* Existing styles for profile, stats, etc. */
@@ -640,7 +641,7 @@ export default {
   color: grey;
 }
 .post {
-  background-color: #f0f0f0;
+  background-color: #f2f2f2;
   padding: 16px;
   width: 100%;
   box-sizing: border-box;
@@ -663,7 +664,7 @@ export default {
 }
 .post-content {
   font-size: 14px;
-  color: grey;
+  color: #667;
   margin-top: 8px;
   white-space: pre-wrap;
   word-break: break-word;
@@ -672,11 +673,20 @@ export default {
 }
 .post-comment {
   font-size: 14px;
-  color: black;
+  color: #333;
+  border-bottom: #667 1px solid;
   margin-top: 8px;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.5;
+}
+.post-comment-content{
+	font-size: 14px;
+	color: #333;
+	margin-top: 8px;
+	white-space: pre-wrap;
+	word-break: break-word;
+	line-height: 1.5;
 }
 .post-actions {
   display: flex;
@@ -704,7 +714,7 @@ export default {
   padding: 16px;
   margin-bottom: 20px;
   border-radius: 8px;
-  background-color: #f0f0f0;
+  background: linear-gradient(145deg, #eaeaea, #fafafa);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
 }

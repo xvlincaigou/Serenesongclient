@@ -13,8 +13,8 @@
 
     <!-- 动态和作品的标签 -->
     <view class="tabs">
-      <text :class="{active: selectedTab === 'allPost'}" @click="selectTab('allPost')">全部动态</text>
-      <text :class="{active: selectedTab === 'friendPost'}" @click="selectTab('friendPost')">词友动态</text>
+      <text :class="{active: selectedTab === 'allPost'}" @click="selectTab('allPost')">全部</text>
+      <text :class="{active: selectedTab === 'friendPost'}" @click="selectTab('friendPost')">词友</text>
     </view>
 
     <!-- 根据选择的标签显示内容 -->
@@ -54,21 +54,29 @@
 		        <view class="post-content">
 		          <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
 		        </view>
-		        <text class="post-comment">\n批注：\n{{ formatComment(post.Comment) }}</text>
-		      </view>
+		        <text class="post-comment">\n批注\n</text>
+		        <text class="post-comment-content">{{ formatComment(post.Comment) }}</text>
+				</view>
 		      <view v-else>
 		        <text class="post-content">{{ post.content }}</text>
 		      </view>
 		    </view>
 		    <!-- 动态操作按钮 -->
 		    <view class="post-actions">
-		      <button @click.stop="comment(post)">评论</button>
-		      <button
+		      <!-- 评论按钮，设置更小的尺寸 -->
+				<image 
+				  :src="'/static/community/icon_comment.png'" 
+				  @click.stop="comment(post)" 
+				  alt="评论"
+				  style="width: 24px; height: 24px; margin-right: 4px;" 
+				/>
+		      <!-- 点赞按钮 -->
+		      <image
+		        :class="isLiked(post) ? 'liked' : 'not-liked'"
 		        @click.stop="love(post)"
-		        :style="{ backgroundColor: isLiked(post) ? 'red' : 'white', color: isLiked(post) ? 'white' : 'grey' }"
-		      >
-		        点赞
-		      </button>
+		        alt="点赞"
+		        style="width: 24px; height: 24px; cursor: pointer;"
+		      />
 		    </view>
 		  </view>
 		</view>
@@ -114,7 +122,8 @@
               <view class="post-content">
                 <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
               </view>
-              <text class="post-comment">\n批注：\n{{ formatComment(post.Comment) }}</text>
+              <text class="post-comment">\n批注\n</text>
+              <text class="post-comment-content">{{ formatComment(post.Comment) }}</text>
             </view>
             <view v-else>
               <text class="post-content">{{ post.content }}</text>
@@ -122,14 +131,22 @@
           </view>
           <!-- 动态操作按钮 -->
           <view class="post-actions">
-            <button @click.stop="comment(post)">评论</button>
-            <button
+            <!-- 评论按钮，设置更小的尺寸 -->
+			<image 
+			  :src="'/static/community/icon_comment.png'" 
+			  @click.stop="comment(post)" 
+			  alt="评论"
+			  style="width: 24px; height: 24px; margin-right: 4px;" 
+			/>
+            <!-- 点赞按钮 -->
+            <image
+              :class="isLiked(post) ? 'liked' : 'not-liked'"
               @click.stop="love(post)"
-              :style="{ backgroundColor: isLiked(post) ? 'red' : 'white', color: isLiked(post) ? 'white' : 'grey' }"
-            >
-              点赞
-            </button>
+              alt="点赞"
+              style="width: 24px; height: 24px; cursor: pointer;"
+            />
           </view>
+
         </view>
       </view>
       <view v-else class="no-friendPosts">
@@ -415,15 +432,21 @@ export default {
 </script>
 
 <style>
+.liked {
+  content: url('/static/community/icon_loved.png');
+}
+
+.not-liked {
+  content: url('/static/community/icon_love.png');
+}
 .container {
   padding: 16px;
   position: relative;
 }
 
-/* 好友列表样式 */
 .friend-list {
   overflow-x: auto;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .friend-list-container {
@@ -440,8 +463,8 @@ export default {
 }
 
 .friend-avatar {
-  width: 60px;
-  height: 60px;
+  width: 55px;
+  height: 55px;
   border-radius: 30px;
 }
 
@@ -558,17 +581,27 @@ export default {
 }
 .post-comment {
   font-size: 14px;
-  color: black;
+  border-bottom: 1px solid #555;
+  color: #333;
   margin-top: 8px;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.5;
+}
+.post-comment-content{
+	font-size: 14px;
+	color: #333;
+	margin-top: 8px;
+	white-space: pre-wrap;
+	word-break: break-word;
+	line-height: 1.5;
 }
 /* 操作按钮样式 */
 .post-actions {
   display: flex;
   justify-content: space-around;
   margin-top: 10px;
+  margin-bottom: 10px;
 }
 .post-actions button {
   font-size: 12px;

@@ -17,9 +17,9 @@
     </view>
     
     <!-- 按钮容器 -->
-    <view class="button-container">
-      <button @click="saveComment" class="bottom-btn">保存批注</button>
-      <button @click="sendCollection" class = "bottom-btn">分享收藏</button>
+    <view class="bottom-buttons">
+      <button class="bottom-btn" @click="saveComment" >保存批注</button>
+      <button class = "bottom-btn"@click="sendCollection" >分享收藏</button>
     </view>
   </view>
 </template>
@@ -219,13 +219,14 @@ export default {
   width: 80%;
   padding: 6px 0;
   margin-left: 10px;
-  margin-right: 20px;
-  background: linear-gradient(145deg, #ffffff, #efefef);
+  margin-right: 10px;
+  background: linear-gradient(145deg, #f8f8f8, #e8e8e8);
   border: none;
   border-radius: 10px;
   text-align: center;
   font-size: 16px;
   color: #333;
+  font-weight: 500;
   box-shadow: 2px 2px 8px rgba(107, 107, 107, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;

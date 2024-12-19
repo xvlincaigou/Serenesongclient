@@ -19,7 +19,7 @@
 		    {{ isFollowed ? '取关' : '关注' }}
 		  </button>
         </view>
-        <view class="post-content">
+        <view class="post">
           <view v-if="post.Type === 0">
             <text class="post-title">{{ post.Classic.cipai[0] }}\n</text>
             <text class="post-author">{{ post.Classic.author }}</text>
@@ -39,7 +39,8 @@
             <view class="post-content">
               <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
             </view>
-            <text class="post-comment">\n批注：\n{{ formatComment(post.Comment) }}</text>
+            <text class="post-comment">\n批注\n</text>
+            <text class="post-comment-content">{{ formatComment(post.Comment) }}</text>
           </view>
           <view v-else>
             <text class="post-content">{{ post.content }}</text>
@@ -53,7 +54,7 @@
             class="comment-input"
             placeholder="请输入评论内容...">
         </textarea>
-        <button class="send-button" @click="sendComment">发送</button>
+        <button class="send-button" @click="sendComment">↑</button>
     </view>
 
     <!-- 评论列表 -->
@@ -65,16 +66,16 @@
           <view class="comment-info">
             <text class="comment-nickname">{{ comment.Name }}</text>
           </view>
+		  <!-- 删除按钮（仅当前用户的评论显示） -->
+		  <view class="comment-actions" v-if="comment.Comment.Commenter === user_id">
+		    <button @click="deleteComment(comment)"class="delete-button">删除</button>
+		  </view>
         </view>
         <!-- 评论内容 -->
         <view class="comment-content">
           <text>{{ comment.Comment.Content }}</text>
         </view>
 
-        <!-- 删除按钮（仅当前用户的评论显示） -->
-        <view class="comment-actions" v-if="comment.Comment.Commenter === user_id">
-          <button @click="deleteComment(comment)">删除</button>
-        </view>
       </view>
     </view>
   </view>
@@ -259,15 +260,27 @@ export default {
 
 <style>
 .container {
-  padding: 20px;
+    width: 100%;
+    padding: 20px; /* 控制容器内的左右间距，避免内容贴边 */
+    box-sizing: border-box;
+}
+
+.post-detail{
+	border-bottom: 1px solid #ddd;
+	padding-bottom: 10px; 
+	margin-bottom: 10px; 
 }
 
 /* 发动态的人的信息 */
 .post-header {
+  padding: 0px 3px;
   display: flex;
   flex-direction: row;
   align-items: center;
   margin-bottom: 8px;
+  border-bottom: 1px solid #ddd; 
+  padding-bottom: 10px; 
+  margin-bottom: 10px; 
 }
 
 .post-avatar {
@@ -305,7 +318,7 @@ export default {
 
 /* 动态内容样式 */
 .post {
-  background-color: #f0f0f0;
+  background-color: #fefcfa;
   padding: 16px;
   width: 100%;
   box-sizing: border-box;
@@ -336,12 +349,21 @@ export default {
   max-width: 100%;
 }
 .post-comment {
+  border-bottom: 1px solid #a8a8a8;
   font-size: 14px;
-  color: black;
+  color: #666;
   margin-top: 8px;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.5;
+}
+.post-comment-content{
+	font-size: 14px;
+	color: #666;
+	margin-top: 8px;
+	white-space: pre-wrap;
+	word-break: break-word;
+	line-height: 1.5;
 }
 /* 操作按钮样式 */
 .post-actions {
@@ -358,49 +380,68 @@ export default {
   cursor: pointer;
 }
 
-/* 评论输入框 */
+/* 评论输入容器 */
 .comment-input-container {
   display: flex;
-  align-items: flex-start;
+  align-items: center;  /* 对齐按钮和输入框 */
   margin-top: 20px;
 }
 
+/* 评论输入框 */
 .comment-input {
   flex: 1;
-  min-height: 20px;
-  max-height: 20px;
-  overflow-y: hidden;
+  height: 20px;  /* 固定高度 */
+  overflow: hidden;  /* 不显示滚动条 */
   border: 1px solid #ccc;
-  padding: 4px;
-  font-size: 14px;
-  border-radius: 4px;
-  resize: none;
+  padding: 7px 12px;  /* 内边距 */
+  font-size: 15px;
+  border-radius: 6px;
+  background-color: #fff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+.comment-input:focus {
+  border-color: #3498db;  /* 聚焦时的边框颜色 */
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);  /* 聚焦时的阴影效果 */
+  outline: none;  /* 去掉默认的输入框外框 */
+}
+
+/* 发送按钮 */
 .send-button {
   width: 30px;
   height: 30px;
-  background-color: green;
+  background-color: #504e4c;  /* 按钮背景色 */
   color: white;
   padding: 0;
   margin-left: 10px;
   border: none;
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: 50%;  /* 圆形按钮 */
   display: flex;
   justify-content: center;
   align-items: center;
-  line-height: 40px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
+
+.send-button:hover {
+  background-color: #3b2d17;  /* 悬浮时的背景色 */
+}
+
+.send-button:active {
+  background-color: #182f7a;  /* 按钮点击时的背景色 */
+}
+
 
 /* 评论列表 */
 .comment-list {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 
 /* 单条评论 */
 .comment-item {
-  margin-bottom: 20px;
+  background-color: white; /* 白色背景 */
+  padding: 5px;
 }
 
 /* 评论者信息 */
@@ -411,9 +452,10 @@ export default {
 }
 
 .comment-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* 圆形头像 */
+    object-fit: cover; /* 确保头像不变形 */
 }
 
 .comment-info {
@@ -423,7 +465,9 @@ export default {
 }
 
 .comment-nickname {
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333; /* 深灰色 */
 }
 
 .comment-time {
@@ -433,25 +477,38 @@ export default {
 
 /* 评论内容 */
 .comment-content {
-  background-color: #f0f0f0;
-  padding: 16px;
-  margin-top: 8px;
-  border-radius: 8px;
+  background-color: #ffffff; /* 背景色略浅 */
+    padding: 12px;
+    margin-top: 8px;
+	border-bottom: 1px #adadad solid;
+    font-size: 14px;
+    color: #333; /* 深灰色 */
+    line-height: 1.5;
 }
 
 /* 评论操作按钮 */
 .comment-actions {
+  right:40px;
+  position: absolute;
   display: flex;
   justify-content: flex-start;
   margin-top: 10px;
 }
 
-.comment-actions button {
-  font-size: 12px;
-  color: grey;
-  background-color: white;
+.delete-button {
+  background-color: #bdbdbd; /* 红色背景 */
+  color: white;
   border: none;
-  margin-right: 10px;
+  margin-bottom: 10px;
+  padding: 0px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.delete-button:hover {
+  background-color: #c0392b; /* 悬浮时颜色加深 */
 }
 
 /* 回复输入框 */
@@ -554,25 +611,42 @@ export default {
 
 /* 关注按钮样式 */
 .follow-button {
-  border-right: 6px;
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: 1px solid;
-  background-color: white;
-  font-size: 12px;
+  position: absolute;
+  right: 25px;
+  padding: 0px 20px;
+  border-radius: 30px; /* 圆角按钮 */
+  border: 0.1px solid  ;
+  background-color: #3498db; /* 背景颜色 */
+  color: white; /* 文字颜色 */
+  font-size: 14px; /* 字体大小 */
+  font-weight: bold; /* 字体加粗 */
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: all 0.3s ease; 
+  box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.1); /* 阴影 */
 }
+
 
 .following {
   border-color: gray;
   color: gray;
+  background-color: #ffffff; /* 已关注时背景色 */
+}
+
+.following:hover {
+  background-color: #dcdcdc; /* 悬浮时背景色 */
 }
 
 .unfollow {
-  border-color: red;
-  color: red;
+  border-color: #a2bbff;
+  color: #a7c6ff;
+  background-color: #ffffff; /* 取消关注时背景色 */
 }
+
+.unfollow:hover {
+  background-color: #eefcff; /* 悬浮时背景色 */
+}
+
 </style>

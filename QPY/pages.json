@@ -9,31 +9,31 @@
     {
       "path": "pages/search/index/index",
       "style": {
-        "navigationBarTitleText": "搜索"
+        "navigationBarTitleText": "博览"
       }
     },
     {
       "path": "pages/community/index/index",
       "style": {
-        "navigationBarTitleText": "群组"
+        "navigationBarTitleText": "流觞"
       }
     },
     {
       "path": "pages/write/index/index",
       "style": {
-        "navigationBarTitleText": "撰写"
+        "navigationBarTitleText": "赋词"
       }
     },
     {
       "path": "pages/dialog/index/index",
       "style": {
-        "navigationBarTitleText": "对话列表"
+        "navigationBarTitleText": "锦书"
       }
     },
     {
       "path": "pages/user/index/index",
       "style": {
-        "navigationBarTitleText": "个人中心"
+        "navigationBarTitleText": "自画"
       }
     }
   ],
@@ -252,31 +252,31 @@
         "pagePath": "pages/search/index/index",
         "iconPath": "static/tabbar/search-icon.png",
         "selectedIconPath": "static/tabbar/search-icon-selected.png",
-        "text": "搜索"
+        "text": "博览"
       },
       {
         "pagePath": "pages/community/index/index",
         "iconPath": "static/tabbar/community-icon.png",
         "selectedIconPath": "static/tabbar/community-icon-selected.png",
-        "text": "社区"
+        "text": "流觞"
       },
       {
         "pagePath": "pages/write/index/index",
         "iconPath": "static/tabbar/write-icon.png",
         "selectedIconPath": "static/tabbar/write-icon-selected.png",
-        "text": "创作"
+        "text": "赋词"
       },
       {
         "pagePath": "pages/dialog/index/index",
         "iconPath": "static/tabbar/dialog-icon.png",
         "selectedIconPath": "static/tabbar/dialog-icon-selected.png",
-        "text": "消息"
+        "text": "锦书"
       },
       {
         "pagePath": "pages/user/index/index",
         "iconPath": "static/tabbar/user-icon.png",
         "selectedIconPath": "static/tabbar/user-icon-seleted.png",
-        "text": "我"
+        "text": "自画"
       }
     ]
   }

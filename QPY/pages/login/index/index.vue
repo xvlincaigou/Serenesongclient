@@ -272,7 +272,12 @@ export default {
 	        if (res.data.subscribed_to === null) {
 	          subscribedToData = [];  // 若为 null，则存入空数组
 	        } else if (res.data.subscribed_to && res.data.subscribed_to.length > 0) {
-	          subscribedToData = res.data.subscribed_to[0].SubscribedTo || [];  // 存入 SubscribedTo
+			  console.log('check1:', res.data.subscribed_to);
+	          res.data.subscribed_to.forEach(item => {
+	            if (item.ID) {
+	                subscribedToData.push(item.ID);
+	            }
+	          });
 	        }
 	
 	        // 存储处理后的数据
@@ -313,7 +318,12 @@ export default {
 				if (res.data.subscribers === null) {
 				  subscribersData = [];  // 若为 null，则存入空数组
 				} else if (res.data.subscribers && res.data.subscribers.length > 0) {
-				  subscribersData = res.data.subscribers[0].Subscribers || [];
+				  console.log('check2:', res.data.subscribers);
+				  res.data.subscribers.forEach(item => {
+				    if (item.ID) {
+				        subscribersData.push(item.ID);
+				    }
+				  });
 				}
 				
 	            uni.setStorage({

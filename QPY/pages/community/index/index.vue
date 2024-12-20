@@ -342,9 +342,8 @@ export default {
 	  },
 	  viewFriendByIcon(friend) {
 		  if(friend === this.user_id) {
-		  	uni.navigateTo({
-		  	  // url: `/pages/user/index/index`
-			  url: `/pages5_user/friendProfile/friendProfile?user_id=${friend}`
+		  	uni.switchTab({
+		  	  url: `/pages/user/index/index`
 		  	});
 		  } else {
 		  	uni.navigateTo({

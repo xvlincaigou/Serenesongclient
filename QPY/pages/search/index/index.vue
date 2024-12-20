@@ -41,6 +41,7 @@ export default {
     return {
       searchText: '',
       isFocused: false,
+	  baseurl: getApp().globalData.baseURL,
       recommendation: {
         text: '',
         image: '',
@@ -71,7 +72,7 @@ export default {
     fetchRecommendation() {
       // 获取推荐词
       uni.request({
-        url: 'http://124.221.16.68:8080/recommendCi',
+        url: `${this.baseurl}/recommendCi`,
         method: 'GET',
         success: (res) => {
           if (res.statusCode === 200 && res.data.recommend) {
@@ -93,7 +94,7 @@ export default {
 
       // 获取推荐图片
       uni.request({
-        url: 'http://124.221.16.68:8080/recommendPic',
+        url: `${this.baseurl}/recommendPic`,
         method: 'GET',
         responseType: 'arraybuffer',
         success: (res) => {

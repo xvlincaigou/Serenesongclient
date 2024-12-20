@@ -211,8 +211,7 @@ export default {
 			user_id: this.user_id
 		  },
           success: (res) => {
-            if (res.statusCode === 200) {
-              console.log('收藏数量:', res.data.collections.length);
+            if (res.data.collections && res.statusCode === 200) {
               this.favoritesCount = res.data.collections.length;
             }
           },

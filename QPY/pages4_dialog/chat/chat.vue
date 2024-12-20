@@ -7,7 +7,8 @@
     </view>
 
     <view class="message-box">
-      <text class="message">{{ message.content }}</text>
+	  <text class="message-title">消息内容：</text>
+      <text class="message">\n{{ message.content }}</text>
     </view>
 	
 	<view class="message-box">
@@ -70,7 +71,7 @@ export default {
 	      method: 'POST',
 	      data: {
 	        token: this.token,
-	        receiver: this.message.receiver,
+	        receiver: this.message.sender,
 	        content: this.messageContent,
 			replyToMessageId: this.message._id,
 	      },

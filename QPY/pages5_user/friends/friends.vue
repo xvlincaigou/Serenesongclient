@@ -9,25 +9,33 @@
     <!-- 列表区域 -->
     <scroll-view class="content" scroll-y="true">
         <view v-if="selectedTab === 'follow'">
-          <view v-if="subscribedTo.length === 0">
+          <view v-if="subscribedTo.length === 0 || !subscribedTo">
             <text>当前还没有关注</text>
           </view>
           <view v-else>
             <view v-for="(friend, index) in subscribedTo" :key="index" class="friend-item" @click="viewFriendProfile(friend)">
-              <image :src="friend.avatar ? 'data:image/png;base64,' + friend.avatar : ''" class="friend-avatar" />
-              <text class="friend-name">{{ friend.name }}</text>
+			  <view v-if="friend.name === ''">
+				<text class="friend-name">未命名用户</text>
+			  </view>
+			  <view v-else>
+				<text class="friend-name">{{ friend.name }}</text>
+			  </view>
             </view>
           </view>
         </view>
         
         <view v-else-if="selectedTab === 'fans'">
-          <view v-if="subscribers.length === 0">
+          <view v-if="subscribers.length === 0 || !subscribers">
             <text>当前还没有粉丝</text>
           </view>
           <view v-else>
             <view v-for="(friend, index) in subscribers" :key="index" class="friend-item" @click="viewFriendProfile(friend)">
-              <image :src="friend.avatar ? 'data:image/png;base64,' + friend.avatar : ''" class="friend-avatar" />
-              <text class="friend-name">{{ friend.name }}</text>
+              <view v-if="friend.name === ''">
+              	<text class="friend-name">未命名用户</text>
+              </view>
+              <view v-else>
+              	<text class="friend-name">{{ friend.name }}</text>
+              </view>
             </view>
           </view>
         </view>
@@ -69,7 +77,7 @@ export default {
     // 通用的获取用户信息函数
     fetchUserInfo(user_id, targetArray) {
       uni.request({
-        url: `${this.baseurl}/getUserInfo`,
+        url: `${this.baseurl}/getUserInfoText`,
         method: 'GET',
         data: {
           token: this.token,
@@ -79,9 +87,8 @@ export default {
           if (res.statusCode === 200) {
             if (res.data) {
               // 将 user_id 添加到用户信息对象中
-              const friendWithId = { user_id: user_id, ...res.data };
-              targetArray.push(friendWithId);
-              this.$set(targetArray, targetArray.length - 1, friendWithId); // 确保响应式
+			  console.log('originsss:', res.data);
+              targetArray.push(res.data);
               console.log('friend:', targetArray);
             }
           } else {
@@ -114,6 +121,7 @@ export default {
         return;
       }
       
+	  console.log("sss:", this.subscribers);
       subscribers.forEach(user_id => {
         this.fetchUserInfo(user_id, this.subscribers);
       });
@@ -133,20 +141,21 @@ export default {
         return;
       }
       
+	  console.log("sss:", this.subscribedTo);
       subscribedTo.forEach(user_id => {
         this.fetchUserInfo(user_id, this.subscribedTo);
       });
     },
     viewFriendProfile(friend) {
       console.log('好友信息:', friend);
-      if (friend.user_id) {
-		if (friend.user_id === this.personal_id) {
+      if (friend._id) {
+		if (friend._id === this.personal_id) {
 			uni.switchTab({
 			  url: `/pages/user/index/index`
 			});
 		} else {
 			uni.navigateTo({
-			  url: `/pages5_user/friendProfile/friendProfile?user_id=${friend.user_id}`
+			  url: `/pages5_user/friendProfile/friendProfile?user_id=${friend._id}`
 			});
 		}
       } else {

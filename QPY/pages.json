@@ -163,7 +163,19 @@
           "style": {
             "navigationBarTitleText": "消息详情"
           }
-        }
+        },
+		{
+		  "path": "nameDetail/nameDetail",
+		  "style": {
+		    "navigationBarTitleText": "消息列表"
+		  }
+		},
+		{
+		  "path": "fromDetail/fromDetail",
+		  "style": {
+		    "navigationBarTitleText": "消息列表"
+		  }
+		}
       ]
     },
     {

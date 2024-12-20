@@ -5,46 +5,56 @@
       <input placeholder="搜索好友" v-model="searchInput" />
       <button class="add-btn" @click="searchUser">+</button>
     </view>
-	
-	<view class="tabs">
-	  <text :class="{active: selectedTab === 'get'}" @click="selectTab('get')">已接收</text>
-	  <text :class="{active: selectedTab === 'send'}" @click="selectTab('send')">已发送</text>
-	</view>
-	
-	<!-- 列表区域 -->
-	<scroll-view class="content" scroll-y="true">
-	    <view v-if="selectedTab === 'get'">
-	      <view v-if="getMessage.length === 0">
-	        <text>当前没有收到的消息</text>
-	      </view>
-	      <view v-else>
-	        <view v-for="(message, index) in reversedGetMessage" :key="index" class="message-item" @click="viewGetMessage(message)">
-			  <view class="friend-header">
-			    <text class="friend-name">
-			      来自：{{ message.senderName }}
-			    </text>
-			    <text class="message-time">\n {{ formatDate(message.time) }}</text> 
-			  </view>
-	        </view>
-	      </view>
-	    </view>
-	    
-	    <view v-else-if="selectedTab === 'send'">
-	      <view v-if="sendMessage.length === 0">
-	        <text>当前没有发送的消息</text>
-	      </view>
-	      <view v-else>
-	        <view v-for="(message, index) in reversedSendMessage" :key="index" class="message-item" @click="viewSendMessage(message)">
-			  <view class="friend-header">
-			    <text class="friend-name">
-			      {{ message.replyTo === '000000000000000000000000' ? '发给：' : '回复：' }}{{ message.receiverName }}
-			    </text>
-			    <text class="message-time">\n {{ formatDate(message.time)}}</text> 
-			  </view>
-	        </view>
-	      </view>
-	    </view>
-	</scroll-view>
+  
+    <view class="tabs">
+      <text :class="{active: selectedTab === 'get'}" @click="selectTab('get')">已接收</text>
+      <text :class="{active: selectedTab === 'send'}" @click="selectTab('send')">已发送</text>
+    </view>
+  
+    <!-- 列表区域 -->
+    <scroll-view class="content" scroll-y="true">
+      <!-- 已接收消息列表 -->
+      <view v-if="selectedTab === 'get'">
+		<view v-if="!uniqueSenderNames || uniqueSenderNames.length === 0">
+		  <text>当前没有收到的消息</text>
+		</view>
+		<view v-else>
+		  <view 
+		    v-for="(senderName, index) in uniqueSenderNames" 
+		    :key="index" 
+		    class="message-item" 
+		    @click="viewSenderDetail(senderName)"
+		  >
+		    <view class="friend-header">
+		      <text class="friend-name">
+		        来自：{{ senderName }}
+		      </text>
+		    </view>
+		  </view>
+		</view>
+      </view>
+      
+      <!-- 已发送消息唯一接收者列表 -->
+      <view v-else-if="selectedTab === 'send'">
+        <view v-if="!uniqueReceiverNames || uniqueReceiverNames.length === 0">
+          <text>当前没有发送的消息</text>
+        </view>
+        <view v-else>
+          <view 
+            v-for="(receiverName, index) in uniqueReceiverNames" 
+            :key="index" 
+            class="message-item" 
+            @click="viewReceiverDetail(receiverName)"
+          >
+            <view class="friend-header">
+              <text class="friend-name">
+                发给：{{ receiverName }}
+              </text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
   </view>
 </template>
 
@@ -53,171 +63,211 @@ export default {
   data() {
     return {
       searchInput: "",
-	  selectedTab: 'get',
+      selectedTab: 'get',
       getMessage: [],
-	  sendMessage: [],
-	  baseurl: getApp().globalData.baseURL,
-	  token: "",
-	  personal_id: "",
+      sendMessage: [],
+      baseurl: getApp().globalData.baseURL,
+      token: "",
+      personal_id: "",
     };
   },
   computed: {
-    filteredFriends() {
-      if (!this.searchText) return this.friends;
-      return this.friends.filter(friend =>
-        friend.nickname.toLowerCase().includes(this.searchText.toLowerCase())
-      );
+    // 反转已接收的消息列表
+    reversedGetMessage() {
+      if (!this.getMessage || this.getMessage.length === 0) {
+        return [];
+      }
+      return this.getMessage.slice().reverse();
     },
-	reversedGetMessage() {
-	  return this.getMessage.slice().reverse();
-	},
-	reversedSendMessage() {
-	  return this.sendMessage.slice().reverse();
+    // 反转已发送的消息列表
+    reversedSendMessage() {
+      if (!this.sendMessage || this.sendMessage.length === 0) {
+        return [];
+      }
+      return this.sendMessage.slice().reverse();
+    },
+    // 提取唯一的 receiverName
+    uniqueReceiverNames() {
+      const namesSet = new Set();
+      this.reversedSendMessage.forEach(message => {
+        if (message.receiverName) {
+          namesSet.add(message.receiverName);
+        }
+      });
+      return Array.from(namesSet);
+    },
+	uniqueSenderNames() {
+	  const namesSet = new Set();
+	  this.reversedGetMessage.forEach(message => {
+	    if (message.senderName) {
+	      namesSet.add(message.senderName);
+	    }
+	  });
+	  return Array.from(namesSet);
 	}
   },
   onLoad() {
-	this.token = uni.getStorageSync('userToken');
-	this.personal_id = uni.getStorageSync('personal_id');
+    this.token = uni.getStorageSync('userToken');
+    this.personal_id = uni.getStorageSync('personal_id');
     this.fetchGetMessage();
     this.fetchSendMessage();
   },
   onShow() {
-  	this.fetchGetMessage();
-  	this.fetchSendMessage();
-	this.searchUser();
+    this.fetchGetMessage();
+    this.fetchSendMessage();
+    this.searchUser();
   },
   methods: {
-	searchUser() {
-		if (!this.searchInput) {
-			return; // 如果搜索框为空，不发送请求
-		}
-		console.log(this.searchInput);
-		
-	    uni.request({
-	      url: `${this.baseurl}/searchUserByName`,
-	      method: 'GET',
-		  data: { 
-			token: this.token,
-			name: this.searchInput, 
-		  },
-	      success: (res) => {
-	      	if (res.statusCode === 200 && res.data) {
-				console.log(res.data);
-				if(res.data.id === this.personal_id) {
-					uni.switchTab({
-					  url: `/pages/user/index/index`
-					});
-				} else {
-					uni.navigateTo({
-					  url: `/pages5_user/friendProfile/friendProfile?user_id=${res.data.id}`
-					});
-				}
-				this.searchInput = '';
-			} else {
-				uni.showToast({
-				  title: '未搜索到用户',
-				  icon: 'none',
-				});
-			}
-	      },
-		  fail: () => {
-		    uni.showToast({
-		      title: '请求失败',
-		      icon: 'none',
-		    });
-		  }
-	    });
-	},
-	selectTab(tab) {
-	    if (this.selectedTab !== tab) {
-	      this.selectedTab = tab;
-	    }
-	},
+    // 搜索用户方法
+    searchUser() {
+      if (!this.searchInput) {
+        return; // 如果搜索框为空，不发送请求
+      }
+      console.log(this.searchInput);
+      
+      uni.request({
+        url: `${this.baseurl}/searchUserByName`,
+        method: 'GET',
+        data: { 
+          token: this.token,
+          name: this.searchInput, 
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            console.log(res.data);
+            if(res.data.id === this.personal_id) {
+              uni.switchTab({
+                url: `/pages/user/index/index`
+              });
+            } else {
+              uni.navigateTo({
+                url: `/pages5_user/friendProfile/friendProfile?user_id=${res.data.id}`
+              });
+            }
+            this.searchInput = '';
+          } else {
+            uni.showToast({
+              title: '未搜索到用户',
+              icon: 'none',
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请求失败',
+            icon: 'none',
+          });
+        }
+      });
+    },
+    // 选项卡切换
+    selectTab(tab) {
+      if (this.selectedTab !== tab) {
+        this.selectedTab = tab;
+      }
+    },
+    // 导航方法
     navigateTo(page) {
       uni.navigateTo({ url: `/pages4_dialog/${page}/${page}` });
     },
-	fetchGetMessage() {
-		if (!this.token) {
-		  this.token = uni.getStorageSync('userToken');
-		}
-		this.getMessage = [];
-		uni.request({
-		  url: `${this.baseurl}/getMessagesIGet`,
-		  method: 'GET',
-		  data: {
-		    token: this.token,
-		  },
-		  success: (res) => {
-		    if (res.statusCode === 200) {
-		      if (res.data) {
-		        console.log(res.data);
-				this.getMessage = res.data.messages;
-		      }
-		    } else {
-		      uni.showToast({
-		        title: '获取信息失败',
-		        icon: 'none',
-		      });
-		    }
-		  },
-		  fail: () => {
-		    uni.showToast({
-		      title: '请求失败',
-		      icon: 'none',
-		    });
-		  }
-		});
-	},
-	fetchSendMessage() {
-		if (!this.token) {
-		  this.token = uni.getStorageSync('userToken');
-		}
-		this.sendMessage = [];
-		uni.request({
-		  url: `${this.baseurl}/getMessagesISend`,
-		  method: 'GET',
-		  data: {
-		    token: this.token,
-		  },
-		  success: (res) => {
-		    if (res.statusCode === 200) {
-		      if (res.data) {
-		        console.log(res.data);
-				this.sendMessage = res.data.messages;
-		      }
-		    } else {
-		      uni.showToast({
-		        title: '获取信息失败',
-		        icon: 'none',
-		      });
-		    }
-		  },
-		  fail: () => {
-		    uni.showToast({
-		      title: '请求失败',
-		      icon: 'none',
-		    });
-		  }
-		});
-	},
-	viewGetMessage(message) {
-		uni.navigateTo({
-		  url: `/pages4_dialog/chat/chat?message=${encodeURIComponent(JSON.stringify(message))}`
-		});
-	},
-	viewSendMessage(message) {
-	  console.log(message);
-	  // 将 message 对象转化为 JSON 字符串并传递给目标页面
+    // 获取已接收的消息
+    fetchGetMessage() {
+      if (!this.token) {
+        this.token = uni.getStorageSync('userToken');
+      }
+      this.getMessage = [];
+      uni.request({
+        url: `${this.baseurl}/getMessagesIGet`,
+        method: 'GET',
+        data: {
+          token: this.token,
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            if (res.data) {
+              console.log(res.data);
+              this.getMessage = res.data.messages;
+            }
+          } else {
+            uni.showToast({
+              title: '获取信息失败',
+              icon: 'none',
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请求失败',
+            icon: 'none',
+          });
+        }
+      });
+    },
+    // 获取已发送的消息
+    fetchSendMessage() {
+      if (!this.token) {
+        this.token = uni.getStorageSync('userToken');
+      }
+      this.sendMessage = [];
+      uni.request({
+        url: `${this.baseurl}/getMessagesISend`,
+        method: 'GET',
+        data: {
+          token: this.token,
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            if (res.data) {
+              console.log(res.data);
+              this.sendMessage = res.data.messages;
+            }
+          } else {
+            uni.showToast({
+              title: '获取信息失败',
+              icon: 'none',
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请求失败',
+            icon: 'none',
+          });
+        }
+      });
+    },
+    // 查看已接收的消息详情
+    viewGetMessage(message) {
+      uni.navigateTo({
+        url: `/pages4_dialog/chat/chat?message=${encodeURIComponent(JSON.stringify(message))}`
+      });
+    },
+    // 查看已发送的消息详情
+    viewSendMessage(message) {
+      console.log(message);
+      // 将 message 对象转化为 JSON 字符串并传递给目标页面
+      uni.navigateTo({
+        url: `/pages4_dialog/messageDetail/messageDetail?message=${encodeURIComponent(JSON.stringify(message))}`
+      });
+    },
+    // 点击 receiverName 跳转到 nameDetail 页面
+    viewReceiverDetail(receiverName) {
+      uni.navigateTo({
+        url: `/pages4_dialog/nameDetail/nameDetail?receiverName=${encodeURIComponent(receiverName)}`
+      });
+    },
+	viewSenderDetail(senderName) {
 	  uni.navigateTo({
-	    url: `/pages4_dialog/messageDetail/messageDetail?message=${encodeURIComponent(JSON.stringify(message))}`
+	    url: `/pages4_dialog/fromDetail/fromDetail?senderName=${encodeURIComponent(senderName)}`
 	  });
 	},
+    // 格式化日期
     formatDate(dateString) {
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     },
   }
 };

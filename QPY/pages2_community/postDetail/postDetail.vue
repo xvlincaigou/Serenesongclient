@@ -12,12 +12,14 @@
             </view>
           </view>
 		  <!-- 关注按钮 -->
-		  <button 
-		    class="follow-button" 
-		    :class="{ 'following': isFollowed, 'unfollow': !isFollowed }"
-		    @click="toggleFollow">
-		    {{ isFollowed ? '取关' : '关注' }}
-		  </button>
+		  <view v-if="post.author != user_id">
+			<button
+			    class="follow-button" 
+			    :class="{ 'following': isFollowed, 'unfollow': !isFollowed }"
+			    @click="toggleFollow">
+			    {{ isFollowed ? '取关' : '关注' }}
+			</button>
+		  </view>
         </view>
         <view class="post">
           <view v-if="post.Type === 0">
@@ -625,6 +627,7 @@ export default {
 .follow-button {
   position: absolute;
   right: 25px;
+  top: 25px;
   padding: 0px 20px;
   border-radius: 30px; /* 圆角按钮 */
   border: 0.1px solid  ;

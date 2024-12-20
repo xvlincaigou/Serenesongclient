@@ -5,19 +5,16 @@
 		<text class="receiver-title">收信人：{{ message.receiverName }}</text>
 		<text class="time">\n {{ formatDate(message.time) }}</text>
     </view>
+	<view v-if="message.replyTo != '000000000000000000000000'">
+	  <view class="message-box">
+	    <text class="message-title">回复消息内容：</text>
+	    <text class="message">\n{{ messageReturn }}</text>
+	  </view>
+	</view>
 
     <view class="message-box">
-      <text class="message">{{ message.content }}</text>
-    </view>
-	
-	<view class="message-box">
-	  <text class="message-title">消息内容</text>
-	  <textarea v-model="messageContent" class="message" placeholder="请输入新消息内容"></textarea>
-	</view>
-    
-    <!-- 按钮容器 -->
-    <view class="button-container">
-      <button @click="sendMessage" class="bottom-btn">再发一条</button>
+	  <text class="message-title">消息内容：</text>
+      <text class="message">\n{{ message.content }}</text>
     </view>
   </view>
 </template>
@@ -30,12 +27,16 @@ export default {
       token: '',
 	  message: [],
 	  messageContent: '',
+	  messageReturn: '',
     };
   },
   onLoad(options) {
     this.token = uni.getStorageSync('userToken');
 	this.message = JSON.parse(decodeURIComponent(options.message));
 	console.log(this.message);
+  },
+  onShow() {
+	this.findMessage();
   },
   methods: {  
     sendMessage() {
@@ -81,6 +82,29 @@ export default {
 	      },
 	  });
     },
+	findMessage() {
+		if (this.message.replyTo === '000000000000000000000000') {
+			return;
+		}
+		console.log(this.message.replyTo);
+		uni.request({
+		    url: `${this.baseurl}/getMessageById`,
+		    method: 'GET',
+			data: {
+				messageId: this.message.replyTo,
+			},
+		    success: (res) => {
+			  console.log('reply:', res.data);
+			  this.messageReturn = res.data.content;
+		    },
+		    fail: () => {
+		      uni.showToast({
+		        title: '请求失败，请稍后重试',
+		        icon: 'none',
+		      });
+		    },
+		});
+	},
 	formatDate(dateString) {
 	    const date = new Date(dateString);
 	    const year = date.getFullYear();

@@ -48,6 +48,7 @@ export default {
   data() {
     return {
       searchText: '',
+	  baseurl: getApp().globalData.baseURL,
       isFocused: false,
       tags: [
        { name: '满江红', description: '激昂深沉\n英雄气概\n人生感悟' },
@@ -148,7 +149,7 @@ export default {
 	fetchCipaiDetails(name) {
 	  return new Promise((resolve, reject) => {
 		uni.request({
-		  url: `http://124.221.16.68:8080/search?keyword=${encodeURIComponent(name)}&option=cipai`,
+		  url: `${this.baseurl}/search?keyword=${encodeURIComponent(name)}&option=cipai`,
 		  method: 'GET',
 		  success: (res) => {
 			if (res.statusCode === 200 && res.data.matched_cipai[name]) {

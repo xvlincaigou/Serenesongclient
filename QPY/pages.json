@@ -1,0 +1,307 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/index/index",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/search/index/index",
+      "style": {
+        "navigationBarTitleText": "博览"
+      }
+    },
+    {
+      "path": "pages/community/index/index",
+      "style": {
+        "navigationBarTitleText": "流觞"
+      }
+    },
+    {
+      "path": "pages/write/index/index",
+      "style": {
+        "navigationBarTitleText": "赋词"
+      }
+    },
+    {
+      "path": "pages/dialog/index/index",
+      "style": {
+        "navigationBarTitleText": "锦书"
+      }
+    },
+    {
+      "path": "pages/user/index/index",
+      "style": {
+        "navigationBarTitleText": "自画"
+      }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "pages1_search",
+      "pages": [
+        {
+          "path": "searchresultList/searchresultList_ci",
+          "style": {
+            "navigationBarTitleText": "词搜索结果列表"
+          }
+        },
+        {
+          "path": "searchresultList/searchresultList_cipai",
+          "style": {
+            "navigationBarTitleText": "词牌搜索结果列表"
+          }
+        },
+        {
+          "path": "searchresultList/searchresultList_author",
+          "style": {
+            "navigationBarTitleText": "词人搜索结果列表"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages2_community",
+      "pages": [
+        {
+          "path": "createPost/createPost",
+          "style": {
+            "navigationBarTitleText": "发帖"
+          }
+        },
+        {
+          "path": "postDetail/postDetail",
+          "style": {
+            "navigationBarTitleText": "帖子详情"
+          }
+        },
+        {
+          "path": "friendProfile/friendProfile",
+          "style": {
+            "navigationBarTitleText": "好友资料"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages3_write",
+      "pages": [
+        {
+          "path": "choose/choose",
+          "style": {
+            "navigationBarTitleText": "选择词牌"
+          }
+        },
+        {
+          "path": "userWorkList/userWorkList",
+          "style": {
+            "navigationBarTitleText": "作品列表"
+          }
+        },
+        {
+          "path": "draftList/draftList",
+          "style": {
+            "navigationBarTitleText": "草稿箱"
+          }
+        },
+        {
+          "path": "draftDetail/draftDetail",
+          "style": {
+            "navigationBarTitleText": "草稿详情"
+          }
+        },
+        {
+          "path": "userWorkDetail/userWorkDetail",
+          "style": {
+            "navigationBarTitleText": "作品详情"
+          }
+        },
+		{
+		  "path": "draftDetail/continueWrite",
+		  "style": {
+		    "navigationBarTitleText": "继续创作"
+		  }
+		},
+		{
+		  "path": "userWorkDetail/modifyUserWork",
+		  "style": {
+		    "navigationBarTitleText": "修改作品"
+		  }
+		},
+        {
+          "path": "write/write",
+          "style": {
+            "navigationBarTitleText": "创作"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages4_dialog",
+      "pages": [
+        {
+          "path": "addFriend/addFriend",
+          "style": {
+            "navigationBarTitleText": "发消息"
+          }
+        },
+		{
+		  "path": "sendMessage/sendMessage",
+		  "style": {
+		    "navigationBarTitleText": "发消息"
+		  }
+		},
+		{
+		  "path": "messageDetail/messageDetail",
+		  "style": {
+		    "navigationBarTitleText": "消息详情"
+		  }
+		},
+        {
+          "path": "chat/chat",
+          "style": {
+            "navigationBarTitleText": "消息详情"
+          }
+        },
+		{
+		  "path": "nameDetail/nameDetail",
+		  "style": {
+		    "navigationBarTitleText": "消息列表"
+		  }
+		},
+		{
+		  "path": "fromDetail/fromDetail",
+		  "style": {
+		    "navigationBarTitleText": "消息列表"
+		  }
+		}
+      ]
+    },
+    {
+      "root": "pages5_user",
+      "pages": [
+        {
+          "path": "creation/creation",
+          "style": {
+            "navigationBarTitleText": "创作"
+          }
+        },
+        {
+          "path": "editProfile/editProfile",
+          "style": {
+            "navigationBarTitleText": "编辑资料"
+          }
+        },
+        {
+          "path": "favoriteDetail/favoriteDetail",
+          "style": {
+            "navigationBarTitleText": "收藏详情"
+          }
+        },
+        {
+          "path": "favorites/favorites",
+          "style": {
+            "navigationBarTitleText": "我的收藏"
+          }
+        },
+        {
+          "path": "favoriteList/favoriteList",
+          "style": {
+            "navigationBarTitleText": "我的收藏"
+          }
+        },
+        {
+          "path": "friendProfile/friendProfile",
+          "style": {
+            "navigationBarTitleText": "好友资料"
+          }
+        },
+        {
+          "path": "friends/friends",
+          "style": {
+            "navigationBarTitleText": "我的好友"
+          }
+        },
+		{
+		  "path": "friendWork/friendWork",
+		  "style": {
+		    "navigationBarTitleText": "好友作品"
+		  }
+		},
+        {
+          "path": "postDetail/postDetail",
+          "style": {
+            "navigationBarTitleText": "帖子详情"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages_info",
+      "pages": [
+        {
+          "path": "info_ci/info_ci",
+          "style": {
+            "navigationBarTitleText": "词详情"
+          }
+        },
+        {
+          "path": "info_cipai/info_cipai",
+          "style": {
+            "navigationBarTitleText": "词牌详情"
+          }
+        },
+        {
+          "path": "info_author/info_author",
+          "style": {
+            "navigationBarTitleText": "词人详情"
+          }
+        }
+      ]
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "清平乐",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#fefdf9"
+  },
+  "tabBar": {
+    "backgroundColor": "#f3f3f3",
+    "color": "#a2a2a7",
+    "selectedColor": "#2b2b2b",
+    "list": [
+      {
+        "pagePath": "pages/search/index/index",
+        "iconPath": "static/tabbar/search-icon.png",
+        "selectedIconPath": "static/tabbar/search-icon-selected.png",
+        "text": "博览"
+      },
+      {
+        "pagePath": "pages/community/index/index",
+        "iconPath": "static/tabbar/community-icon.png",
+        "selectedIconPath": "static/tabbar/community-icon-selected.png",
+        "text": "流觞"
+      },
+      {
+        "pagePath": "pages/write/index/index",
+        "iconPath": "static/tabbar/write-icon.png",
+        "selectedIconPath": "static/tabbar/write-icon-selected.png",
+        "text": "赋词"
+      },
+      {
+        "pagePath": "pages/dialog/index/index",
+        "iconPath": "static/tabbar/dialog-icon.png",
+        "selectedIconPath": "static/tabbar/dialog-icon-selected.png",
+        "text": "锦书"
+      },
+      {
+        "pagePath": "pages/user/index/index",
+        "iconPath": "static/tabbar/user-icon.png",
+        "selectedIconPath": "static/tabbar/user-icon-seleted.png",
+        "text": "自画"
+      }
+    ]
+  }
+}

@@ -5,8 +5,8 @@
 
     <!-- 文字部分 -->
     <view class="footer">
-	  <text class="text-a" @click="checkWork()">我的作品集</text>
-      <text class="text-b" @click="checkDraft()">我的草稿箱</text>
+	  <text class="text-a" @click="checkWork()">我的文集</text>
+      <text class="text-b" @click="checkDraft()">我的手稿</text>
     </view>
   </view>
 </template>
@@ -66,7 +66,7 @@ export default {
   color: #808080;
   text-align: center;
   cursor: pointer;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   text-shadow: 2px 2px 4px  rgba(144, 144, 144, 0.3);
 }
 </style>

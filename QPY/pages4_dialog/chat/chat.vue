@@ -160,16 +160,15 @@ export default {
 }
 
 .bottom-btn {
-  width: 100%;
   padding: 6px 0;
-  margin-left: 10px;
-  margin-right: 10px;
-  background: linear-gradient(145deg, #ffffff, #efefef);
-  border: none;
+  margin-bottom: 20px;
+  background: linear-gradient(145deg, #ffffff, #eeeeee);
+  border: 1px solid #eeeeee;
   border-radius: 10px;
   text-align: center;
   font-size: 16px;
   color: #333;
+  font-weight: 500;
   box-shadow: 2px 2px 8px rgba(107, 107, 107, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;

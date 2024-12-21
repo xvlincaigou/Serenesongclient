@@ -18,7 +18,7 @@
             <text class="friend-name">
               来自：{{ message.senderName }}
             </text>
-            <text class="message-time">\n {{ formatDate(message.time)}}</text> 
+            <text class="message-time"> {{ formatDate(message.time)}}</text> 
           </view>
         </view>
       </view>
@@ -81,7 +81,7 @@ export default {
     // 查看消息详情
     viewMessageDetail(message) {
       uni.navigateTo({
-        url: `/pages4_dialog/messageDetail/messageDetail?message=${encodeURIComponent(JSON.stringify(message))}`
+        url: `/pages4_dialog/chat/chat?message=${encodeURIComponent(JSON.stringify(message))}`
       });
     },
     // 格式化日期
@@ -96,36 +96,56 @@ export default {
 };
 </script>
 
+
 <style scoped>
-.container { background-color: #f8f8f8; }
+.container { background-color: #ffffff;}
 .header {
-  padding: 16px;
-  background-color: #e8e8e8;
-  font-size: 20px;
-  font-weight: bold;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-bottom: 1px #999 solid;
 }
-.content {
-  height: 100%;
+.header text{
+	margin-left: 8px;
+	font-size: 15px;
+	color: #666;
+	font-weight: bold;
+}
+.content { 
+  min-height: 500px;
+  max-height: 1000px;
+  overflow-y: auto;
+  padding: 0px;
+  margin-right: 50px;
+  margin-top: 20px;
+  font-size: 14px;
 }
 .message-item {
   padding: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
   border-radius: 8px;
-  background-color: #f8f9fa;
+  background: linear-gradient(145deg, #eaeaea, #fafafa);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
+
 .friend-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .friend-name {
   font-size: 18px;
   font-weight: bold;
-  color: #1b4965;
+  color: #112f41;
 }
+
 .message-time {
   font-size: 14px;
+  margin-top: 10px;
   color: #888888;
 }
 </style>
+

@@ -127,8 +127,8 @@
 
     <!-- 底部按钮 -->
     <view class="bottom-buttons">
-      <button class="bottom-btn" @click="addToCollection">加入作品集</button>
-      <button class="bottom-btn" @click="addToDrafts">放入草稿箱</button>
+      <button class="bottom-btn" @click="addToCollection">加入文集</button>
+      <button class="bottom-btn" @click="addToDrafts">存为手稿</button>
     </view>
   </view>
 </template>

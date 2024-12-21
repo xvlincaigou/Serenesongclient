@@ -41,7 +41,6 @@ export default {
     return {
       searchText: '',
       isFocused: false,
-	  baseurl: getApp().globalData.baseURL,
       recommendation: {
         text: '',
         image: '',
@@ -69,10 +68,36 @@ export default {
         this.isFocused = false;
       }, 100);
     },
-    fetchRecommendation() {
+	getCachedRecommendation() {
+        const cachedData = uni.getStorageSync('recommendation');
+         if (cachedData) {
+           const now = new Date().getTime();
+           // 假设推荐缓存有效期为12小时
+           if (now - cachedData.timestamp < 12 * 60 * 60 * 1000) {
+             return cachedData.data; // 返回缓存数据
+           }
+         }
+         return null; // 缓存无效或不存在
+       },
+
+	setRecommendationCache(data) {
+	      const cacheData = {
+	        data,
+	        timestamp: new Date().getTime(),
+	      };
+	      uni.setStorageSync('recommendation', cacheData); // 存储数据到缓存
+	},
+	 // 获取推荐数据
+	fetchRecommendation() {
+	      // 先从缓存获取推荐内容
+	      const cachedRecommendation = this.getCachedRecommendation();
+	      if (cachedRecommendation) {
+	        this.recommendation = cachedRecommendation;
+	        return;
+	      }
       // 获取推荐词
       uni.request({
-        url: `${this.baseurl}/recommendCi`,
+        url: 'http://124.221.16.68:8080/recommendCi',
         method: 'GET',
         success: (res) => {
           if (res.statusCode === 200 && res.data.recommend) {
@@ -81,8 +106,11 @@ export default {
             const firstLine = recommendData.content[0].split(/[，。\n]/)[0];
             const author = recommendData.author;
             const content = recommendData.content.join('\n');
-            const text = `${cipai}·${firstLine}\n${author}\n\n${content}`;
+            const text = `${cipai}·${firstLine}\n${author}\n\n${content.substring(0, 1000)}`;
             this.recommendation.text = text;
+
+            // 缓存推荐词
+            this.setRecommendationCache(this.recommendation);
           } else {
             console.error('获取推荐词失败', res);
           }
@@ -92,22 +120,21 @@ export default {
         },
       });
 
-      // 获取推荐图片
-      uni.request({
-        url: `${this.baseurl}/recommendPic`,
-        method: 'GET',
-        responseType: 'arraybuffer',
+      // 下载推荐图片
+      uni.downloadFile({
+        url: 'http://124.221.16.68:8080/recommendPic',
         success: (res) => {
           if (res.statusCode === 200) {
-            const base64 = uni.arrayBufferToBase64(res.data);
-            const imageSrc = 'data:image/png;base64,' + base64;
-            this.recommendation.image = imageSrc;
+            this.recommendation.image = res.tempFilePath;
+
+            // 更新缓存
+            this.setRecommendationCache(this.recommendation);
           } else {
-            console.error('获取推荐图片失败', res);
+            console.error('下载推荐图片失败', res);
           }
         },
         fail: (err) => {
-          console.error('请求失败', err);
+          console.error('下载请求失败', err);
         },
       });
     },
@@ -125,7 +152,7 @@ export default {
 }
 
 .search-bar {
-  width:100%;
+  width: 100%;
   position: relative;
   padding: 8px;
   background-color: #f8f8f8;
@@ -142,7 +169,7 @@ input {
 
 .search-dropdown {
   position: absolute;
-  top: 56px; 
+  top: 56px;
   left: 0;
   right: 0;
   background-color: #ffffff;

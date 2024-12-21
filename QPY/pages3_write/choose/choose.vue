@@ -166,7 +166,7 @@ export default {
 	}
 	},
 	mounted() {
-       this.refreshRecommendations(); // 组件挂载时调用，确保一开始就有随机词牌显示
+       this.refreshRecommendations();
      }
    };
 </script>

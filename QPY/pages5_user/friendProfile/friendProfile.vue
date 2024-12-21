@@ -14,12 +14,6 @@
           <text class="stat-label">收藏</text>
           <text class="stat-number">{{ favoritesCount }}</text>
         </view>
-		<button
-		  class="follow-button" 
-		  :class="{ 'following': isFollowed, 'unfollow': !isFollowed }"
-		  @click="toggleFollow">
-		  {{ isFollowed ? '取关' : '关注' }}
-		</button>
       </view>
     </view>
     <view class="info">
@@ -28,9 +22,18 @@
 	  <text class="id">{{ user_id }}</text>
     </view>
 	
-	<button class="send-message" @click="sendMessage()">发消息</button>
-
-    <!-- Tabs for 动态 and 作品 -->
+	<!-- 新增按钮行容器 -->
+	<view class="button-row">
+		<button class="send-message" @click="sendMessage()">发消息</button>
+		<button
+		  class="follow-button" 
+		  :class="{ 'following': isFollowed, 'unfollow': !isFollowed }"
+		  @click="toggleFollow">
+		  {{ isFollowed ? '取关' : '关注' }}
+		</button>
+	</view>
+    
+	<!-- Tabs for 动态 and 作品 -->
     <view class="tabs">
       <text :class="{ active: selectedTab === 'dynamic' }" @click="selectTab('dynamic')">动态</text>
       <text :class="{ active: selectedTab === 'works' }" @click="selectTab('works')">代表作品</text>
@@ -490,8 +493,6 @@ export default {
   min-height: 100vh;
 }
 
-/* Existing styles for profile, stats, etc. */
-
 .section {
   display: flex;
   align-items: center;
@@ -531,7 +532,7 @@ export default {
 .stats {
   display: flex;
   justify-content: space-around;
-  margin-left: 30px;
+  margin-left:60px;
   margin-right: 30px;
 }
 .stat-item {
@@ -551,16 +552,58 @@ export default {
   margin-top: 4px;
 }
 
-.send-message {
-  width: 100%;
-  margin: 12px 0;
-  padding: 0px 0;
+/* 新增按钮行容器样式 */
+.button-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* 按钮之间均匀分布 */
+  align-items: center; /* 垂直居中对齐 */
+  margin-top: 10px;
+  gap: 20px; /* 按钮之间的间距 */
+  padding: 0 5px; /* 容器左右内边距，防止按钮靠边 */
+}
+
+/* 更新后的发送消息和关注按钮样式 */
+.send-message,
+.follow-button {
+  flex: 1; /* 让按钮平分容器宽度 */
+  padding: 3px 0; /* 增大按钮高度，增强触控体验 */
   font-size: 14px;
-  background-color: white;
-  color: black;
+  background-color: #ffffff;
+  color: #333333;
   border: 1px solid grey;
-  border-radius: 4px;
+  border-radius: 8px;
   text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+/* 按钮悬停效果 */
+.send-message:hover,
+.follow-button:hover {
+  background-color: #f0f0f0;
+}
+
+/* 按钮按下效果 */
+.send-message:active,
+.follow-button:active {
+  background-color: #e0e0e0;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+}
+
+/* 关注按钮的不同状态 */
+.follow-button.following {
+  background-color: #fefefe; /* 已关注时背景色 */
+  color: #333333;
+  border-color: #a2a2a2;
+}
+.follow-button.unfollow {
+  background-color: #ffffff; /* 未关注时背景色 */
+  color: #333333;
+  border-color: #a2bbff;
+}
+.follow-button.unfollow:hover {
+  background-color: #eefcff; /* 悬浮时背景色 */
 }
 
 .tabs {
@@ -722,26 +765,5 @@ button:hover {
   background-color: #e0e0e0;
 }
 
-.follow-button {
-  border-right: 6px;
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: 1px solid;
-  background-color: white;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-.following {
-  border-color: gray;
-  color: gray;
-}
-
-.unfollow {
-  border-color: red;
-  color: red;
-}
 </style>

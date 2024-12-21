@@ -18,7 +18,8 @@
         </view>
       </view>
       <view v-else class="no-results">
-        <text>哎呀，没有匹配搜索的词</text>
+        <text v-if="isLoading">正在加载中...</text>
+        <text v-else>哎呀，没有匹配搜索的词</text>
       </view>
     </view>
   </view>
@@ -29,18 +30,27 @@ export default {
   data() {
     return {
       keyword: '', 
-      matchedCi: [] 
+      matchedCi: [],
+      isLoading: false,
+      loadTimer: null   // 定时器ID
     };
   },
   onLoad(options) {
     this.keyword = options.keyword || '';
     this.fetchResults();
   },
+  onUnload() {
+    // 清除定时器以防止内存泄漏
+    if (this.loadTimer) {
+      clearTimeout(this.loadTimer);
+    }
+  },
   methods: {
     fetchResults() {
+      this.isLoading = true; // 开始加载
       const baseurl = getApp().globalData.baseURL;
-	  const keywords = this.keyword.split(' ').filter(k => k.trim() !== '');
-	  const keywordsString = keywords.map(k => `keyword=${encodeURIComponent(k)}`).join('&'); 
+      const keywords = this.keyword.split(' ').filter(k => k.trim() !== '');
+      const keywordsString = keywords.map(k => `keyword=${encodeURIComponent(k)}`).join('&'); 
       uni.request({
         url: `${baseurl}/search?${keywordsString}&option=ci`,
         method: 'GET',
@@ -48,12 +58,25 @@ export default {
           console.log('API response:', res);
           if (res.statusCode === 200 && res.data) {
             this.matchedCi = res.data.matched_ci || [];
+            if (this.matchedCi.length === 0) {
+              // 如果没有匹配结果，设置2秒后显示“没有匹配的词”
+              this.loadTimer = setTimeout(() => {
+                this.isLoading = false;
+              }, 2000);
+            } else {
+              // 有匹配结果，立即停止加载
+              this.isLoading = false;
+            }
           } else {
             console.error('API error:', res);
+            // API出错也停止加载
+            this.isLoading = false;
           }
         },
         fail: (err) => {
           console.error('API request failed:', err);
+          // 请求失败也停止加载
+          this.isLoading = false;
         }
       });
     },

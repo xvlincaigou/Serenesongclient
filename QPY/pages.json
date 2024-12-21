@@ -56,7 +56,7 @@
         {
           "path": "searchresultList/searchresultList_author",
           "style": {
-            "navigationBarTitleText": "词人搜索结果列表"
+            "navigationBarTitleText": "古代词人搜索结果列表"
           }
         }
       ]
@@ -65,21 +65,9 @@
       "root": "pages2_community",
       "pages": [
         {
-          "path": "createPost/createPost",
-          "style": {
-            "navigationBarTitleText": "发帖"
-          }
-        },
-        {
           "path": "postDetail/postDetail",
           "style": {
-            "navigationBarTitleText": "帖子详情"
-          }
-        },
-        {
-          "path": "friendProfile/friendProfile",
-          "style": {
-            "navigationBarTitleText": "好友资料"
+            "navigationBarTitleText": "流觞曲水"
           }
         }
       ]

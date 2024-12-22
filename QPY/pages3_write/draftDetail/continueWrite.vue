@@ -129,7 +129,7 @@
     <!-- 底部按钮 -->
     <view class="bottom-buttons">
       <button class="bottom-btn" @click="turnToCollection">转为正式作品</button>
-      <button class="bottom-btn" @click="modifyDrafts">完成草稿修改</button>
+      <button class="bottom-btn" @click="modifyDrafts">完成手稿修改</button>
     </view>
   </view>
 </template>

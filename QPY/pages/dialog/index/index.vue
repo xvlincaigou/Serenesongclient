@@ -2,21 +2,24 @@
   <view class="container">
     <!-- 搜索框和添加好友按钮 -->
     <view class="search-bar">
-      <input placeholder="搜索好友" v-model="searchInput" />
-      <button class="add-btn" @click="searchUser">+</button>
+	  <textarea v-model="searchInput"
+	      class="search-input"
+	      placeholder="寻觅知音">
+	  </textarea>
+      <button class="add-btn" @click="searchUser">→</button>
     </view>
   
     <view class="tabs">
-      <text :class="{active: selectedTab === 'get'}" @click="selectTab('get')">已接收</text>
-      <text :class="{active: selectedTab === 'send'}" @click="selectTab('send')">已发送</text>
+      <text :class="{active: selectedTab === 'get'}" @click="selectTab('get')">来  雁</text>
+      <text :class="{active: selectedTab === 'send'}" @click="selectTab('send')">往  雁</text>
     </view>
   
     <!-- 列表区域 -->
     <scroll-view class="content" scroll-y="true">
       <!-- 已接收消息列表 -->
-      <view v-if="selectedTab === 'get'">
+      <view v-if="selectedTab === 'get'" class="list">
 		<view v-if="!uniqueSenderNames || uniqueSenderNames.length === 0">
-		  <text>当前没有收到的消息</text>
+		  <text class="message-shu">暂无来雁</text>
 		</view>
 		<view v-else>
 		  <view 
@@ -37,7 +40,7 @@
       <!-- 已发送消息唯一接收者列表 -->
       <view v-else-if="selectedTab === 'send'">
         <view v-if="!uniqueReceiverNames || uniqueReceiverNames.length === 0">
-          <text>当前没有发送的消息</text>
+          <text class="message-shu">暂未飞雁</text>
         </view>
         <view v-else>
           <view 
@@ -274,31 +277,50 @@ export default {
 </script>
 
 <style scoped>
-.container { background-color: #f8f8f8; }
+.container { background-color: #fff; }
 .search-bar {
   display: flex;
   align-items: center;
   padding: 8px;
-  background-color: #e8e8e8;
+  background-color: #f8f8f8;
   position: sticky;
   top: 0;
   z-index: 10;
 }
-input {
-  flex: 1;
-  padding: 8px;
-  border: none;
-  background-color: #ffffff;
+.search-input{
+	flex: 1;
+	height: 20px;  /* 固定高度 */
+	overflow: hidden;  /* 不显示滚动条 */
+	border: 1px solid #ccc;
+	padding: 7px 12px;  /* 内边距 */
+	font-size: 15px;
+	border-radius: 6px;
+	background-color: #fff;
+	transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .add-btn {
+  width: 30px;
+  height: 30px;
+  background-color: #504e4c;  /* 按钮背景色 */
+  color: white;
+  padding: 0;
+  margin-left: 10px;
+  border: none;
+  border-radius: 50%;  /* 圆形按钮 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 18px;
-  color: #333333;
-  margin-left: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.friend-list {
-  height: calc(800px); /* 调整高度，保证最多显示7个好友 */
-  overflow-y: auto;
+.add-btn:hover {
+  background-color: #3b2d17;  /* 悬浮时的背景色 */
+}
+
+.add-btn:active {
+  background-color: #182f7a;  /* 按钮点击时的背景色 */
 }
 
 .tabs {
@@ -307,16 +329,27 @@ input {
   margin-bottom: 10px;
   border-bottom: 1px solid #ccc;
 }
+input {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background-color: #ffffff;
+}
 
+.tabs{
+	padding-top: 10px;
+}
 .tabs text {
   font-size: 16px;
   padding: 10px;
   cursor: pointer;
+  justify-content: center;
+  align-items: center;
 }
 
 .tabs text.active {
-  color: #007aff;
-  border-bottom: 2px solid #007aff;
+  color: #5b5e95;
+  border-bottom: 2px solid #565795;
 }
 
 .loading-text {
@@ -325,16 +358,23 @@ input {
   font-size: 16px;
 }
 
-.content {
-  height: 100%; /* 根据页面需要进行调整 */
+.content { 
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 0px;
+  margin-right: 50px;
+  font-size: 14px;
 }
 
 .message-item {
   padding: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
   border-radius: 8px;
-  background-color: #f8f9fa;
+  background: linear-gradient(145deg, #eaeaea, #fafafa);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 .friend-header {
@@ -346,11 +386,18 @@ input {
 .friend-name {
   font-size: 18px;
   font-weight: bold;
-  color: #1b4965;
+  color: #112f41;
 }
 
 .message-time {
   font-size: 14px;
   color: #888888;
+}
+.message-shu {
+	  color: #888888;
+	  display: flex; 
+	  justify-content: center;
+	  align-items: center;
+	  height: 50px; 
 }
 </style>

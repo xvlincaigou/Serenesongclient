@@ -4,95 +4,106 @@
     <!-- 好友列表 -->
     <scroll-view scroll-x="true" class="friend-list">
       <view class="friend-list-container">
-		<view v-for="(friend, index) in friends" :key="index" class="friend-item">
-		  <image :src="friend.avatar ? 'data:image/png;base64,' + friend.avatar : ''" class="friend-avatar" @click="viewFriend(friend)"></image>
-		  <text class="friend-name">{{ friend.name }}</text>
-		</view>
+        <view v-for="friend in friends" :key="friend.user_id" class="friend-item">
+          <image 
+            :src="friend.avatar ? 'data:image/png;base64,' + friend.avatar : ''" 
+            class="friend-avatar" 
+            @click="viewFriend(friend)"
+          ></image>
+          <text class="friend-name">{{ friend.name }}</text>
+        </view>
       </view>
     </scroll-view>
 
     <!-- 动态和作品的标签 -->
     <view class="tabs">
-      <text :class="{active: selectedTab === 'allPost'}" @click="selectTab('allPost')">全部</text>
-      <text :class="{active: selectedTab === 'friendPost'}" @click="selectTab('friendPost')">词友</text>
+      <text :class="{active: selectedTab === 'allPost'}" @click="selectTab('allPost')">比邻</text>
+      <text :class="{active: selectedTab === 'friendPost'}" @click="selectTab('friendPost')">知音</text>
     </view>
 
     <!-- 根据选择的标签显示内容 -->
     <scroll-view v-if="selectedTab === 'allPost'" class="content" scroll-y="true">
-		<view v-if="allPosts">
-		  <view v-for="(post, index) in allPosts" :key="index">
-		    <!-- Display post time outside of the post box -->
-		    <!-- 发动态的人的头像和昵称 -->
-		    <view class="post-header">
-		      <image :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" class="post-avatar" @click="viewFriendByIcon(post.author)"></image>
-		      <view class="post-info">
-		        <text class="post-nickname">{{ post.name }}</text>
-		        <view class="post-meta">
-		          <text class="post-category">{{ getCategory(post.Type) }}</text>
-		        </view>
-		      </view>
-		    </view>
-		    <!-- 动态内容 -->
-		    <view class="post" @click="viewPost(post)">
-		      <!-- 动态内容根据Type渲染 -->
-		      <view v-if="post.Type === 0">
-		        <text class="post-title">{{ post.Classic.cipai[0] }}\n</text>
-		        <text class="post-author">{{ post.Classic.author }}</text>
-		        <view class="post-content">
-		          <text v-for="(line, idx) in post.Classic.content" :key="idx">{{ line }}\n</text>
-		        </view>
-		      </view>
-		      <view v-else-if="post.Type === 1">
-		        <text class="post-title">{{ post.Modern.cipai[0] }} · {{ post.Modern.title }}</text>
-		        <view class="post-content">
-		          <text v-for="(line, idx) in post.Modern.content" :key="idx">{{ line }}\n</text>
-		        </view>
-		      </view>
-		      <view v-else-if="post.Type === 2">
-		        <text class="post-title">{{ post.CollectionCi.cipai[0] }}\n</text>
-		        <text class="post-author">{{ post.CollectionCi.author }}</text>
-		        <view class="post-content">
-		          <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
-		        </view>
-		        <text class="post-comment">\n批注\n</text>
-		        <text class="post-comment-content">{{ formatComment(post.Comment) }}</text>
-				</view>
-		      <view v-else>
-		        <text class="post-content">{{ post.content }}</text>
-		      </view>
-		    </view>
-		    <!-- 动态操作按钮 -->
-		    <view class="post-actions">
-		      <!-- 评论按钮，设置更小的尺寸 -->
-				<image 
-				  :src="'/static/community/icon_comment.png'" 
-				  @click.stop="comment(post)" 
-				  alt="评论"
-				  style="width: 24px; height: 24px; margin-right: 4px;" 
-				/>
-		      <!-- 点赞按钮 -->
-		      <image
-		        :class="isLiked(post) ? 'liked' : 'not-liked'"
-		        @click.stop="love(post)"
-		        alt="点赞"
-		        style="width: 24px; height: 24px; cursor: pointer;"
-		      />
-		    </view>
-		  </view>
-		</view>
-		<view v-else class="no-dynamicPosts">
-		  <text>当前还没有人发动态</text>
-		</view>
-    </scroll-view>
-
-    <!-- 词友动态 -->
-    <scroll-view v-else class="content" scroll-y="true">
-      <view v-if="friendPosts.length > 0">
-        <view v-for="(post, index) in friendPosts" :key="index">
+      <view v-if="allPosts.length > 0">
+        <view v-for="post in allPosts" :key="post.ID">
           <!-- Display post time outside of the post box -->
           <!-- 发动态的人的头像和昵称 -->
           <view class="post-header">
-            <image :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" class="post-avatar"></image>
+            <image 
+              :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" 
+              class="post-avatar" 
+              @click="viewFriendByIcon(post.author)"
+            ></image>
+            <view class="post-info">
+              <text class="post-nickname">{{ post.name }}</text>
+              <view class="post-meta">
+                <text class="post-category">{{ getCategory(post.Type) }}</text>
+              </view>
+            </view>
+          </view>
+          <!-- 动态内容 -->
+          <view class="post" @click="viewPost(post)">
+            <!-- 动态内容根据Type渲染 -->
+            <view v-if="post.Type === 0">
+              <text class="post-title">{{ post.Classic.cipai[0] }}\n</text>
+              <text class="post-author">{{ post.Classic.author }}</text>
+              <view class="post-content">
+                <text v-for="(line, idx) in post.Classic.content" :key="idx">{{ line }}\n</text>
+              </view>
+            </view>
+            <view v-else-if="post.Type === 1">
+              <text class="post-title">{{ post.Modern.cipai[0] }} · {{ post.Modern.title }}</text>
+              <view class="post-content">
+                <text v-for="(line, idx) in post.Modern.content" :key="idx">{{ line }}\n</text>
+              </view>
+            </view>
+            <view v-else-if="post.Type === 2">
+              <text class="post-title">{{ post.CollectionCi.cipai[0] }}\n</text>
+              <text class="post-author">{{ post.CollectionCi.author }}</text>
+              <view class="post-content">
+                <text v-for="(line, idx) in post.CollectionCi.content" :key="idx">{{ line }}\n</text>
+              </view>
+              <text class="post-comment">\n批注\n</text>
+              <text class="post-comment-content">{{ formatComment(post.Comment) }}</text>
+            </view>
+            <view v-else>
+              <text class="post-content">{{ post.content }}</text>
+            </view>
+          </view>
+          <!-- 动态操作按钮 -->
+          <view class="post-actions">
+            <!-- 评论按钮 -->
+            <image 
+              :src="'/static/community/icon_comment.png'" 
+              @click.stop="comment(post)" 
+              alt="评论"
+              style="width: 24px; height: 24px; margin-right: 4px;" 
+            />
+            <!-- 点赞按钮 -->
+            <image
+              :class="isLiked(post) ? 'liked' : 'not-liked'"
+              @click.stop="love(post)"
+              alt="点赞"
+              style="width: 24px; height: 24px; cursor: pointer;"
+            />
+          </view>
+        </view>
+      </view>
+      <view v-else class="no-dynamicPosts">
+        <text>暂无流觞</text>
+      </view>
+    </scroll-view>
+
+    <!-- 词友动态 -->
+    <scroll-view v-if="selectedTab === 'friendPost'" class="content" scroll-y="true">
+      <view v-if="friendPosts.length > 0">
+        <view v-for="post in friendPosts" :key="post.ID">
+          <!-- Display post time outside of the post box -->
+          <!-- 发动态的人的头像和昵称 -->
+          <view class="post-header">
+            <image 
+              :src="post.icon ? 'data:image/png;base64,' + post.icon : ''" 
+              class="post-avatar"
+            ></image>
             <view class="post-info">
               <text class="post-nickname">{{ post.name }}</text>
               <view class="post-meta">
@@ -132,12 +143,12 @@
           <!-- 动态操作按钮 -->
           <view class="post-actions">
             <!-- 评论按钮，设置更小的尺寸 -->
-			<image 
-			  :src="'/static/community/icon_comment.png'" 
-			  @click.stop="comment(post)" 
-			  alt="评论"
-			  style="width: 24px; height: 24px; margin-right: 4px;" 
-			/>
+            <image 
+              :src="'/static/community/icon_comment.png'" 
+              @click.stop="comment(post)" 
+              alt="评论"
+              style="width: 24px; height: 24px; margin-right: 4px;" 
+            />
             <!-- 点赞按钮 -->
             <image
               :class="isLiked(post) ? 'liked' : 'not-liked'"
@@ -146,7 +157,6 @@
               style="width: 24px; height: 24px; cursor: pointer;"
             />
           </view>
-
         </view>
       </view>
       <view v-else class="no-friendPosts">
@@ -160,9 +170,9 @@
 export default {
   data() {
     return {
-	  baseurl: getApp().globalData.baseURL,
-	  user_id: '',
-	  token: "",
+      baseurl: getApp().globalData.baseURL,
+      user_id: '',
+      token: "",
       selectedTab: 'allPost',  // 默认选择的标签
       friends: [],
       allPosts: [],
@@ -171,281 +181,301 @@ export default {
   },
   onShow() {
     this.getUserID();
-	this.getFriends();
-	this.getAllDynamics(); // 获取动态列表
-	this.getFriendDynamics();
+    this.getFriends();
+    this.getAllDynamics(); // 获取动态列表
+    this.getFriendDynamics();
   },
   methods: {
-	  getUserID() {
-	    const token = uni.getStorageSync('userToken');
-	    if (!token) {
-	      uni.showToast({
-	        title: '请先登录',
-	        icon: 'none',
-	      });
-	      return;
-	    }
-		this.token = token;
-	    uni.request({
-	      url: `${this.baseurl}/getPersonalID`,
-	      method: 'GET',
-	      data: { token },
-	      success: (res) => {
-	        if (res.statusCode === 200 && res.data.personal_id) {
-	          console.log('User ID:', res.data.personal_id);
-	          this.user_id = res.data.personal_id;
-	        } else {
-	          uni.showToast({
-	            title: '获取用户ID失败',
-	            icon: 'none',
-	          });
-	        }
-	      },
-	      fail: () => {
-	        uni.showToast({
-	          title: '请求失败',
-	          icon: 'none',
-	        });
-	      }
-	    });
-	  },
-      selectTab(tab) {
-        this.selectedTab = tab;
-      },
-	  fetchUserInfo(user_id, targetArray) {
-	    uni.request({
-	      url: `${this.baseurl}/getUserInfo`,
-	      method: 'GET',
-	      data: {
-	        token: this.token,
-	        user_id: user_id,
-	      },
-	      success: (res) => {
-	        if (res.statusCode === 200) {
-	          if (res.data) {
-	            // 将 user_id 添加到用户信息对象中
-	            const friendWithId = { user_id: user_id, ...res.data };
-	            targetArray.push(friendWithId);
-	            this.$set(targetArray, targetArray.length - 1, friendWithId); // 确保响应式
-	            console.log('friend:', targetArray);
-	          }
-	        } else {
-	          uni.showToast({
-	            title: '获取用户信息失败',
-	            icon: 'none',
-	          });
-	        }
-	      },
-	      fail: () => {
-	        uni.showToast({
-	          title: '请求失败',
-	          icon: 'none',
-	        });
-	      }
-	    });
-	  },
-	  getFriends() {
-		if (!this.token) {
-		  this.token = uni.getStorageSync('userToken');
-		}
-		
-		// 获取关注列表
-		const subscribedTo = uni.getStorageSync('subscribedTo');
-		console.log('关注列表:', subscribedTo);
-		this.friends = [];
-		
-		// 如果关注列表为空或不是数组，则不做任何处理
-		if (!Array.isArray(subscribedTo) || subscribedTo.length === 0) {
-		  return;
-		}
-		
-		subscribedTo.forEach(user_id => {
-		  this.fetchUserInfo(user_id, this.friends);
-		});
-	  },
-	  getAllDynamics() {
-	    if (!this.token) {
-	        this.token = uni.getStorageSync('userToken');
-	    }
-	    uni.request({
-	        url: `${this.baseurl}/getRandomPosts`,
-	        method: 'GET',
-	        data: {
-	            token: this.token,
-	            value: '100',
-	        },
-	        success: (res) => {
-	            if (res.statusCode === 200) {
-	              this.allPosts = res.data.dynamics;
-	            } else {
-	              uni.showToast({
-	                title: '获取动态列表失败',
-	                icon: 'none',
-	              });
-	            }
-	        },
-	        fail: () => {
-	            uni.showToast({
-	              title: '请求失败',
-	              icon: 'none',
-	            });
-	        }
-	    });
-	  },
-	  getFriendDynamics() {
-	      // 获取用户 token，如果不存在则从本地存储中获取
-	      if (!this.token) {
-	          this.token = uni.getStorageSync('userToken');
-	      }
-	  
-	      // 获取关注列表
-	      const subscribedTo = uni.getStorageSync('subscribedTo');
-		  this.friendPosts = [];
-	  
-	      // 如果关注列表为空或不是数组，则不做任何处理
-	      if (subscribedTo.length === 0) {
-	          return;
-	      }
-	  
-	      // 遍历关注列表中的每个 user_id
-	      subscribedTo.forEach(user_id => {
-	          uni.request({
-	              url: `${this.baseurl}/getFollowingPosts`,
-	              method: 'GET',
-	              data: {
-	                  token: this.token,
-	                  user_id: user_id,
-	              },
-	              success: (res) => {
-					  console.log('id:', user_id);
-	                  if (res.statusCode === 200) {
-	                      // 将获取到的动态数据添加到 friendPosts 数组中
-	                      if (res.data && res.data.dynamics) {
-	                          this.friendPosts = this.friendPosts.concat(res.data.dynamics);
-							  console.log('fP:', this.friendPosts);
-	                      }
-	                  } else {
-	                      uni.showToast({
-	                          title: '获取动态列表失败',
-	                          icon: 'none',
-	                      });
-	                  }
-	              },
-	              fail: () => {
-	                  uni.showToast({
-	                      title: '请求失败',
-	                      icon: 'none',
-	                  });
-	              }
-	          });
-	      });
-	  },
-	  viewFriendByIcon(friend) {
-		  if(friend === this.user_id) {
-		  	uni.switchTab({
-		  	  url: `/pages/user/index/index`
-		  	});
-		  } else {
-		  	uni.navigateTo({
-		  	  url: `/pages5_user/friendProfile/friendProfile?user_id=${friend}`
-		  	});
-		  }
-	  },
-      viewPost(post) {
-        const params = `post=${encodeURIComponent(JSON.stringify(post))}`;
-        uni.navigateTo({ url: `/pages2_community/postDetail/postDetail?${params}` });
-      },
-      comment(post) {
-        const params = `post=${encodeURIComponent(JSON.stringify(post))}`;
-        uni.navigateTo({ url: `/pages2_community/postDetail/postDetail?${params}` });
-      },
-      love(post) {
-        if (!this.token) {
+    getUserID() {
+      const token = uni.getStorageSync('userToken');
+      if (!token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none',
+        });
+        return;
+      }
+      this.token = token;
+      uni.request({
+        url: `${this.baseurl}/getPersonalID`,
+        method: 'GET',
+        data: { token },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.personal_id) {
+            console.log('User ID:', res.data.personal_id);
+            this.user_id = res.data.personal_id;
+          } else {
+            uni.showToast({
+              title: '获取用户ID失败',
+              icon: 'none',
+            });
+          }
+        },
+        fail: () => {
           uni.showToast({
-            title: '请先登录',
+            title: '请求失败',
             icon: 'none',
           });
-          return;
         }
-      
-        const isLikeAction = this.isLiked(post);
-        console.log('isLiked:', isLikeAction);
-        
-        const apiUrl = isLikeAction ? `${this.baseurl}/withdrawLike` : `${this.baseurl}/likePost`;
-      
+      });
+    },
+    selectTab(tab) {
+      this.selectedTab = tab;
+    },
+    fetchUserInfo(user_id, targetArray) {
+      uni.request({
+        url: `${this.baseurl}/getUserInfo`,
+        method: 'GET',
+        data: {
+          token: this.token,
+          user_id: user_id,
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            if (res.data) {
+              // 将 user_id 添加到用户信息对象中
+              const friendWithId = { user_id: user_id, ...res.data };
+              targetArray.push(friendWithId);
+              this.$set(targetArray, targetArray.length - 1, friendWithId); // 确保响应式
+              console.log('friend:', targetArray);
+            }
+          } else {
+            uni.showToast({
+              title: '获取用户信息失败',
+              icon: 'none',
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请求失败',
+            icon: 'none',
+          });
+        }
+      });
+    },
+    getFriends() {
+      if (!this.token) {
+        this.token = uni.getStorageSync('userToken');
+      }
+
+      // 获取关注列表
+      const subscribedTo = uni.getStorageSync('subscribedTo');
+      console.log('关注列表:', subscribedTo);
+      this.friends = [];
+
+      // 如果关注列表为空或不是数组，则不做任何处理
+      if (!Array.isArray(subscribedTo) || subscribedTo.length === 0) {
+        return;
+      }
+
+      subscribedTo.forEach(user_id => {
+        this.fetchUserInfo(user_id, this.friends);
+      });
+    },
+    getAllDynamics() {
+      if (!this.token) {
+        this.token = uni.getStorageSync('userToken');
+      }
+      uni.request({
+        url: `${this.baseurl}/getRandomPosts`,
+        method: 'GET',
+        data: {
+          token: this.token,
+          value: '100',
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            this.allPosts = res.data.dynamics;
+          } else {
+            uni.showToast({
+              title: '获取动态列表失败',
+              icon: 'none',
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({
+            title: '请求失败',
+            icon: 'none',
+          });
+        }
+      });
+    },
+    getFriendDynamics() {
+      // 获取用户 token，如果不存在则从本地存储中获取
+      if (!this.token) {
+        this.token = uni.getStorageSync('userToken');
+      }
+
+      // 获取关注列表
+      const subscribedTo = uni.getStorageSync('subscribedTo');
+      subscribedTo.sort((a, b) => a - b);
+      this.friendPosts = [];
+
+      if (subscribedTo.length === 0) {
+        return;
+      }
+
+      // 遍历关注列表中的每个 user_id
+      subscribedTo.forEach(user_id => {
         uni.request({
-          url: apiUrl,
-          method: 'POST',
+          url: `${this.baseurl}/getFollowingPosts`,
+          method: 'GET',
           data: {
             token: this.token,
-            post_id: post.ID
+            user_id: user_id,
           },
           success: (res) => {
+            console.log('id:', user_id);
             if (res.statusCode === 200) {
-              // 重新获取动态列表以更新点赞状态
-      		  this.getAllDynamics();
-			  this.getFriendDynamics();
-              uni.showToast({
-                title: !isLikeAction ? '点赞成功' : '取消点赞成功',
-                icon: 'success'
-              });
+              // 将获取到的动态数据添加到 friendPosts 数组中
+              if (res.data && res.data.dynamics) {
+                this.friendPosts = this.friendPosts.concat(res.data.dynamics);
+                console.log('fP:', this.friendPosts);
+              }
             } else {
               uni.showToast({
-                title: !isLikeAction ? '点赞失败' : '取消点赞失败',
-                icon: 'none'
+                title: '获取动态列表失败',
+                icon: 'none',
               });
             }
           },
           fail: () => {
             uni.showToast({
               title: '请求失败',
-              icon: 'none'
+              icon: 'none',
             });
           }
         });
-      },
-      isLiked(post) {
-        // 检查当前用户是否已点赞该动态
-        return post.Likes.some(like => String(like) === String(this.user_id));
-      },
-      viewFriend(friend) {
-        console.log('好友信息:', friend);
-        if (friend.user_id) {
-          if(friend.user_id === this.user_id) {
-          	uni.switchTab({
-          	  url: `/pages/user/index/index`
-          	});
+      });
+    },
+    viewFriendByIcon(authorId) {
+      if (authorId === this.user_id) {
+        uni.switchTab({
+          url: `/pages/user/index/index`
+        });
+      } else {
+        uni.navigateTo({
+          url: `/pages5_user/friendProfile/friendProfile?user_id=${authorId}`
+        });
+      }
+    },
+    viewPost(post) {
+      const params = `post=${encodeURIComponent(JSON.stringify(post))}`;
+      uni.navigateTo({ url: `/pages2_community/postDetail/postDetail?${params}` });
+    },
+    comment(post) {
+      const params = `post=${encodeURIComponent(JSON.stringify(post))}`;
+      uni.navigateTo({ url: `/pages2_community/postDetail/postDetail?${params}` });
+    },
+    love(post) {
+      if (!this.token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none',
+        });
+        return;
+      }
+
+      const isLikeAction = this.isLiked(post);
+      console.log('isLiked:', isLikeAction);
+
+      const apiUrl = isLikeAction ? `${this.baseurl}/withdrawLike` : `${this.baseurl}/likePost`;
+
+      uni.request({
+        url: apiUrl,
+        method: 'POST',
+        data: {
+          token: this.token,
+          post_id: post.ID
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            // 根据当前标签页更新对应的列表
+            if (this.selectedTab === 'allPost') {
+              const targetList = this.allPosts;
+              this.updateLikeStatus(targetList, post, isLikeAction);
+            } else if (this.selectedTab === 'friendPost') {
+              const targetList = this.friendPosts;
+              this.updateLikeStatus(targetList, post, isLikeAction);
+            }
+
+            uni.showToast({
+              title: !isLikeAction ? '点赞成功' : '取消点赞成功',
+              icon: 'success'
+            });
           } else {
-          	uni.navigateTo({
-          	  url: `/pages5_user/friendProfile/friendProfile?user_id=${friend.user_id}`
-          	});
+            uni.showToast({
+              title: !isLikeAction ? '点赞失败' : '取消点赞失败',
+              icon: 'none'
+            });
           }
-        } else {
+        },
+        fail: () => {
           uni.showToast({
-            title: '用户ID不存在',
-            icon: 'none',
+            title: '请求失败',
+            icon: 'none'
           });
         }
-      },
-	  getCategory(type) {
-	    const categories = {
-	      0: '经典',
-	      1: '创作',
-	      2: '收藏'
-	    };
-	    return categories[type] || '其他';
-	  },
-	  formatComment(comment) {
-	    if (!comment) return '';
-	    // 将评论按每10个字符分割
-	    const regex = /.{1,10}/g;
-	    return comment.match(regex).join('\n');
-	  },
-	  refreshPost() {
-		  console.log('refresh');
-	  }
+      });
+    },
+    updateLikeStatus(targetList, post, isLikeAction) {
+      const index = targetList.findIndex(item => item.ID === post.ID);
+      if (index !== -1) {
+        if (isLikeAction) {
+          // 取消点赞
+          targetList[index].Likes = targetList[index].Likes.filter(like => String(like) !== String(this.user_id));
+        } else {
+          // 点赞
+          targetList[index].Likes.push(this.user_id);
+        }
+        // 确保响应式
+        this.$set(targetList, index, { ...targetList[index] });
+      }
+    },
+    isLiked(post) {
+      // 检查当前用户是否已点赞该动态
+      return post.Likes.some(like => String(like) === String(this.user_id));
+    },
+    viewFriend(friend) {
+      console.log('好友信息:', friend);
+      if (friend.user_id) {
+        if (friend.user_id === this.user_id) {
+          uni.switchTab({
+            url: `/pages/user/index/index`
+          });
+        } else {
+          uni.navigateTo({
+            url: `/pages5_user/friendProfile/friendProfile?user_id=${friend.user_id}`
+          });
+        }
+      } else {
+        uni.showToast({
+          title: '用户ID不存在',
+          icon: 'none',
+        });
+      }
+    },
+    getCategory(type) {
+      const categories = {
+        0: '经典',
+        1: '创作',
+        2: '收藏'
+      };
+      return categories[type] || '其他';
+    },
+    formatComment(comment) {
+      if (!comment) return '';
+      // 将评论按每10个字符分割
+      const regex = /.{1,10}/g;
+      return comment.match(regex).join('\n');
+    },
+    refreshPost() {
+      console.log('refresh');
     }
-  };
+  }
+};
 </script>
 
 <style>
@@ -606,12 +636,12 @@ export default {
   line-height: 1.5;
 }
 .post-comment-content{
-	font-size: 14px;
-	color: #333;
-	margin-top: 8px;
-	white-space: pre-wrap;
-	word-break: break-word;
-	line-height: 1.5;
+  font-size: 14px;
+  color: #333;
+  margin-top: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
 }
 /* 操作按钮样式 */
 .post-actions {

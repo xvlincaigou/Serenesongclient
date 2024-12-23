@@ -84,19 +84,19 @@
         {
           "path": "userWorkList/userWorkList",
           "style": {
-            "navigationBarTitleText": "作品列表"
+            "navigationBarTitleText": "我的文集"
           }
         },
         {
           "path": "draftList/draftList",
           "style": {
-            "navigationBarTitleText": "草稿箱"
+            "navigationBarTitleText": "我的手稿"
           }
         },
         {
           "path": "draftDetail/draftDetail",
           "style": {
-            "navigationBarTitleText": "草稿详情"
+            "navigationBarTitleText": "手稿详情"
           }
         },
         {
@@ -108,7 +108,7 @@
 		{
 		  "path": "draftDetail/continueWrite",
 		  "style": {
-		    "navigationBarTitleText": "继续创作"
+		    "navigationBarTitleText": "继续赋词"
 		  }
 		},
 		{
@@ -120,7 +120,7 @@
         {
           "path": "write/write",
           "style": {
-            "navigationBarTitleText": "创作"
+            "navigationBarTitleText": "赋词"
           }
         }
       ]
@@ -128,40 +128,34 @@
     {
       "root": "pages4_dialog",
       "pages": [
-        {
-          "path": "addFriend/addFriend",
-          "style": {
-            "navigationBarTitleText": "发消息"
-          }
-        },
 		{
 		  "path": "sendMessage/sendMessage",
 		  "style": {
-		    "navigationBarTitleText": "发消息"
+		    "navigationBarTitleText": "飞雁传书"
 		  }
 		},
 		{
 		  "path": "messageDetail/messageDetail",
 		  "style": {
-		    "navigationBarTitleText": "消息详情"
+		    "navigationBarTitleText": "详情"
 		  }
 		},
         {
           "path": "chat/chat",
           "style": {
-            "navigationBarTitleText": "消息详情"
+            "navigationBarTitleText": "详情"
           }
         },
 		{
 		  "path": "nameDetail/nameDetail",
 		  "style": {
-		    "navigationBarTitleText": "消息列表"
+		    "navigationBarTitleText": "往雁列表"
 		  }
 		},
 		{
 		  "path": "fromDetail/fromDetail",
 		  "style": {
-		    "navigationBarTitleText": "消息列表"
+		    "navigationBarTitleText": "来雁列表"
 		  }
 		}
       ]
@@ -169,12 +163,6 @@
     {
       "root": "pages5_user",
       "pages": [
-        {
-          "path": "creation/creation",
-          "style": {
-            "navigationBarTitleText": "创作"
-          }
-        },
         {
           "path": "editProfile/editProfile",
           "style": {
@@ -202,25 +190,25 @@
         {
           "path": "friendProfile/friendProfile",
           "style": {
-            "navigationBarTitleText": "详细资料"
+            "navigationBarTitleText": "知音"
           }
         },
         {
           "path": "friends/friends",
           "style": {
-            "navigationBarTitleText": "我的词友"
+            "navigationBarTitleText": "知音"
           }
         },
 		{
 		  "path": "friendWork/friendWork",
 		  "style": {
-		    "navigationBarTitleText": "词友作品"
+		    "navigationBarTitleText": "高山流水"
 		  }
 		},
         {
           "path": "postDetail/postDetail",
           "style": {
-            "navigationBarTitleText": "帖子详情"
+            "navigationBarTitleText": "详情"
           }
         }
       ]
@@ -243,7 +231,7 @@
         {
           "path": "info_author/info_author",
           "style": {
-            "navigationBarTitleText": "词人详情"
+            "navigationBarTitleText": "古代词人详情"
           }
         }
       ]

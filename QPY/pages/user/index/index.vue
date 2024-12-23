@@ -15,7 +15,7 @@
           <text class="stat-number">{{ favoritesCount }}</text>
         </view>
         <view class="stat-item" @click="navigateTo('friends')">
-          <text class="stat-label">词友</text>
+          <text class="stat-label">知音</text>
           <text class="stat-number">{{ friendsCount }}</text>
         </view>
       </view>
@@ -79,17 +79,30 @@
               <text class="post-content">{{ post.content }}</text>
             </view>
           </view>
-          <!-- 动态操作按钮 -->
-          <view class="post-actions">
-            <button @click.stop="del(post)">删除</button>
-            <button @click.stop="comment(post)">评论</button>
-            <button
-              @click.stop="love(post)"
-              :style="{ backgroundColor: isLiked(post) ? 'red' : 'white', color: isLiked(post) ? 'white' : 'grey' }"
-            >
-              点赞
-            </button>
-          </view>
+		  <!-- 动态操作按钮 -->
+		  <view class="post-actions">
+			<!-- 删除按钮，设置更小的尺寸 -->
+			<image 
+			  :src="'/static/community/icon_delete.png'" 
+			  @click.stop="del(post)" 
+			  alt="删除"
+			  style="width: 21px; height: 21px; margin-right: 4px;" 
+			/>
+		    <!-- 评论按钮，设置更小的尺寸 -->
+		    <image 
+		      :src="'/static/community/icon_comment.png'" 
+		      @click.stop="comment(post)" 
+		      alt="评论"
+		      style="width: 24px; height: 24px; margin-right: 4px;" 
+		    />
+		    <!-- 点赞按钮 -->
+		    <image
+		      :class="isLiked(post) ? 'liked' : 'not-liked'"
+		      @click.stop="love(post)"
+		      alt="点赞"
+		      style="width: 24px; height: 24px; cursor: pointer;"
+		    />
+		  </view>
         </view>
       </view>
       <view v-else class="no-dynamicPosts">
@@ -488,6 +501,13 @@ export default {
 </script>
 
 <style scoped>
+.liked {
+  content: url('/static/community/icon_loved.png');
+}
+
+.not-liked {
+  content: url('/static/community/icon_love.png');
+}
 .container {
   padding: 16px;
   min-height: 100vh;

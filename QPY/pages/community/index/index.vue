@@ -160,7 +160,7 @@
         </view>
       </view>
       <view v-else class="no-friendPosts">
-        <text>当前还没有好友发动态</text>
+        <text>暂无知音流觞</text>
       </view>
     </scroll-view>
   </view>

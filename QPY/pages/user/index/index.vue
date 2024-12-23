@@ -31,7 +31,7 @@
 
     <!-- Tabs for 动态 and 作品 -->
     <view class="tabs">
-      <text :class="{ active: selectedTab === 'dynamic' }" @click="selectTab('dynamic')">分享日常</text>
+      <text :class="{ active: selectedTab === 'dynamic' }" @click="selectTab('dynamic')">流觞曲水</text>
       <text :class="{ active: selectedTab === 'works' }" @click="selectTab('works')">代表作品</text>
     </view>
 
@@ -106,7 +106,7 @@
         </view>
       </view>
       <view v-else class="no-dynamicPosts">
-        <text>哎呀，您还没有发过动态~</text>
+        <text>暂无流觞</text>
       </view>
     </scroll-view>
 
@@ -128,7 +128,7 @@
           </view>
         </view>
         <view v-else class="no-UserWorks">
-          <text>哎呀，没有公开的作品，试试去创作吧！</text>
+          <text>暂无代表作，尝试去创作吧！</text>
         </view>
       </view>
     </scroll-view>

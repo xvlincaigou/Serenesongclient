@@ -83,16 +83,23 @@
             </view>
           </view>
           <!-- 动态操作按钮 -->
-          <view class="post-actions">
-            <button @click.stop="comment(post)">评论</button>
-            <button
-              @click.stop="love(post)"
-              :style="{ backgroundColor: isLiked(post) ? 'red' : 'white', color: isLiked(post) ? 'white' : 'grey' }"
-            >
-              点赞
-            </button>
+            <view class="post-actions">
+              <!-- 评论按钮 -->
+              <image 
+                :src="'/static/community/icon_comment.png'" 
+                @click.stop="comment(post)" 
+                alt="评论"
+                style="width: 24px; height: 24px; margin-right: 4px;" 
+              />
+              <!-- 点赞按钮 -->
+              <image
+                :class="isLiked(post) ? 'liked' : 'not-liked'"
+                @click.stop="love(post)"
+                alt="点赞"
+                style="width: 24px; height: 24px; cursor: pointer;"
+              />
+            </view>
           </view>
-        </view>
       </view>
       <view v-else class="no-dynamicPosts">
         <text>他/她还没有发过动态</text>
@@ -473,6 +480,13 @@ export default {
 </script>
 
 <style scoped>
+.liked {
+  content: url('/static/community/icon_loved.png');
+}
+
+.not-liked {
+  content: url('/static/community/icon_love.png');
+}
 .container {
   padding: 16px;
   background-color: #ffffff;
@@ -692,10 +706,12 @@ export default {
   word-break: break-word;
   line-height: 1.5;
 }
+/* 操作按钮样式 */
 .post-actions {
   display: flex;
   justify-content: space-around;
   margin-top: 10px;
+  margin-bottom: 10px;
 }
 .post-actions button {
   font-size: 12px;

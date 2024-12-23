@@ -3,7 +3,7 @@
     <!-- 搜索框 -->
     <view class="search-bar">
       <input
-        placeholder="搜索词人、词、词牌"
+        placeholder="搜索古代词人、词、词牌"
         v-model="searchText"
         @focus="isFocused = true"
         @blur="handleBlur"
@@ -95,9 +95,10 @@ export default {
 	        this.recommendation = cachedRecommendation;
 	        return;
 	      }
+		  let baseurl = getApp().globalData.baseURL;
       // 获取推荐词
       uni.request({
-        url: 'http://124.221.16.68:8080/recommendCi',
+        url: `${baseurl}/recommendCi`,
         method: 'GET',
         success: (res) => {
           if (res.statusCode === 200 && res.data.recommend) {
@@ -117,7 +118,7 @@ export default {
 
       // 下载推荐图片
       uni.downloadFile({
-        url: 'http://124.221.16.68:8080/recommendPic',
+        url: `${baseurl}/recommendPic`,
         success: (res) => {
           if (res.statusCode === 200) {
             this.recommendation.image = res.tempFilePath;

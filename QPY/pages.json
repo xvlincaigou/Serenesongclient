@@ -202,19 +202,19 @@
         {
           "path": "friendProfile/friendProfile",
           "style": {
-            "navigationBarTitleText": "好友资料"
+            "navigationBarTitleText": "详细资料"
           }
         },
         {
           "path": "friends/friends",
           "style": {
-            "navigationBarTitleText": "我的好友"
+            "navigationBarTitleText": "我的词友"
           }
         },
 		{
 		  "path": "friendWork/friendWork",
 		  "style": {
-		    "navigationBarTitleText": "好友作品"
+		    "navigationBarTitleText": "词友作品"
 		  }
 		},
         {

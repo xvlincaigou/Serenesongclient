@@ -213,9 +213,6 @@ export default {
           this.tempInput = Array(this.ciContent.length).fill('');
 		  this.validationResults = Array(this.ciContent.length).fill(true); // 初始化验证结果
 		  this.runCheck();
-        },
-        fail: (err) => {
-          console.error('Failed to fetch data:', err);
         }
       });
     },
@@ -252,7 +249,6 @@ export default {
             const yunshu = uni.getStorageSync('yunshu');
             
             if (!pingshuiyun || !yunshu || !yunshu.rhymes || !yunshu.rhymes[0]) {
-              console.error('数据获取失败');
               return;
             }
 
@@ -292,7 +288,6 @@ export default {
               });
             }
           } catch (e) {
-            console.error('搜索过程出错:', e);
             uni.showToast({
               title: '搜索出错，请重试',
               icon: 'none'
@@ -503,7 +498,6 @@ export default {
     },
 	addToDrafts() {
 	  const contentArray = this.getContentArray();
-	  console.log('contentArr:', contentArray);
 	  const draftData = {
 	    title: this.ciTitle || '未命名', 
 	    cipai: [this.cipaiName, this.formatNum], 
@@ -516,7 +510,6 @@ export default {
 	    token: this.token,
 	    draft: draftData
 	  };
-	  console.log('Request Data:', JSON.stringify(requestData));
 	  const baseurl = getApp().globalData.baseURL;
 	  
 	  uni.request({
@@ -560,7 +553,6 @@ export default {
 		return;  // 如果没有完成创作，直接返回
 		}
 		const contentArray = this.getContentArray();
-		console.log('contentArr:', contentArray);
 		const draftData = {
 		  title: this.ciTitle || '未命名',
 		  cipai: [this.cipaiName,this.formatNum],

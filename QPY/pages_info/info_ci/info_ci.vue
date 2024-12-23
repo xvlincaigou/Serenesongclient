@@ -61,7 +61,6 @@ export default {
   },
   onLoad(options) {
     this.ci = JSON.parse(decodeURIComponent(options.ci));
-    console.log('Loaded ci object:', this.ci);
     this.ciID = this.ci._id;
     // 获取用户 token
     uni.getStorage({
@@ -103,7 +102,6 @@ export default {
               title: res.data.message || '发布失败',
               icon: 'none',
             });
-            console.error('API 返回错误:', res.data);
           }
         },
         fail: (err) => {
@@ -111,7 +109,6 @@ export default {
             title: '请求失败，请稍后再试',
             icon: 'none',
           });
-          console.error('API 请求失败:', err);
         },
       });
     },
@@ -128,21 +125,14 @@ export default {
       this.fetchCollections();
     },
     fetchCollections() {
-      console.log(this.userToken);
       uni.request({
         url: `${this.baseurl}/getAllCollections?token=${this.userToken}`,
         method: 'GET',
         success: (res) => {
           if (res.data && res.data.collections) {
-            console.log(res)
             this.collections = res.data.collections;
-          } else {
-            console.log('Failed to get collections:', res);
           }
-        },
-        fail: (err) => {
-          console.log('API request failed:', err);
-        },
+        }
       });
     },
     onCancel() {
@@ -166,8 +156,6 @@ export default {
               icon: 'success',
             });
             this.showModal = false;
-          } else {
-            console.log('Failed to add to collection:', res);
           }
         },
         fail: (err) => {
@@ -175,7 +163,6 @@ export default {
             title: '请求失败',
             icon: 'none',
           });
-          console.log('API request failed:', err);
         },
       });
     },
@@ -216,7 +203,6 @@ export default {
               title: '创建失败',
               icon: 'none',
             });
-            console.log('Failed to create collection:', res);
           }
         },
         fail: (err) => {
@@ -224,7 +210,6 @@ export default {
             title: '请求失败',
             icon: 'none',
           });
-          console.log('API request failed:', err);
         },
       });
     },

@@ -87,9 +87,7 @@ export default {
           if (res.statusCode === 200) {
             if (res.data) {
               // 将 user_id 添加到用户信息对象中
-			  console.log('originsss:', res.data);
               targetArray.push(res.data);
-              console.log('friend:', targetArray);
             }
           } else {
             uni.showToast({
@@ -113,15 +111,12 @@ export default {
       
       // 获取粉丝列表
       const subscribers = uni.getStorageSync('subscribers');
-      console.log('粉丝列表:', subscribers);
       this.subscribers = [];
       
       // 如果粉丝列表为空或不是数组，则不做任何处理
       if (!Array.isArray(subscribers) || subscribers.length === 0) {
         return;
       }
-      
-	  console.log("sss:", this.subscribers);
       subscribers.forEach(user_id => {
         this.fetchUserInfo(user_id, this.subscribers);
       });
@@ -133,21 +128,17 @@ export default {
       
       // 获取关注列表
       const subscribedTo = uni.getStorageSync('subscribedTo');
-      console.log('关注列表:', subscribedTo);
       this.subscribedTo = [];
       
       // 如果关注列表为空或不是数组，则不做任何处理
       if (!Array.isArray(subscribedTo) || subscribedTo.length === 0) {
         return;
       }
-      
-	  console.log("sss:", this.subscribedTo);
       subscribedTo.forEach(user_id => {
         this.fetchUserInfo(user_id, this.subscribedTo);
       });
     },
     viewFriendProfile(friend) {
-      console.log('好友信息:', friend);
       if (friend._id) {
 		if (friend._id === this.personal_id) {
 			uni.switchTab({

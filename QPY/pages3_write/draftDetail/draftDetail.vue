@@ -58,14 +58,8 @@ export default {
 	    url: url,
 	    method: 'GET',
 	    success: (res) => {
-	      console.log('Data received:', res.data); // 打印返回的数据
 	      this.formatData = res.data;
-	      console.log('tunes:', this.formatData.format.tunes);
 		  this.getContentArray();
-		  console.log('cicontent',this.contentArray);
-	    },
-	    fail: (err) => {
-	      console.error('Failed to fetch data:', err); // 打印错误信息
 	    }
 	  });
 	},
@@ -110,9 +104,6 @@ export default {
     deleteDraft() {
         let baseurl = getApp().globalData.baseURL;
         const url = `${baseurl}/delDraft`;
-        console.log('Sending request to:', url);
-        console.log('Using token:', this.token);
-		console.log('ciID:', this.draft._id);
         uni.request({
           url: url,
           method: 'DELETE',
@@ -121,9 +112,7 @@ export default {
             draftID: this.draft._id, 
           },
           success: (res) => {
-            console.log('Response data:', res.data);
             if (res.statusCode === 200) {
-              console.log('草稿删除成功！');
 			   // 显示删除成功的通知
 			  uni.showToast({
 				title: '删除成功',
@@ -142,12 +131,7 @@ export default {
 				  }, 500);  // 延迟 500 毫秒（0.5 秒）
 				}
 			  });
-            } else {
-              console.error('删除失败:', res.statusCode);
             }
-          },
-          fail: (err) => {
-            console.error('请求失败:', err);
           }
         });
       },

@@ -105,7 +105,6 @@ export default {
   onLoad(options) {
     if (options.post) {
         this.post = JSON.parse(decodeURIComponent(options.post));
-		console.log(this.post);
     }
 	const token = uni.getStorageSync('userToken');
 	if (!token) {
@@ -164,15 +163,10 @@ export default {
               content: this.commentText,
             },
             success: (res) => {
-				// console.log(this.token);
-				// console.log(this.post.ID);
-				// console.log(this.commentText);
-				// console.log(res.data);
 				if (!Array.isArray(this.comments)) {
 				    this.comments = [];
 				}
 				this.comments.unshift(res.data.comment);
-				// console.log(this.comments);
 				this.commentText = '';  // 清空评论输入框
 				this.commentInputHeight = 20;  // 重置输入框高度
             },
@@ -186,7 +180,6 @@ export default {
     },
     deleteComment(comment) {
         const commentID = comment.CommentId;
-        console.log(`删除的评论ID: ${commentID}`);
     
         // 调用API删除评论
         uni.request({
@@ -197,10 +190,8 @@ export default {
                 comment_id: commentID,
             },
             success: (res) => {
-                console.log('API响应数据:', res.data);
                 // 使用filter方法过滤掉要删除的评论，并更新this.comments
                 this.comments = this.comments.filter(item => item.CommentId !== res.data.comment_id);
-                console.log('更新后的评论列表:', this.comments);
                 uni.showToast({
                     title: '评论删除成功',
                     icon: 'success',
@@ -221,14 +212,12 @@ export default {
 	// 检查是否已关注
 	checkFollowStatus() {
 	    const subscribedTo = uni.getStorageSync('subscribedTo') || [];
-		console.log('first:', subscribedTo);
 		if(subscribedTo === []) {
 			this.isFollowed = false;
 		}
 		else {
 			this.isFollowed = subscribedTo.includes(this.post.author);
 		}
-		console.log('isF?:', this.isFollowed);
 	},
 	// 切换关注状态
 	toggleFollow() {
@@ -253,7 +242,6 @@ export default {
 	            subscribedTo = subscribedTo.filter(item => item !== this.post.author);  // 取关
 	          }
 	          uni.setStorageSync('subscribedTo', subscribedTo);  // 更新本地存储
-			  console.log('now:', subscribedTo);
 	          this.isFollowed = isSubscribing;  // 更新按钮显示
 	          uni.showToast({
 	            title: isSubscribing ? '已关注' : '已取关',

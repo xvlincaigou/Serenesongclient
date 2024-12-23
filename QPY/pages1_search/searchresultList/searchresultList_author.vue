@@ -40,15 +40,9 @@ export default {
         url: `${baseurl}/search?keyword=${encodeURIComponent(this.keyword)}&option=author`,
         method: 'GET',
         success: (res) => {
-          console.log('API response:', res);
           if (res.statusCode === 200 && res.data) {
             this.matched_authors = res.data.matched_authors || [];
-          } else {
-            console.error('API error:', res);
           }
-        },
-        fail: (err) => {
-          console.error('API request failed:', err);
         }
       });
     },

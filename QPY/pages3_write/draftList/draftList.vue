@@ -46,7 +46,6 @@ export default {
       key: 'userToken',
       success: (res) => {
         this.userToken = res.data;
-        console.log('1userToken', this.userToken);
         // 在获取到token之后再调用fetchResults
         this.fetchResults();
       },
@@ -54,27 +53,18 @@ export default {
   },
   methods: {
 	refreshDraftList() {
-	    // 这里放置刷新草稿列表的逻辑，比如重新获取草稿数据
-	    console.log('Refreshing drafts list...');
 	    this.fetchResults();  // 假设你有一个 fetchDrafts 方法来获取草稿数据
 	  },
     fetchResults() {
       const baseurl = getApp().globalData.baseURL;
-      console.log('2userToken', this.userToken);
       uni.request({
         url: `${baseurl}/getMyWorks?token=${this.userToken}&kind=drafts`,
         method: 'GET',
         success: (res) => {
-          console.log('API response:', res);
           if (res.statusCode === 200 && res.data) {
             this.drafts = res.data.drafts || [];
-          } else {
-            console.error('API error:', res);
           }
-        },
-        fail: (err) => {
-          console.error('API request failed:', err);
-        },
+        }
       });
     },
     navigateToDetail(draft) {

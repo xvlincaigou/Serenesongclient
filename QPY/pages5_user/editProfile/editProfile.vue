@@ -100,12 +100,10 @@ export default {
       this.nickname = e.detail.value; // 处理输入
     },
     async onChooseavatar(e) {
-      console.log('选择的头像信息:', e.detail);
       if (e.detail.avatarUrl) {
         this.avatarUrl = e.detail.avatarUrl;
         await this.convertImageToBase64(this.avatarUrl);
       };
-	  console.log("token",this.token,"name",this.nickname,"avatar",this.avatarData,"sig",this.signature);
     },
     convertImageToBase64(url) {
       return new Promise((resolve, reject) => {
@@ -123,13 +121,11 @@ export default {
                 resolve();
               },
               fail: (err) => {
-                console.error('读取文件失败:', err);
                 reject(err);
               },
             });
           },
           fail: (err) => {
-            console.error('获取图片信息失败:', err);
             reject(err);
           },
         });
@@ -172,7 +168,6 @@ export default {
           });
         }
       } catch (error) {
-        console.error('保存资料时出错:', error);
         uni.showToast({
           title: '保存失败，请稍后重试',
           icon: 'none',
@@ -183,7 +178,6 @@ export default {
       }
     },
     sendSaveRequest() {
-	  console.log("token",this.token,"name",this.nickname,"avatar",this.avatarData,"sig",this.signature);
       return new Promise((resolve, reject) => {
         uni.request({
           url: 'https://sss.xulincaigou.online/saveUserInfo',

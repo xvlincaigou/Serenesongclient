@@ -39,7 +39,6 @@ export default {
   onLoad(options) {
     const workData = options.UserWork ? JSON.parse(decodeURIComponent(options.UserWork)) : null;
     this.UserWork = workData;
-    console.log('workID:', this.UserWork.is_public);
     this.token = uni.getStorageSync('userToken');
   },
   computed: {
@@ -89,7 +88,6 @@ export default {
               title: res.data.message || '发布失败',
               icon: 'none',
             });
-            console.error('API 返回错误:', res.data);
           }
         },
         fail: (err) => {
@@ -97,7 +95,6 @@ export default {
             title: '请求失败，请稍后再试',
             icon: 'none',
           });
-          console.error('API 请求失败:', err);
         },
       });
     },
@@ -136,7 +133,6 @@ export default {
               title: res.data.message || '操作失败',
               icon: 'none'
             });
-            console.error('API 返回错误:', res.data);
           }
         },
         fail: (err) => {
@@ -144,7 +140,6 @@ export default {
             title: '请求失败，请稍后再试',
             icon: 'none'
           });
-          console.error('API 请求失败:', err);
         }
       });
     },

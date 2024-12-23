@@ -183,11 +183,7 @@ export default {
   },
 
   onLoad(options) {
-	console.log("Options received:", options);
     const draftData = options.draft ? JSON.parse(decodeURIComponent(options.draft)) : {};
-    
-    // 检查传递的数据
-    console.log("Received draft data:", draftData);
   
     // 更新当前页面的 state
     this.draft = draftData || {};
@@ -225,9 +221,6 @@ export default {
           this.tempInput = this.draft.content;
 		  this.validationResults = Array(this.ciContent.length).fill(true); // 初始化验证结果
 		  this.runCheck();
-        },
-        fail: (err) => {
-          console.error('Failed to fetch data:', err);
         }
       });
     },
@@ -264,7 +257,6 @@ export default {
             const yunshu = uni.getStorageSync('yunshu');
             
             if (!pingshuiyun || !yunshu || !yunshu.rhymes || !yunshu.rhymes[0]) {
-              console.error('数据获取失败');
               return;
             }
 
@@ -304,7 +296,6 @@ export default {
               });
             }
           } catch (e) {
-            console.error('搜索过程出错:', e);
             uni.showToast({
               title: '搜索出错，请重试',
               icon: 'none'
@@ -357,24 +348,19 @@ export default {
     },
 	
 	check(ciContentArray, cipai){
-	  console.log('content:', ciContentArray);
       let isValid = [];
       let possibleRhythms = []; // 截止到目前位置可以使用的韵
       const tunes = cipai.format.tunes;
-	  console.log('tunes:', tunes);
       
       for (let i = 0; i < ciContentArray.length; ++i) {
         const char = ciContentArray[i];
-		console.log('char:', char);
         if (!char) {
           isValid.push(true);
           continue;
         }
         // 检查平仄是否符合
         const tune = this.pingshuiyun.pingze[0][char];
-		console.log('tune:', tune);
         const exactTune = tunes[i]['tune'];
-		console.log('exactTune:', exactTune);
 		if (exactTune === '中') {
 		  isValid.push(true);
 		  continue;
@@ -383,7 +369,6 @@ export default {
           isValid.push(false);
           continue;
         }
-		console.log(this.pingshuiyun.pingze[0]);
         
         // 检查押韵是否符合
         const rhythms = this.pingshuiyun.rhymes[0][char] ? this.pingshuiyun.rhymes[0][char].map(entry => entry.Rhyme) : [];
@@ -408,7 +393,6 @@ export default {
         }
         isValid.push(true);
       }
-	  console.log('check:', isValid);
       return isValid;
     },
 	
@@ -523,7 +507,6 @@ export default {
     },
 	modifyDrafts() {
 	  const contentArray = this.getContentArray();
-	  console.log('contentArr:', contentArray);
 	  const draftData = {
 	    title: this.ciTitle || '未命名', 
 	    cipai: [this.cipaiName, this.formatNum], 
@@ -537,7 +520,6 @@ export default {
 		draftID : this.draft._id,
 	    draft: draftData
 	  };
-	  console.log('Request Data:', JSON.stringify(requestData));
 	  const baseurl = getApp().globalData.baseURL;
 	  
 	  uni.request({
@@ -580,7 +562,6 @@ export default {
 		return;  // 如果没有完成创作，直接返回
 		}
 		const contentArray = this.getContentArray();
-		console.log('contentArr:', contentArray);
 		const draftData = {
 		  title: this.ciTitle || '未命名', 
 		  cipai: [this.cipaiName, this.formatNum], 
@@ -594,7 +575,6 @@ export default {
 				draftID : this.draft._id,
 		  draft: draftData
 		};
-		console.log('Request Data:', JSON.stringify(requestData));
 		const baseurl = getApp().globalData.baseURL;
 		
 		uni.request({

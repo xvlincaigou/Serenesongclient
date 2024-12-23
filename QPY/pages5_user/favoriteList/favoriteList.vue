@@ -60,15 +60,12 @@ export default {
         },
         success: (res) => {
           if (res.statusCode === 200) {
-			console.log('API Response Data:', res.data);
             this.works = res.data.collectionItems.map(workItem => ({
 			  ciID: workItem.ciID || workItem.CiId,
 			  comment: workItem.comment || workItem.Comment,
 			}));
-            console.log('收藏夹内容:', this.works);
 			const requests = this.works.map(item => {
 				if (!item.ciID) {
-				    console.error('ciID is undefined for item:', item);
 				    return Promise.reject(new Error('ciID is undefined'));
 				}
 				return new Promise((resolve, reject) => {
@@ -102,10 +99,8 @@ export default {
 			Promise.all(requests)
 			    .then(results => {
 			        this.works = results;
-			        console.log('收藏夹内容:', this.works);
 			    })
 			    .catch(err => {
-			        console.error('获取作品详细信息失败:', err);
 			        uni.showToast({
 			            title: '获取作品详细信息失败',
 			            icon: 'none',

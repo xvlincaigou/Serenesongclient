@@ -33,7 +33,6 @@ export default {
 		if (!this.searchInput) {
 			return; // 如果搜索框为空，不发送请求
 		}
-		console.log(this.searchInput);
 		
         uni.request({
           url: `${this.baseurl}/searchUserByName`,
@@ -44,7 +43,6 @@ export default {
 		  },
           success: (res) => {
           	if (res.statusCode === 200 && res.data) {
-				console.log(res.data);
 				if(res.data.id === this.personal_id) {
 					uni.switchTab({
 					  url: `/pages/user/index/index`

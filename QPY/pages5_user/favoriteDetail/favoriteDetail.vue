@@ -56,7 +56,6 @@ export default {
         icon: 'none',
       });
     }
-    console.log('获取到的token:', this.token);
   },
   methods: {
 	getFirstSentence(text) {
@@ -94,7 +93,6 @@ export default {
               title: res.data.message || '发布失败',
               icon: 'none',
             });
-            console.error('API 返回错误:', res.data);
           }
         },
         fail: (err) => {
@@ -102,7 +100,6 @@ export default {
             title: '请求失败，请稍后再试',
             icon: 'none',
           });
-          console.error('API 请求失败:', err);
         },
       });
     },

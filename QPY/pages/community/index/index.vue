@@ -202,7 +202,6 @@ export default {
         data: { token },
         success: (res) => {
           if (res.statusCode === 200 && res.data.personal_id) {
-            console.log('User ID:', res.data.personal_id);
             this.user_id = res.data.personal_id;
           } else {
             uni.showToast({
@@ -237,7 +236,6 @@ export default {
               const friendWithId = { user_id: user_id, ...res.data };
               targetArray.push(friendWithId);
               this.$set(targetArray, targetArray.length - 1, friendWithId); // 确保响应式
-              console.log('friend:', targetArray);
             }
           } else {
             uni.showToast({
@@ -261,7 +259,6 @@ export default {
 
       // 获取关注列表
       const subscribedTo = uni.getStorageSync('subscribedTo');
-      console.log('关注列表:', subscribedTo);
       this.friends = [];
 
       // 如果关注列表为空或不是数组，则不做任何处理
@@ -327,12 +324,10 @@ export default {
             user_id: user_id,
           },
           success: (res) => {
-            console.log('id:', user_id);
             if (res.statusCode === 200) {
               // 将获取到的动态数据添加到 friendPosts 数组中
               if (res.data && res.data.dynamics) {
                 this.friendPosts = this.friendPosts.concat(res.data.dynamics);
-                console.log('fP:', this.friendPosts);
               }
             } else {
               uni.showToast({
@@ -379,7 +374,6 @@ export default {
       }
 
       const isLikeAction = this.isLiked(post);
-      console.log('isLiked:', isLikeAction);
 
       const apiUrl = isLikeAction ? `${this.baseurl}/withdrawLike` : `${this.baseurl}/likePost`;
 
@@ -439,7 +433,6 @@ export default {
       return post.Likes.some(like => String(like) === String(this.user_id));
     },
     viewFriend(friend) {
-      console.log('好友信息:', friend);
       if (friend.user_id) {
         if (friend.user_id === this.user_id) {
           uni.switchTab({
@@ -470,9 +463,6 @@ export default {
       // 将评论按每10个字符分割
       const regex = /.{1,10}/g;
       return comment.match(regex).join('\n');
-    },
-    refreshPost() {
-      console.log('refresh');
     }
   }
 };

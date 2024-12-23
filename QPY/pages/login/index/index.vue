@@ -14,8 +14,8 @@
 export default {
   data() {
     return {
-      pingshuiyun: null, // 已有变量 pingshuiyun
-      yunshu: null // 新增变量 yunshu
+      pingshuiyun: null,
+      yunshu: null
     };
   },
   methods: {
@@ -24,7 +24,6 @@ export default {
       uni.login({
         provider: 'weixin',
         success: loginRes => {
-          console.log('请求信息：', loginRes);
           this.processLogin(loginRes.code);
         },
         fail: () => {
@@ -36,7 +35,6 @@ export default {
     // 通过微信授权码向后端发送请求处理登录
     processLogin(code) {
       let baseurl = getApp().globalData.baseURL;
-      console.log('是否取到全局变量：', baseurl);
       uni.request({
         url: `${baseurl}/login?wxcode=${code}`,
         method: 'POST',
@@ -55,7 +53,6 @@ export default {
         uni.showToast({ title: '微信登录成功', icon: 'success' });
         this.processToken(response.data);
       } else {
-        console.error('登录请求失败，目前状态码:', response.statusCode);
         uni.showToast({ title: '微信登录失败3', icon: 'none' });
       }
     },
@@ -63,7 +60,6 @@ export default {
     // 处理服务器返回的 token
     processToken(data) {
       if (data && data.token) {
-        console.log('Token:', data.token);
         // 存储 userToken
         uni.setStorage({
           key: 'userToken',
@@ -92,12 +88,10 @@ export default {
         success: (res) => {
           if (res.statusCode === 200 && res.data && res.data.personal_id) {
             // 存储 personal_id
-			console.log('id:', res.data.personal_id);
             uni.setStorage({
               key: 'personal_id',
               data: res.data.personal_id,
               success: () => {
-                console.log('personal_id:', res.data.personal_id);
                 // personal_id 获取并存储完成后，继续检查 pingshuiyun
                 this.checkPingshuiyun();
               },
@@ -106,12 +100,10 @@ export default {
               }
             });
           } else {
-            console.error('获取 personal_id 失败，状态码:', res.statusCode);
             uni.showToast({ title: '获取 personal_id 失败', icon: 'none' });
           }
         },
         fail: () => {
-          console.error('getPersonalID API 请求失败');
           uni.showToast({ title: '请求 personal_id 失败', icon: 'none' });
         }
       });
@@ -124,7 +116,6 @@ export default {
         success: res => {
           if (res.data) {
             this.pingshuiyun = res.data;
-            console.log('pingshuiyun:', this.pingshuiyun);
             // pingshuiyun 处理完成后，继续检查 yunshu
             this.checkYunshu();
           } else {
@@ -153,7 +144,6 @@ export default {
               key: 'pingshuiyun',
               data: this.pingshuiyun,
               success: () => {
-                console.log('pingshuiyun:', this.pingshuiyun);
                 // pingshuiyun 获取并存储完成后，继续检查 yunshu
                 this.checkYunshu();
               },
@@ -162,12 +152,10 @@ export default {
               }
             });
           } else {
-            console.error('getRhymes API 失败，状态码:', response.statusCode);
             uni.showToast({ title: '获取平水韵失败', icon: 'none' });
           }
         },
         fail: () => {
-          console.error('getRhymes API 请求失败');
           uni.showToast({ title: '获取平水韵失败', icon: 'none' });
         }
       });
@@ -180,7 +168,6 @@ export default {
         success: res => {
           if (res.data) {
             this.yunshu = res.data;
-            console.log('yunshu:', this.yunshu);
             // yunshu 处理完成后，跳转页面
             this.redirectToSearch();
           } else {
@@ -213,14 +200,12 @@ export default {
               key: 'yunshu',
               data: this.yunshu,
               success: () => {
-                console.log('yunshu:', this.yunshu.rhymes);
                 
                 // 存储预处理后的数据
                 uni.setStorage({
                   key: 'processedYunShu',
                   data: processedData,
                   success: () => {
-                    console.log('Processed yunshu data stored');
                     this.redirectToSearch();
                   },
                   fail: () => {
@@ -233,12 +218,10 @@ export default {
               }
             });
           } else {
-            console.error('getYunshu API 失败，状态码:', response.statusCode);
             uni.showToast({ title: '获取韵书失败', icon: 'none' });
           }
         },
         fail: () => {
-          console.error('getYunshu API 请求失败');
           uni.showToast({ title: '获取韵书失败', icon: 'none' });
         }
       });
@@ -272,7 +255,6 @@ export default {
 	        if (res.data.subscribed_to === null) {
 	          subscribedToData = [];  // 若为 null，则存入空数组
 	        } else if (res.data.subscribed_to && res.data.subscribed_to.length > 0) {
-			  console.log('check1:', res.data.subscribed_to);
 	          res.data.subscribed_to.forEach(item => {
 	            if (item.ID) {
 	                subscribedToData.push(item.ID);
@@ -284,22 +266,16 @@ export default {
 	        uni.setStorage({
 	          key: 'subscribedTo',
 	          data: subscribedToData,
-	          success: () => {
-	            console.log('用户关注列表存储成功');
-	            console.log('关注:', subscribedToData);
-	          },
 	          fail: () => {
 	            uni.showToast({ title: '存储关注列表失败', icon: 'none' });
 	          }
 	        });
 	
 	      } else {
-	        console.error('获取关注列表失败，状态码:', res.statusCode);
 	        uni.showToast({ title: '获取关注列表失败', icon: 'none' });
 	      }
 	    },
 	    fail: () => {
-	      console.error('获取关注列表请求失败');
 	      uni.showToast({ title: '请求关注列表失败', icon: 'none' });
 	    }
 	  });
@@ -318,7 +294,6 @@ export default {
 				if (res.data.subscribers === null) {
 				  subscribersData = [];  // 若为 null，则存入空数组
 				} else if (res.data.subscribers && res.data.subscribers.length > 0) {
-				  console.log('check2:', res.data.subscribers);
 				  res.data.subscribers.forEach(item => {
 				    if (item.ID) {
 				        subscribersData.push(item.ID);
@@ -329,21 +304,15 @@ export default {
 	            uni.setStorage({
 	              key: 'subscribers',
 	              data: subscribersData,
-	              success: () => {
-	                console.log('用户粉丝列表存储成功');
-					console.log('粉丝:', subscribersData);
-	              },
 	              fail: () => {
 	                uni.showToast({ title: '存储粉丝列表失败', icon: 'none' });
 	              }
 	            });
 	          } else {
-	            console.error('获取粉丝列表失败，状态码:', res.statusCode);
 	            uni.showToast({ title: '获取粉丝列表失败', icon: 'none' });
 	          }
 	        },
 	        fail: () => {
-	          console.error('获取粉丝列表请求失败');
 	          uni.showToast({ title: '请求粉丝列表失败', icon: 'none' });
 	        }
 	    });

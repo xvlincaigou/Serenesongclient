@@ -111,13 +111,8 @@ export default {
 
             // 缓存推荐词
             this.setRecommendationCache(this.recommendation);
-          } else {
-            console.error('获取推荐词失败', res);
           }
-        },
-        fail: (err) => {
-          console.error('请求失败', err);
-        },
+        }
       });
 
       // 下载推荐图片
@@ -129,13 +124,8 @@ export default {
 
             // 更新缓存
             this.setRecommendationCache(this.recommendation);
-          } else {
-            console.error('下载推荐图片失败', res);
           }
-        },
-        fail: (err) => {
-          console.error('下载请求失败', err);
-        },
+        }
       });
     },
   },

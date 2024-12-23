@@ -126,7 +126,6 @@ export default {
       if (!this.searchInput) {
         return; // 如果搜索框为空，不发送请求
       }
-      console.log(this.searchInput);
       
       uni.request({
         url: `${this.baseurl}/searchUserByName`,
@@ -137,7 +136,6 @@ export default {
         },
         success: (res) => {
           if (res.statusCode === 200 && res.data) {
-            console.log(res.data);
             if(res.data.id === this.personal_id) {
               uni.switchTab({
                 url: `/pages/user/index/index`
@@ -188,7 +186,6 @@ export default {
         success: (res) => {
           if (res.statusCode === 200) {
             if (res.data) {
-              console.log(res.data);
               this.getMessage = res.data.messages;
             }
           } else {
@@ -221,7 +218,6 @@ export default {
         success: (res) => {
           if (res.statusCode === 200) {
             if (res.data) {
-              console.log(res.data);
               this.sendMessage = res.data.messages;
             }
           } else {
@@ -247,7 +243,6 @@ export default {
     },
     // 查看已发送的消息详情
     viewSendMessage(message) {
-      console.log(message);
       // 将 message 对象转化为 JSON 字符串并传递给目标页面
       uni.navigateTo({
         url: `/pages4_dialog/messageDetail/messageDetail?message=${encodeURIComponent(JSON.stringify(message))}`

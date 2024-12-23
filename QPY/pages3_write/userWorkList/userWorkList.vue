@@ -36,7 +36,6 @@ export default {
       key: 'userToken',
       success: (res) => {
         this.userToken = res.data;
-        console.log('1userToken', this.userToken);
         // 在获取到token之后再调用fetchResults
         this.fetchResults();
       },
@@ -45,21 +44,14 @@ export default {
   methods: {
     fetchResults() {
       const baseurl = getApp().globalData.baseURL;
-      console.log('2userToken', this.userToken);
       uni.request({
         url: `${baseurl}/getMyWorks?token=${this.userToken}&kind=UserWorks`,
         method: 'GET',
         success: (res) => {
-          console.log('API response:', res);
           if (res.statusCode === 200 && res.data) {
             this.UserWorks = res.data.UserWorks || [];
-          } else {
-            console.error('API error:', res);
           }
-        },
-        fail: (err) => {
-          console.error('API request failed:', err);
-        },
+        }
       });
     },
     navigateToDetail(UserWork) {

@@ -31,7 +31,7 @@
 
     <!-- Tabs for 动态 and 作品 -->
     <view class="tabs">
-      <text :class="{ active: selectedTab === 'dynamic' }" @click="selectTab('dynamic')">我的动态</text>
+      <text :class="{ active: selectedTab === 'dynamic' }" @click="selectTab('dynamic')">分享日常</text>
       <text :class="{ active: selectedTab === 'works' }" @click="selectTab('works')">代表作品</text>
     </view>
 
@@ -170,7 +170,6 @@ export default {
         data: { token },
         success: (res) => {
           if (res.statusCode === 200 && res.data.personal_id) {
-            console.log('User ID:', res.data.personal_id);
             this.user_id = res.data.personal_id;
             this.getUserInfo();
             this.getDynamics(); // 获取动态列表
@@ -204,7 +203,6 @@ export default {
         },
         success: (res) => {
           if (res.statusCode === 200 && res.data) {
-            console.log('用户信息:', res.data);
             this.avatar = res.data.avatar ? 'data:image/png;base64,' + res.data.avatar : '';
             this.name = res.data.name || "";
             this.signature = res.data.signature || "";
@@ -230,14 +228,12 @@ export default {
       const token = uni.getStorageSync('userToken');
       if (token) {
         this.token = token;
-        console.log('token:', token);
         uni.request({
           url: `${this.baseurl}/getCollectionItemCount`,
           method: 'GET',
           data: { token: this.token },
           success: (res) => {
             if (res.statusCode === 200) {
-              console.log('收藏数量:', res.data.count);
               this.favoritesCount = res.data.count;
             }
           },
@@ -268,7 +264,6 @@ export default {
           },
           success: (res) => {
             if (res.statusCode === 200 && res.data.UserWorks) {
-              console.log('作品:', res.data.UserWorks.length);
               this.creationCount = res.data.UserWorks.length;
             }
           },
@@ -303,7 +298,6 @@ export default {
         return;
       }
       const baseurl = this.baseurl;
-      console.log('Fetching user works with token:', this.token);
       uni.request({
         url: `${baseurl}/getMyWorks`,
         method: 'GET',
@@ -312,12 +306,9 @@ export default {
           kind: 'UserWorks'
         },
         success: (res) => {
-          console.log('API response:', res);
           if (res.statusCode === 200 && res.data) {
             this.userWorks = res.data.UserWorks || [];
-            console.log('获取到的所有作品:', this.userWorks);
           } else {
-            console.error('API error:', res);
             uni.showToast({
               title: '获取作品失败',
               icon: 'none',
@@ -325,7 +316,6 @@ export default {
           }
         },
         fail: (err) => {
-          console.error('API request failed:', err);
           uni.showToast({
             title: '请求失败，请稍后再试',
             icon: 'none',
@@ -355,7 +345,6 @@ export default {
           if (res.statusCode === 200) {
             // 直接赋值动态列表，不再添加 liked 属性
             this.dynamicPosts = res.data.dynamics;
-            console.log('获取到的动态列表:', this.dynamicPosts);
           } else {
             uni.showToast({
               title: '获取动态列表失败',
@@ -431,7 +420,6 @@ export default {
       }
 
       const isLikeAction = this.isLiked(post);
-	  console.log('isLiked:', isLikeAction);
 	  
       const apiUrl = isLikeAction ? `${this.baseurl}/withdrawLike` : `${this.baseurl}/likePost`;
 

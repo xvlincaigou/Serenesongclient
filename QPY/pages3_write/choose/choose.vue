@@ -139,7 +139,6 @@ export default {
 		  url: `/pages_info/info_cipai/info_cipai?cipai=${encodeURIComponent(JSON.stringify(cipaiDetail))}`
 		});
 	  }).catch(error => {
-		console.error('Failed to fetch cipai details:', error);
 		uni.showToast({
 		  title: '获取数据失败，请稍后再试',
 		  icon: 'none'

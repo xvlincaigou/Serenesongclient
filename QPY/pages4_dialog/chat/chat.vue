@@ -64,7 +64,6 @@ export default {
 	  if (!this.messageContent) {
 	  	return; // 如果搜索框为空，不发送请求
 	  }
-	  console.log(this.messageContent);
 	  
 	  uni.request({
 	      url: `${this.baseurl}/sendMessage`,
@@ -80,7 +79,6 @@ export default {
 	          title: '消息已发送',
 	          icon: 'success',
 	        });
-			console.log(res.data);
 			setTimeout(() => {
 			  uni.switchTab({
 			    url: `/pages/dialog/index/index`

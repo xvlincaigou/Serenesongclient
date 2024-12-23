@@ -50,7 +50,6 @@ export default {
       const token = uni.getStorageSync('userToken');
       if (token) {
         this.token = token;
-        console.log('获取到的token:', this.token); // 调试输出
         // 获取收藏夹列表
         this.getAllCollections();
       } else {
@@ -77,7 +76,6 @@ export default {
               collectionName: collection.Name || collection.collectionName,
               description: collection.description || '',
             }));
-            console.log('收藏夹列表:', this.favorites); // 调试输出
           } else {
             uni.showToast({
               title: '获取收藏夹失败',
@@ -113,7 +111,6 @@ export default {
           'Content-Type': 'application/json',
         },
         success: (res) => {
-          console.log('服务器返回的数据:', res.data);
           if (res.statusCode === 200) {
             // 根据服务器返回的数据结构，进行判断
             let collectionID = '';
@@ -135,7 +132,6 @@ export default {
                 title: '创建失败，未返回收藏夹ID',
                 icon: 'none',
               });
-              console.error('创建失败，服务器未返回收藏夹ID:', res.data);
               return;
             }
     
@@ -144,8 +140,6 @@ export default {
               collectionID,
               collectionName,
             });
-            console.log('collectionID:', collectionID);
-            console.log('name:', collectionName);
             this.showCreateModal = false;
             this.newCollectionName = '';
             uni.showToast({
@@ -158,7 +152,6 @@ export default {
               title: '创建失败',
               icon: 'none',
             });
-            console.error('创建失败', res.data);
           }
         },
         fail: (err) => {
@@ -166,7 +159,6 @@ export default {
             title: '请求失败',
             icon: 'none',
           });
-          console.error('请求失败', err);
         },
       });
     },
@@ -183,8 +175,6 @@ export default {
     },
     // 删除收藏夹
     deleteCollection(collectionID, index) {
-      console.log('删除收藏夹，collectionID:', collectionID);
-      console.log('Token:', this.token);
       uni.request({
         url: `${this.baseurl}/deleteCollection?collectionID=${collectionID}&token=${this.token}`,
         method: 'POST',
@@ -205,7 +195,6 @@ export default {
               title: res.data.message || '删除失败',
               icon: 'none',
             });
-            console.error('删除失败', res.data);
           }
         },
         fail: (err) => {
@@ -213,7 +202,6 @@ export default {
             title: '请求失败',
             icon: 'none',
           });
-          console.error('请求失败', err);
         },
       });
     },

@@ -55,7 +55,6 @@ export default {
         url: `${baseurl}/search?${keywordsString}&option=ci`,
         method: 'GET',
         success: (res) => {
-          console.log('API response:', res);
           if (res.statusCode === 200 && res.data) {
             this.matchedCi = res.data.matched_ci || [];
             if (this.matchedCi.length === 0) {
@@ -68,13 +67,11 @@ export default {
               this.isLoading = false;
             }
           } else {
-            console.error('API error:', res);
             // API出错也停止加载
             this.isLoading = false;
           }
         },
         fail: (err) => {
-          console.error('API request failed:', err);
           // 请求失败也停止加载
           this.isLoading = false;
         }

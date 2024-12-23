@@ -33,7 +33,6 @@ export default {
   onLoad(options) {
     this.token = uni.getStorageSync('userToken');
 	this.message = JSON.parse(decodeURIComponent(options.message));
-	console.log(this.message);
   },
   onShow() {
 	this.findMessage();
@@ -51,7 +50,6 @@ export default {
 	  if (!this.messageContent) {
 	  	return; // 如果搜索框为空，不发送请求
 	  }
-	  console.log(this.messageContent);
 	  
 	  uni.request({
 	      url: `${this.baseurl}/sendMessage`,
@@ -67,7 +65,6 @@ export default {
 	          title: '消息已发送',
 	          icon: 'success',
 	        });
-			console.log(res.data);
 			setTimeout(() => {
 			  uni.switchTab({
 			    url: `/pages/dialog/index/index`
@@ -86,7 +83,6 @@ export default {
 		if (this.message.replyTo === '000000000000000000000000') {
 			return;
 		}
-		console.log(this.message.replyTo);
 		uni.request({
 		    url: `${this.baseurl}/getMessageById`,
 		    method: 'GET',
@@ -94,7 +90,6 @@ export default {
 				messageId: this.message.replyTo,
 			},
 		    success: (res) => {
-			  console.log('reply:', res.data);
 			  this.messageReturn = res.data.content;
 		    },
 		    fail: () => {

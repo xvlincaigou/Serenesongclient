@@ -36,15 +36,9 @@ export default {
         url: `${baseurl}/search?keyword=${encodeURIComponent(this.keyword)}&option=cipai`,
         method: 'GET',
         success: (res) => {
-          console.log('API response:', res);
           if (res.statusCode === 200 && res.data) {
             this.matchedCipai = res.data.matched_cipai || {};
-          } else {
-            console.error('API error:', res);
           }
-        },
-        fail: (err) => {
-          console.error('API request failed:', err);
         }
       });
     },

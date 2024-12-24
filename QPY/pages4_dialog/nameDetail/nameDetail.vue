@@ -1,11 +1,11 @@
 <template>
   <view class="container">
     <view class="header">
-      <text >发给 "{{ receiverName }}" 的消息</text>
+      <text >"{{ receiverName }}"</text>
     </view>
     <scroll-view class="content" scroll-y="true">
       <view v-if="reversedSendMessage.length === 0">
-        <text>没有与 "{{ receiverName }}" 相关的消息</text>
+        <text>暂无</text>
       </view>
       <view v-else>
         <view 
@@ -65,7 +65,7 @@ export default {
             this.sendMessage = res.data.messages;
           } else {
             uni.showToast({
-              title: '获取信息失败',
+              title: '获取失败',
               icon: 'none',
             });
           }

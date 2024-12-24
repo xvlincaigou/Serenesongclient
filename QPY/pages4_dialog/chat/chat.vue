@@ -2,24 +2,24 @@
   <view class="container">
 	  
 	<view class="title-header">
-		<text class="receiver-title">寄信人：{{ message.senderName }}</text>
+		<text class="receiver-title">{{ message.senderName }}</text>
 		<text class="time">\n {{ formatDate(message.time) }}</text>
     </view>
 
     <view class="message-box">
-	  <text class="message-title">消息内容：</text>
+	  <text class="message-title">来雁：</text>
       <text class="message">\n{{ message.content }}</text>
     </view>
 	
 	<view class="message-box">
-	  <text class="message-title">回复</text>
-	  <textarea v-model="messageContent" class="message" placeholder="请输入回复内容"></textarea>
+	  <text class="message-title">飞雁</text>
+	  <textarea v-model="messageContent" class="message" placeholder="请输入"></textarea>
 	</view>
     
     <!-- 按钮容器 -->
     <view class="button-container">
-      <button @click="checkFriend" class="bottom-btn">查看寄信人</button>
-	  <button @click="sendMessage" class="bottom-btn">回复消息</button>
+      <button @click="checkFriend" class="bottom-btn">知音</button>
+	  <button @click="sendMessage" class="bottom-btn">放飞</button>
     </view>
   </view>
 </template>

@@ -1,11 +1,11 @@
 <template>
   <view class="container">
     <view class="header">
-      <text>来自 "{{ senderName }}" 的消息</text>
+      <text>"{{ senderName }}" </text>
     </view>
     <scroll-view class="content" scroll-y="true">
       <view v-if="reversedGetMessage.length === 0">
-        <text>没有与 "{{ senderName }}" 相关的消息</text>
+        <text>暂无</text>
       </view>
       <view v-else>
         <view 

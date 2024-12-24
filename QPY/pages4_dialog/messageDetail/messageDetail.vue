@@ -2,18 +2,18 @@
   <view class="container">
 	  
 	<view class="title-header">
-		<text class="receiver-title">收信人：{{ message.receiverName }}</text>
+		<text class="receiver-title">{{ message.receiverName }}</text>
 		<text class="time">\n {{ formatDate(message.time) }}</text>
     </view>
 	<view v-if="message.replyTo != '000000000000000000000000'">
 	  <view class="message-box">
-	    <text class="message-title">回复消息内容：</text>
+	    <text class="message-title">来雁：</text>
 	    <text class="message">\n{{ messageReturn }}</text>
 	  </view>
 	</view>
 
     <view class="message-box">
-	  <text class="message-title">消息内容：</text>
+	  <text class="message-title">飞雁：</text>
       <text class="message">\n{{ message.content }}</text>
     </view>
   </view>

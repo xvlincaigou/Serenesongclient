@@ -2,17 +2,17 @@
   <view class="container">
 	  
 	<view class="title-header">
-		<text class="receiver-title">收信人：{{ name }}</text>
+		<text class="receiver-title">{{ name }}</text>
     </view>
 
     <view class="message-box">
-	  <text class="message-title">消息内容</text>
-      <textarea v-model="messageContent" class="message" placeholder="请输入消息内容"></textarea>
+	  <text class="message-title">飞雁</text>
+      <textarea v-model="messageContent" class="message" placeholder="请输入"></textarea>
     </view>
     
     <!-- 按钮容器 -->
     <view class="button-container">
-      <button @click="sendMessage" class="bottom-btn">发送</button>
+      <button @click="sendMessage" class="bottom-btn">放飞</button>
     </view>
   </view>
 </template>
@@ -58,7 +58,7 @@ export default {
 	      },
 	      success: (res) => {
 	        uni.showToast({
-	          title: '消息已发送',
+	          title: '已发送',
 	          icon: 'success',
 	        });
 			setTimeout(() => {
